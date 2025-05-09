@@ -136,7 +136,7 @@
 <ul class="pagination">
 	 
 				
-		<li class="prev"><a href="/2025/05/09/%E6%96%87%E7%AB%A0/" class="alignleft prev"><i class="fa fa-arrow-circle-o-left"></i>上一页</a></li>
+		<li class="prev"><a href="/2025/05/09/%E5%A4%9A%E5%B0%91%E5%95%8A%E5%A4%A7%E5%A4%A7%E6%96%87%E7%AB%A0/" class="alignleft prev"><i class="fa fa-arrow-circle-o-left"></i>上一页</a></li>
   		
 
         <li><a href="/archives"><i class="fa fa-archive"></i>Archive</a></li>
@@ -189,7 +189,7 @@
            repo: 'pistachioss.github.io',      // The repository of store comments,
            owner: 'pistachioss',
            admin: ['pistachioss'],
-           id: document.title,      // Ensure uniqueness and length less than 50
+           id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50
            distractionFreeMode: false  // Facebook-like distraction free mode
          });
 
