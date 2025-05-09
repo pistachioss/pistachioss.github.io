@@ -187,8 +187,9 @@
            repo: 'pistachioss.github.io',      // The repository of store comments,
            owner: 'pistachioss',
            admin: ['pistachioss'],
-           id: "博客搭建",      // Ensure uniqueness and length less than 50  decodeURI(location.pathname)
-           distractionFreeMode: false  // Facebook-like distraction free mode
+           id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50
+           distractionFreeMode: false,  // Facebook-like distraction free mode
+		   labels: ['%= page.title ']
          });
 
          gitalk.render('gitalk-container');
