@@ -305,7 +305,7 @@
            owner: 'pistachioss',
            admin: ['pistachioss'],
            id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50 
-           issueTitle: document.title, // 这里设置你的自定义标题
+           issueTitle: `评论 - ${document.title}`, // 这里设置你的自定义标题
 		   distractionFreeMode: false  // Facebook-like distraction free mode
          });
 
