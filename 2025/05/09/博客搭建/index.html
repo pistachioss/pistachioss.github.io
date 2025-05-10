@@ -301,7 +301,7 @@
         const gitalk = new Gitalk({
            clientID: 'Ov23liTbPXkD3NfIs0KX',
            clientSecret: '4e727600e55d74a25577449de551363030ee5a0e',
-		   issueTitle: `评论 - ${document.title}`, // 这里设置你的自定义标题
+		   issueTitle: `${document.title}`,, // 这里设置你的自定义标题
            repo: 'pistachioss.github.io',      // The repository of store comments,
            owner: 'pistachioss',
            admin: ['pistachioss'],
@@ -385,6 +385,15 @@
 </script>
 
 
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
 
 
 <!-- syntax highlighting -->
