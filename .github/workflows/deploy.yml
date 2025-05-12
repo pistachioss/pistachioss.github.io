@@ -1,53 +1,37 @@
-name: Deploy Hexo Blog to GitHub Pages
+name: Build and Deploy Hexo Blog
 
-# 触发条件：当 push 到 main 分支时触发
 on:
   push:
     branches:
-      - main # 或者你的源代码分支，如 master, source
+      - main # 当 main 分支有 push 操作时触发
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest # 使用最新的 Ubuntu 环境
+    runs-on: ubuntu-latest # 使用最新的 ubuntu 系统作为运行环境
     steps:
-      # 步骤1：检出你的代码
-      - name: Checkout
-        uses: actions/checkout@v3 # 使用官方的 checkout action
+      - name: Checkout source code # 步骤1: 拉取 main 分支的源代码
+        uses: actions/checkout@v3
 
-      # 步骤2：设置 Node.js 环境
-      - name: Setup Node.js
+      - name: Setup Node.js # 步骤2: 设置 Node.js 环境
         uses: actions/setup-node@v3
         with:
-          node-version: '20' # 指定你项目使用的 Node.js 版本，例如 16, 18, 20
+          node-version: '20' # 根据你的 Hexo 版本和依赖选择合适的 Node.js 版本 (e.g., 16, 18, 20)
           cache: 'npm' # 缓存 npm 依赖，加快后续构建速度
 
-      # 步骤3：安装项目依赖
-      - name: Install Dependencies
-        run: npm install # 或者 yarn install
+      - name: Install Dependencies # 步骤3: 安装项目依赖
+        run: npm install
 
-      # 步骤4：(可选但推荐) 配置 Git 用户信息，用于 deploy 时的 commit
-      # Action 执行者信息会被用作提交者，这里可以明确指定
-      - name: Configure Git User
-        run: |
-          git config --global user.name "${{ github.actor }}"
-          git config --global user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
-          # 或者你可以使用一个固定的机器人账户信息
-          # git config --global user.name "GitHub Actions Bot"
-          # git config --global user.email "actions-bot@users.noreply.github.com"
+      - name: Build Hexo # 步骤4: 生成静态文件
+        run: npx hexo clean && npx hexo generate # 或者 npm run build (如果你在 package.json 中定义了)
 
-      # 步骤5：生成静态文件并部署
-      - name: Build and Deploy
-        env:
-          # GITHUB_TOKEN 是 GitHub Actions 自动提供的，不需要手动在 Secrets 中配置
-          # 但如果你的 _config.yml 中的 repo 地址没有包含 token，你可能需要像下面这样传递它
-          # 如果 _config.yml 中 repo 地址已包含 token (如 https://${{ secrets.GITHUB_TOKEN }}@...)，则这里不需要显式传递
-          # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # 对于上面 _config.yml 的配置，因为 token 已经在 repo URL 里了，所以这里不需要额外 env
-        run: |
-          # hexo clean # 可选，清理旧文件
-          # hexo generate # 生成静态文件
-          # hexo deploy # 部署
-          # 如果你的 package.json 中定义了 deploy 脚本，也可以用 npm run deploy
-          npm run publish # 假设你在 package.json 中配置了 "deploy": "hexo clean && hexo deploy" 或类似命令
-          # 或者直接执行 hexo 命令：
-          # hexo clean && hexo g && hexo d
+      - name: Deploy to gh-pages # 步骤5: 部署到 gh-pages 分支
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }} # GitHub Action 自动提供的 token
+          publish_dir: ./public # Hexo 生成的静态文件目录
+          publish_branch: gh-pages # 推送到的目标分支
+          # cname: your.custom.domain.com # 如果你没有在 source/CNAME 添加文件，可以在这里指定
+                                          # 但推荐使用 source/CNAME 文件的方式
+          user_name: 'github-actions[bot]' # 提交者名称
+          user_email: 'github-actions[bot]@users.noreply.github.com' # 提交者邮箱
+          commit_message: 'Deploy: ${{ github.event.head_commit.message }}' # 自定义提交信息
