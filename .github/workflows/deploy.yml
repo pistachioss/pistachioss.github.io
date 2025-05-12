@@ -3,35 +3,45 @@ name: Build and Deploy Hexo Blog
 on:
   push:
     branches:
-      - main # 当 main 分支有 push 操作时触发
+      - main
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest # 使用最新的 ubuntu 系统作为运行环境
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
-      - name: Checkout source code # 步骤1: 拉取 main 分支的源代码
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js # 步骤2: 设置 Node.js 环境
-        uses: actions/setup-node@v3
+      - name: Checkout source code
+        uses: actions/checkout@v4
         with:
-          node-version: '20' # 根据你的 Hexo 版本和依赖选择合适的 Node.js 版本 (e.g., 16, 18, 20)
-          cache: 'npm' # 缓存 npm 依赖，加快后续构建速度
+          fetch-depth: 0
 
-      - name: Install Dependencies # 步骤3: 安装项目依赖
-        run: npm install
-
-      - name: Build Hexo # 步骤4: 生成静态文件
-        run: npx hexo clean && npx hexo generate # 或者 npm run build (如果你在 package.json 中定义了)
-
-      - name: Deploy to gh-pages # 步骤5: 部署到 gh-pages 分支
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }} # GitHub Action 自动提供的 token
-          publish_dir: ./public # Hexo 生成的静态文件目录
-          publish_branch: gh-pages # 推送到的目标分支
-          # cname: your.custom.domain.com # 如果你没有在 source/CNAME 添加文件，可以在这里指定
-                                          # 但推荐使用 source/CNAME 文件的方式
-          user_name: 'github-actions[bot]' # 提交者名称
-          user_email: 'github-actions[bot]@users.noreply.github.com' # 提交者邮箱
-          commit_message: 'Deploy: ${{ github.event.head_commit.message }}' # 自定义提交信息
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: |
+          npm install -g hexo-cli
+          npm install
+
+      - name: Build Hexo
+        run: npx hexo clean && npx hexo generate
+
+      - name: Add .nojekyll
+        run: touch public/.nojekyll
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'Deploy: ${{ github.event.head_commit.message }}'
+          keep_files: false

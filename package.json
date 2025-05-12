@@ -25,7 +25,7 @@
   },
   "scripts": {
     "server": "hexo server",
-    "build": "hexo generate",
+    "build": "hexo clean && hexo generate",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
     "publish": "npm run clean && npm run build && npm run deploy",
