@@ -14,6 +14,7 @@ timezone: 'Asia/Shanghai'  # 时区
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
 url: https://blog.5224xy.xyz # 替换成你的博客网址
+root: /
 permalink: :year/:month/:day/:title/ # 文章链接格式，推荐
 permalink_defaults:
 pretty_urls:
