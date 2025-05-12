@@ -1,0 +1,539 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>llm-agent工具开发 | pistachioss</title>
+  <meta name="author" content="shineXGO">
+  
+  <meta name="description" content="基于springboot开发agent">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="llm-agent工具开发"/>
+  <meta property="og:site_name" content="pistachioss"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="pistachioss" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/themes/cerulean.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight-default.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/comment.css" media="screen" type="text/css">
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.9/es5-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-sham.min.js"></script>
+  <![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+  
+  
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+	<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  
+  <!-- analytics -->
+  
+
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <nav id="main-nav" class="navbar navbar-inverse navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+	<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+       <a class="navbar-brand" href="/">pistachioss</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="about me">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+    <div class="content">
+      
+
+
+	
+		<div class="page-header page-header-inverse ">		
+			<h1 class="title title-inverse "> llm-agent工具开发</h1>
+		</div>		
+	
+
+
+
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  
+		 <div class="alert alert-success description">
+			<i class="fa fa-info-circle"></i> <p>基于springboot开发agent</p>
+			
+		 </div> <!-- alert -->
+	  		
+
+	  <p>开发一个基于 Spring Boot 和 Vue 的大模型 Agent，按照以下提示开发，最后你需要尽量去优化我没想到的地方，优化页面，让大模型Agent功能和市面上通用智能体差不多</p>
+<h2 id="后端-Spring-Boot-编码提示词示例："><a href="#后端-Spring-Boot-编码提示词示例：" class="headerlink" title="后端 (Spring Boot) 编码提示词示例："></a>后端 (Spring Boot) 编码提示词示例：</h2><h3 id="建基础项目结构："><a href="#建基础项目结构：" class="headerlink" title="建基础项目结构："></a>建基础项目结构：</h3><ul>
+<li>“为我生成一个 Spring Boot 3.x 项目的骨架，包含 Web, Lombok, Spring Data JPA (使用 H2 内存数据库作为示例) 和 Spring Security (基础认证) 的依赖。项目使用 Maven 管理，Java 版本为 17。”</li>
+<li>“请为这个 Spring Boot 项目创建一个基础的目录结构，包括 controller, service, repository, model, config, dto 等包。”</li>
+</ul>
+<h3 id="义数据模型-Entity-DTO-："><a href="#义数据模型-Entity-DTO-：" class="headerlink" title="义数据模型 (Entity&#x2F;DTO)："></a>义数据模型 (Entity&#x2F;DTO)：</h3><ul>
+<li>“为一个大模型 Agent 创建一个 Spring Boot JPA 实体类 <code>AgentTask</code>，它应该包含以下字段：<code>id</code> (Long, 主键, 自增), <code>taskName</code> (String, 非空), <code>prompt</code> (String, 文本类型), <code>status</code> (枚举类型 <code>TaskStatus</code>: PENDING, RUNNING, COMPLETED, FAILED), <code>createdAt</code> (LocalDateTime, 自动生成创建时间), <code>updatedAt</code> (LocalDateTime, 自动生成更新时间)。请同时生成相应的 Lombok注解 (<code>@Data</code>, <code>@Entity</code> 等)。”</li>
+<li>“为 <code>AgentTask</code> 实体创建一个对应的 DTO 类 <code>AgentTaskDTO</code>，包含 <code>id</code>, <code>taskName</code>, <code>prompt</code>, <code>status</code> 字段。并为 <code>AgentTask</code> 和 <code>AgentTaskDTO</code> 之间编写一个 MapStruct 的映射接口。”</li>
+</ul>
+<h3 id="建-Repository-层："><a href="#建-Repository-层：" class="headerlink" title="建 Repository 层："></a>建 Repository 层：</h3><ul>
+<li>“为 <code>AgentTask</code> 实体创建一个 Spring Data JPA Repository 接口 <code>AgentTaskRepository</code>，继承自 <code>JpaRepository</code>。并添加一个根据 <code>status</code> 查询任务列表的方法。”</li>
+</ul>
+<h3 id="Service-层："><a href="#Service-层：" class="headerlink" title="Service 层："></a>Service 层：</h3><ul>
+<li><p>“创建一个 Spring Boot Service 类 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AgentTaskService</span><br></pre></td></tr></table></figure>
+
+<p>，注入 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AgentTaskRepository</span><br></pre></td></tr></table></figure>
+
+<p>。实现以下方法：</p>
+<ul>
+<li><code>createTask(AgentTaskDTO taskDTO)</code>: 创建一个新的 Agent 任务。</li>
+<li><code>getTaskById(Long id)</code>: 根据 ID 获取任务详情。</li>
+<li><code>getAllTasks()</code>: 获取所有任务列表。</li>
+<li><code>updateTaskStatus(Long id, TaskStatus status)</code>: 更新任务状态。</li>
+<li><code>deleteTask(Long id)</code>: 删除任务。”</li>
+</ul>
+</li>
+<li><p>“在 <code>AgentTaskService</code> 的 <code>createTask</code> 方法中，添加逻辑：在保存任务到数据库之前，记录一条 info 级别的日志，内容为 ‘Creating new agent task with name: [taskName]’。”</p>
+</li>
+</ul>
+<h3 id="建-Controller-层-REST-API-："><a href="#建-Controller-层-REST-API-：" class="headerlink" title="建 Controller 层 (REST API)："></a>建 Controller 层 (REST API)：</h3><ul>
+<li><p>“创建一个 Spring Boot REST Controller </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AgentTaskController</span><br></pre></td></tr></table></figure>
+
+<p>，注入 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AgentTaskService</span><br></pre></td></tr></table></figure>
+
+<p>。为以下操作创建 API 接口：</p>
+<ul>
+<li><code>POST /api/tasks</code>: 创建新任务，请求体为 <code>AgentTaskDTO</code>，返回创建后的 <code>AgentTaskDTO</code>。</li>
+<li><code>GET /api/tasks/&#123;id&#125;</code>: 根据 ID 获取任务，返回 <code>AgentTaskDTO</code>。</li>
+<li><code>GET /api/tasks</code>: 获取所有任务列表，返回 <code>List&lt;AgentTaskDTO&gt;</code>。</li>
+<li><code>PUT /api/tasks/&#123;id&#125;/status</code>: 更新任务状态，路径参数为任务 ID，请求参数为新的 <code>status</code>，返回更新后的 <code>AgentTaskDTO</code>。</li>
+<li><code>DELETE /api/tasks/&#123;id&#125;</code>: 删除任务，返回操作成功的消息。”</li>
+</ul>
+</li>
+<li><p>“为 <code>AgentTaskController</code> 中的所有 API 接口添加合适的 <code>@ApiOperation</code> (Swagger) 注解，描述接口功能、参数和响应。”</p>
+</li>
+<li><p>“在 <code>AgentTaskController</code> 中实现全局异常处理，捕获 <code>ResourceNotFoundException</code> 并返回 404 状态码和错误信息。”</p>
+</li>
+</ul>
+<h3 id="大模型交互的-Service："><a href="#大模型交互的-Service：" class="headerlink" title="大模型交互的 Service："></a>大模型交互的 Service：</h3><ul>
+<li><p>“创建一个 Spring Boot Service 类 <code>LargeModelService</code>，用于与外部大模型 API 进行交互。假设大模型 API 的地址是 <code>https://api.example-llm.com/generate</code>，需要通过 HTTP POST 请求发送 JSON 数据，包含 <code>prompt</code> 字段，并期望返回一个包含 <code>result</code> 字段的 JSON 响应。”</p>
+</li>
+<li><p>“在 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LargeModelService</span><br></pre></td></tr></table></figure>
+
+<p> 中实现一个方法 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">executePrompt(String prompt)</span><br></pre></td></tr></table></figure>
+
+<p>:</p>
+<ul>
+<li>使用 <code>RestTemplate</code> 或 <code>WebClient</code> 向大模型 API 发送请求。</li>
+<li>处理可能的 API 错误和网络异常。</li>
+<li>返回大模型生成的文本结果。</li>
+<li>(可选) 添加重试逻辑，如果 API 调用失败则重试最多3次，每次间隔5秒。”</li>
+</ul>
+</li>
+<li><p>“将 <code>LargeModelService</code> 注入到 <code>AgentTaskService</code> 中。修改 <code>AgentTaskService</code> 的 <code>createTask</code> 方法，在任务状态变为 <code>RUNNING</code> 后，调用 <code>LargeModelService.executePrompt</code> 方法，并将结果更新到任务的某个字段（例如，<code>resultText</code>）。”</p>
+</li>
+</ul>
+<ol start="7">
+<li><p><strong>配置和安全：</strong></p>
+<ul>
+<li>“为 Spring Boot 应用生成一个 <code>application.yml</code> 或 <code>application.properties</code> 文件，配置数据库连接信息 (H2)、服务器端口 (例如 8080)，以及一个自定义配置项 <code>llm.api.key</code> 用于存放调用大模型 API 的密钥。”</li>
+<li>“使用 Spring Security 配置基于 JWT 的认证和授权。创建一个 <code>JwtTokenProvider</code> 类用于生成和验证 Token。保护 <code>/api/tasks</code> 下的所有接口，除了允许匿名访问的注册和登录接口。”</li>
+</ul>
+</li>
+</ol>
+<h2 id="前端-Vue-编码提示词示例："><a href="#前端-Vue-编码提示词示例：" class="headerlink" title="前端 (Vue) 编码提示词示例："></a>前端 (Vue) 编码提示词示例：</h2><h3 id="建基础项目结构和组件："><a href="#建基础项目结构和组件：" class="headerlink" title="建基础项目结构和组件："></a>建基础项目结构和组件：</h3><ul>
+<li>“使用 Vue 3 (Composition API) 和 Vite 创建一个新的前端项目。安装 Axios 用于 API 请求，以及一个 UI 库，例如 Element Plus 或 Vuetify。”</li>
+<li>“创建一个 Vue 组件 <code>TaskList.vue</code>，用于显示 Agent 任务列表。”</li>
+<li>“创建一个 Vue 组件 <code>TaskForm.vue</code>，用于创建新的 Agent 任务，包含任务名称和 Prompt 输入框。”</li>
+<li>“创建一个 Vue 组件 <code>TaskDetail.vue</code>，用于显示单个任务的详细信息。”</li>
+</ul>
+<h3 id="PI-服务封装："><a href="#PI-服务封装：" class="headerlink" title="PI 服务封装："></a>PI 服务封装：</h3><ul>
+<li>“在 Vue 项目的 <code>src</code> 目录下创建一个 <code>services</code> 文件夹，并在其中创建一个 <code>taskService.js</code> 文件。封装与后端 <code>/api/tasks</code> 相关的 Axios API 请求方法，例如 <code>WorkspaceTasks</code>, <code>WorkspaceTaskById</code>, <code>createTask</code>, <code>updateTaskStatus</code>, <code>deleteTask</code>。”</li>
+</ul>
+<h3 id="态管理-Pinia-或-Vuex-："><a href="#态管理-Pinia-或-Vuex-：" class="headerlink" title="态管理 (Pinia 或 Vuex)："></a>态管理 (Pinia 或 Vuex)：</h3><ul>
+<li>“使用 Pinia 为 Agent 任务创建一个 store (<code>taskStore.js</code>)。这个 store 应该包含以下 state: <code>tasks</code> (数组), <code>currentTask</code> (对象), <code>loading</code> (布尔值), <code>error</code> (字符串或对象)。”</li>
+<li>“为 <code>taskStore.js</code> 添加 actions 用于调用 <code>taskService.js</code> 中的方法来获取和修改任务数据，并更新 state。例如：<code>loadTasksAction</code>, <code>createTaskAction</code>。”</li>
+</ul>
+<h3 id="件实现-任务列表-TaskList-vue-："><a href="#件实现-任务列表-TaskList-vue-：" class="headerlink" title="件实现 - 任务列表 (TaskList.vue)："></a>件实现 - 任务列表 (<code>TaskList.vue</code>)：</h3><ul>
+<li><p>“在 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TaskList.vue</span><br></pre></td></tr></table></figure>
+
+<p> 组件中：</p>
+<ul>
+<li>使用 <code>taskStore</code> 获取任务列表并展示在一个表格中，表格列应包括：ID, 任务名称, 状态, 创建时间。</li>
+<li>每行提供一个“查看详情”按钮和一个“删除”按钮。</li>
+<li>点击“查看详情”按钮，导航到任务详情页。</li>
+<li>点击“删除”按钮，调用 <code>taskStore</code> 中的 action 删除任务并刷新列表。”</li>
+</ul>
+</li>
+<li><p>“为 <code>TaskList.vue</code> 中的表格添加分页功能。”</p>
+</li>
+<li><p>“在 <code>TaskList.vue</code> 中添加一个“创建新任务”的按钮，点击后弹出一个模态框或导航到创建任务的表单页面。”</p>
+</li>
+</ul>
+<h3 id="件实现-创建任务表单-TaskForm-vue-："><a href="#件实现-创建任务表单-TaskForm-vue-：" class="headerlink" title="件实现 - 创建任务表单 (TaskForm.vue)："></a>件实现 - 创建任务表单 (<code>TaskForm.vue</code>)：</h3><ul>
+<li><p>“在 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TaskForm.vue</span><br></pre></td></tr></table></figure>
+
+<p> 组件中：</p>
+<ul>
+<li>包含两个输入字段：任务名称 (必填) 和 Prompt (文本域, 必填)。</li>
+<li>一个“提交”按钮。</li>
+<li>点击“提交”按钮时，获取表单数据，调用 <code>taskStore</code> 中的 <code>createTaskAction</code> 创建任务。</li>
+<li>成功创建后，清空表单并给出提示，或者导航到任务列表页。”</li>
+</ul>
+</li>
+<li><p>“为 <code>TaskForm.vue</code> 中的输入字段添加基础的表单校验规则。”</p>
+</li>
+</ul>
+<h3 id="件实现-任务详情-TaskDetail-vue-："><a href="#件实现-任务详情-TaskDetail-vue-：" class="headerlink" title="件实现 - 任务详情 (TaskDetail.vue)："></a>件实现 - 任务详情 (<code>TaskDetail.vue</code>)：</h3><ul>
+<li><p>“在 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TaskDetail.vue</span><br></pre></td></tr></table></figure>
+
+<p> 组件中：</p>
+<ul>
+<li>从路由参数中获取任务 ID。</li>
+<li>使用 <code>taskStore</code> 根据 ID 加载任务详情。</li>
+<li>显示任务的名称, Prompt, 状态, 创建时间, 更新时间, 以及大模型返回的结果 (如果后端实现了)。</li>
+<li>提供一个下拉框或按钮组，允许用户更新任务的状态 (例如，从 PENDING 改为 RUNNING，或标记为 COMPLETED&#x2F;FAILED)。”</li>
+</ul>
+</li>
+</ul>
+<h3 id="由配置-router-index-js-："><a href="#由配置-router-index-js-：" class="headerlink" title="由配置 (router/index.js)："></a>由配置 (<code>router/index.js</code>)：</h3><ul>
+<li>“为 Vue 应用配置路由：<ul>
+<li><code>/tasks</code>: 对应 <code>TaskList.vue</code> 组件。</li>
+<li><code>/tasks/new</code>: 对应 <code>TaskForm.vue</code> 组件。</li>
+<li><code>/tasks/:id</code>: 对应 <code>TaskDetail.vue</code> 组件。”</li>
+</ul>
+</li>
+</ul>
+<h3 id="I-交互和样式："><a href="#I-交互和样式：" class="headerlink" title="I 交互和样式："></a>I 交互和样式：</h3><ul>
+<li>“在 <code>TaskList.vue</code> 中，当任务状态为 <code>RUNNING</code> 时，显示一个加载中的动画或图标。”</li>
+<li>“使用 Element Plus 的 <code>ElLoading</code> 组件，在 API 请求期间显示全局加载遮罩。”</li>
+<li>“为 <code>TaskForm.vue</code> 的表单元素添加一些基本的 CSS 样式，使其更美观。”</li>
+</ul>
+<h2 id="LangChain-LLM流程"><a href="#LangChain-LLM流程" class="headerlink" title="LangChain LLM流程"></a>LangChain LLM流程</h2><p><strong>LangChain (或更准确地说，是 LangChain4j 中的 <code>AiServices</code> 或 Agent 执行器) 之所以知道要调用 <code>DateTimeTool</code>，是 LLM (大语言模型，如 DeepSeek) “告诉”它的。</strong></p>
+<p>以下是这个过程的分解说明：</p>
+<h3 id="LLM-提供工具信息-Prompt-Engineering-Function-Calling-Metadata"><a href="#LLM-提供工具信息-Prompt-Engineering-Function-Calling-Metadata" class="headerlink" title="LLM 提供工具信息 (Prompt Engineering &#x2F; Function Calling Metadata):"></a>LLM 提供工具信息 (Prompt Engineering &#x2F; Function Calling Metadata):</h3><ul>
+<li>当你构建 <code>AiServices</code> 并传入 <code>.tools(this.dateTimeTool)</code> 时，LangChain4j 会在内部做几件事情：<ul>
+<li><strong>提取工具元数据:</strong> 它会检查 DateTimeTool 类中所有被 @Tool 注解标记的方法 (如 getCurrentDateTime, getCurrentDate)。</li>
+<li>对于每个工具方法，它会收集：<ul>
+<li><strong>工具名称:</strong> 方法名 (或者 @Tool(“description”) 中的描述可以被用来辅助生成一个对 LLM 更友好的名称&#x2F;标识，但通常方法名是基础)。</li>
+<li><strong>工具描述:</strong> @Tool 注解中的描述字符串 (例如，”Gets the current date and time in a specified format.”)。</li>
+<li><strong>参数描述:</strong> 对于每个参数，使用 @P 注解提供的描述 (例如，”The format string for the date and time…”) 以及参数的类型。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>构建特殊的 Prompt 或 Function&#x2F;Tool Calling 请求:</strong><ul>
+<li><strong>传统 ReAct 模式 (如果 LLM 不支持原生 Tool Calling):</strong> LangChain4j 会将这些工具的名称、描述和参数信息，以特定的文本格式，<strong>注入到发送给 LLM 的 System Prompt 或 User Prompt 的一部分</strong>。它会告诉 LLM：“你有以下这些工具可用：[工具A描述], [工具B描述]… 如果你需要使用工具，请按如下格式输出：Action: [工具名] ActionInput: [输入]”。</li>
+<li><strong>原生 Tool Calling &#x2F; Function Calling 模式 (如 OpenAI, Gemini):</strong> 如果底层的 ChatLanguageModel (比如 OpenAiChatModel) 支持，并且 LLM 本身也支持此功能，LangChain4j 会将工具的元数据（名称、描述、参数 schema）按照 LLM API 指定的格式（通常是 JSON Schema）封装，并与用户的提问一起发送给 LLM。</li>
+</ul>
+</li>
+</ul>
+<h3 id="LM-进行决策"><a href="#LM-进行决策" class="headerlink" title="LM 进行决策:"></a>LM 进行决策:</h3><ul>
+<li>LLM 接收到用户的提问，以及关于可用工具的信息。</li>
+<li>基于它对用户意图的理解和它被训练来遵循指令的能力，LLM 会判断：<ul>
+<li>这个问题是否可以通过直接回答来解决？</li>
+<li>还是说，我需要调用某个工具来获取额外的信息或执行某个操作才能回答这个问题？</li>
+</ul>
+</li>
+<li>如果 LLM 决定需要使用工具，它会根据工具的描述来选择最合适的工具，并尝试理解需要为这个工具提供什么参数。</li>
+<li><strong>例如:</strong> 当用户问 “现在几点了？请用 yyyy-MM-dd HH:mm 格式告诉我。”<ul>
+<li>LLM 看到 DateTimeTool 中有一个 getCurrentDateTime 方法，其描述是 “Gets the current date and time in a specified format.”，并且有一个参数 formatString。</li>
+<li>LLM 就会判断这个工具非常适合回答这个问题。</li>
+</ul>
+</li>
+</ul>
+<h3 id="LM-输出工具调用指令"><a href="#LM-输出工具调用指令" class="headerlink" title="LM 输出工具调用指令:"></a>LM 输出工具调用指令:</h3><ul>
+<li><p><strong>传统 ReAct 模式:</strong> LLM 会按照 Prompt 中约定的格式输出，例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Thought: The user wants the current time in a specific format. I should use the getCurrentDateTime tool.</span><br><span class="line">Action: getCurrentDateTime</span><br><span class="line">ActionInput: &#123;&quot;formatString&quot;: &quot;yyyy-MM-dd HH:mm&quot;&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>​	(注意：ActionInput 的具体格式也可能在 Prompt 中约定，JSON 是一种常见的选择)</p>
+<ul>
+<li><strong>原生 Tool Calling &#x2F; Function Calling 模式:</strong> LLM API 会返回一个特殊的响应，明确指示应该调用哪个函数以及参数是什么，例如 (OpenAI 风格)：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;choices&quot;: [</span><br><span class="line">    &#123;</span><br><span class="line">      &quot;message&quot;: &#123;</span><br><span class="line">        &quot;role&quot;: &quot;assistant&quot;,</span><br><span class="line">        &quot;tool_calls&quot;: [</span><br><span class="line">          &#123;</span><br><span class="line">            &quot;id&quot;: &quot;call_abc123&quot;,</span><br><span class="line">            &quot;type&quot;: &quot;function&quot;,</span><br><span class="line">            &quot;function&quot;: &#123;</span><br><span class="line">              &quot;name&quot;: &quot;getCurrentDateTime&quot;,</span><br><span class="line">              &quot;arguments&quot;: &quot;&#123;\&quot;formatString\&quot;:\&quot;yyyy-MM-dd HH:mm\&quot;&#125;&quot;</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">        ]</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">  // ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="LangChain4j-解析指令并执行工具"><a href="#LangChain4j-解析指令并执行工具" class="headerlink" title="LangChain4j 解析指令并执行工具:"></a>LangChain4j 解析指令并执行工具:</h3><ul>
+<li>LangChain4j (例如 AiServices 的内部逻辑或 Agent 执行器) 会接收 LLM 的这个输出。</li>
+<li>它会解析出工具的名称 (例如 “getCurrentDateTime”) 和参数 (例如 {“formatString”:”yyyy-MM-dd HH:mm”}).</li>
+<li>然后，它会在之前注册的工具列表 (即你传入的 this.dateTimeTool 实例) 中查找具有该名称的方法。</li>
+<li>一旦找到，它会尝试将 LLM 提供的参数（通常是字符串形式的 JSON）反序列化或转换为 DateTimeTool 中 getCurrentDateTime 方法期望的参数类型 (这里是 String formatString)。</li>
+<li>然后，LangChain4j <strong>在你的 Java 应用中实际调用</strong> dateTimeTool.getCurrentDateTime(“yyyy-MM-dd HH:mm”) 方法。</li>
+</ul>
+<h3 id="工具结果反馈给-LLM"><a href="#工具结果反馈给-LLM" class="headerlink" title="工具结果反馈给 LLM:"></a>工具结果反馈给 LLM:</h3><ul>
+<li>dateTimeTool.getCurrentDateTime(…) 方法执行后返回一个结果 (例如 “Current date and time is: 2025-05-08 10:30 Thursday”).</li>
+<li>LangChain4j 会将这个工具的执行结果再次发送给 LLM，通常会附带一些上下文，告诉 LLM：“这是你之前请求调用的 getCurrentDateTime 工具的输出结果：[结果字符串]”。</li>
+</ul>
+<h3 id="LM-生成最终回复"><a href="#LM-生成最终回复" class="headerlink" title="LM 生成最终回复:"></a>LM 生成最终回复:</h3><ul>
+<li>LLM 接收到工具的输出结果后，现在它有了回答用户原始问题所需的信息。</li>
+<li>它会基于用户的原始提问和工具的输出，生成最终的自然语言回复给用户。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h3 id="LM-是决策者："><a href="#LM-是决策者：" class="headerlink" title="LM 是决策者："></a>LM 是决策者：</h3><pre><code> 是 LLM 根据用户的输入和 LangChain4j 提供的工具描述，来决定是否使用工具、使用哪个工具以及如何使用。
+</code></pre>
+<h3 id="LngChain4j-是执行者和协调者："><a href="#LngChain4j-是执行者和协调者：" class="headerlink" title="LngChain4j 是执行者和协调者："></a>LngChain4j 是执行者和协调者：</h3><ul>
+<li>它负责将工具信息有效地传递给 LLM。</li>
+<li>它负责解析 LLM 返回的工具调用指令。</li>
+<li>它负责在本地实际执行工具代码。</li>
+<li>它负责将工具结果反馈给 LLM。</li>
+<li>它负责驱动整个 Agent 的思考-行动循环。</li>
+</ul>
+<p>LangChain4j <strong>本身并不会“智能地”去匹配用户的自然语言和工具方法</strong>，它依赖于 LLM 的自然语言理解和指令遵循能力来完成这个“匹配”和“决策”过程。LangChain4j 的作用是提供一个框架，使得这个 LLM 驱动的工具调用过程能够顺畅地进行。</p>
+	  
+	</div>
+
+	<!-- recommended posts -->
+	
+
+	<div>
+  	<center>
+	<div class="pagination">
+<ul class="pagination">
+	 
+		
+          <li class="prev disabled"><a><i class="fa fa-arrow-circle-o-left"></i>Prev</a></li>
+        
+
+        <li><a href="/archives"><i class="fa fa-archive"></i>Archive</a></li>
+
+		
+          <li class="next"><a href="/2024/10/09/prometheus-grafana/" class="alignright next">Next<i class="fa fa-arrow-circle-o-right"></i></a></li>
+        
+	
+</ul>
+</div>
+
+    </center>
+	</div>
+
+    <!-- share -->
+    
+        
+    <div class="bdsharebuttonbox">
+        <a href="#" class="bds_more" data-cmd="more"></a>
+        <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+        <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+        <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+        <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+        <a href="#" class="bds_linkedin" data-cmd="linkedin" title="分享到linkedin"></a>
+        <a href="#" class="bds_evernotecn" data-cmd="evernotecn" title="分享到印象笔记"></a>
+        <a href="#" class="bds_youdao" data-cmd="youdao" title="分享到有道云笔记"></a>
+        <a href="#" class="bds_copy" data-cmd="copy" title="分享到复制网址"></a>
+    </div>
+    <script>
+        window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"24"},"share":{}};
+        with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+    </script>
+
+
+        
+
+    
+	
+	<!-- comment -->
+	
+<section id="comment">
+  <h2 class="title">Comments</h2>
+  
+     <div id="gitalk-container"></div>
+	 <script type="text/javascript">
+	 // 拼接 body 内容
+	    const decodedPageUrl = decodeURI(location.href)
+		const issueBody = `${decodedPageUrl} \n\n 基于springboot开发agent`;
+        const gitalk = new Gitalk({
+           clientID: 'Ov23liTbPXkD3NfIs0KX',
+           clientSecret: '4e727600e55d74a25577449de551363030ee5a0e',
+           repo: 'pistachioss.github.io',      // The repository of store comments,
+           owner: 'pistachioss',
+           admin: ['pistachioss'],
+           id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50 
+		   title: 'llm-agent工具开发', // 使用文章标题作为 Issue 的标题
+		   body: issueBody, // 拼接好的 body
+		   distractionFreeMode: false  // Facebook-like distraction free mode
+         });
+
+         gitalk.render('gitalk-container');
+	 </script>
+  
+</section>
+
+
+	</div> <!-- col-md-9/col-md-12 -->
+		
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2025-03-11 
+	</div>
+	
+
+	<!-- categories -->
+    
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
+    <ul id="categorys" class="tag_box list-unstyled collapse in">
+          
+  <li>
+    <li><a href="/categories/llm/">llm<span>1</span></a></li>
+  </li>
+
+    </ul>
+	</div>
+	
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/wiki/">wiki<span>16</span></a></li>
+
+    </ul>
+	</div>
+	
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	   <a data-toggle="collapse" data-target="#toc"><i class="fa fa-bars"></i></a>
+	   <div id="toc" class="toc collapse in">
+			<ol class="toc-article"><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#%E5%90%8E%E7%AB%AF-Spring-Boot-%E7%BC%96%E7%A0%81%E6%8F%90%E7%A4%BA%E8%AF%8D%E7%A4%BA%E4%BE%8B%EF%BC%9A"><span class="toc-article-text">后端 (Spring Boot) 编码提示词示例：</span></a><ol class="toc-article-child"><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#%E5%BB%BA%E5%9F%BA%E7%A1%80%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84%EF%BC%9A"><span class="toc-article-text">建基础项目结构：</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#%E4%B9%89%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B-Entity-DTO-%EF%BC%9A"><span class="toc-article-text">义数据模型 (Entity&#x2F;DTO)：</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#%E5%BB%BA-Repository-%E5%B1%82%EF%BC%9A"><span class="toc-article-text">建 Repository 层：</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#Service-%E5%B1%82%EF%BC%9A"><span class="toc-article-text">Service 层：</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#%E5%BB%BA-Controller-%E5%B1%82-REST-API-%EF%BC%9A"><span class="toc-article-text">建 Controller 层 (REST API)：</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#%E5%A4%A7%E6%A8%A1%E5%9E%8B%E4%BA%A4%E4%BA%92%E7%9A%84-Service%EF%BC%9A"><span class="toc-article-text">大模型交互的 Service：</span></a></li></ol></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#%E5%89%8D%E7%AB%AF-Vue-%E7%BC%96%E7%A0%81%E6%8F%90%E7%A4%BA%E8%AF%8D%E7%A4%BA%E4%BE%8B%EF%BC%9A"><span class="toc-article-text">前端 (Vue) 编码提示词示例：</span></a><ol class="toc-article-child"><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#%E5%BB%BA%E5%9F%BA%E7%A1%80%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84%E5%92%8C%E7%BB%84%E4%BB%B6%EF%BC%9A"><span class="toc-article-text">建基础项目结构和组件：</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#PI-%E6%9C%8D%E5%8A%A1%E5%B0%81%E8%A3%85%EF%BC%9A"><span class="toc-article-text">PI 服务封装：</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#%E6%80%81%E7%AE%A1%E7%90%86-Pinia-%E6%88%96-Vuex-%EF%BC%9A"><span class="toc-article-text">态管理 (Pinia 或 Vuex)：</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#%E4%BB%B6%E5%AE%9E%E7%8E%B0-%E4%BB%BB%E5%8A%A1%E5%88%97%E8%A1%A8-TaskList-vue-%EF%BC%9A"><span class="toc-article-text">件实现 - 任务列表 (TaskList.vue)：</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#%E4%BB%B6%E5%AE%9E%E7%8E%B0-%E5%88%9B%E5%BB%BA%E4%BB%BB%E5%8A%A1%E8%A1%A8%E5%8D%95-TaskForm-vue-%EF%BC%9A"><span class="toc-article-text">件实现 - 创建任务表单 (TaskForm.vue)：</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#%E4%BB%B6%E5%AE%9E%E7%8E%B0-%E4%BB%BB%E5%8A%A1%E8%AF%A6%E6%83%85-TaskDetail-vue-%EF%BC%9A"><span class="toc-article-text">件实现 - 任务详情 (TaskDetail.vue)：</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#%E7%94%B1%E9%85%8D%E7%BD%AE-router-index-js-%EF%BC%9A"><span class="toc-article-text">由配置 (router&#x2F;index.js)：</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#I-%E4%BA%A4%E4%BA%92%E5%92%8C%E6%A0%B7%E5%BC%8F%EF%BC%9A"><span class="toc-article-text">I 交互和样式：</span></a></li></ol></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#LangChain-LLM%E6%B5%81%E7%A8%8B"><span class="toc-article-text">LangChain LLM流程</span></a><ol class="toc-article-child"><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#LLM-%E6%8F%90%E4%BE%9B%E5%B7%A5%E5%85%B7%E4%BF%A1%E6%81%AF-Prompt-Engineering-Function-Calling-Metadata"><span class="toc-article-text">LLM 提供工具信息 (Prompt Engineering &#x2F; Function Calling Metadata):</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#LM-%E8%BF%9B%E8%A1%8C%E5%86%B3%E7%AD%96"><span class="toc-article-text">LM 进行决策:</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#LM-%E8%BE%93%E5%87%BA%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8%E6%8C%87%E4%BB%A4"><span class="toc-article-text">LM 输出工具调用指令:</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#LangChain4j-%E8%A7%A3%E6%9E%90%E6%8C%87%E4%BB%A4%E5%B9%B6%E6%89%A7%E8%A1%8C%E5%B7%A5%E5%85%B7"><span class="toc-article-text">LangChain4j 解析指令并执行工具:</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#%E5%B7%A5%E5%85%B7%E7%BB%93%E6%9E%9C%E5%8F%8D%E9%A6%88%E7%BB%99-LLM"><span class="toc-article-text">工具结果反馈给 LLM:</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#LM-%E7%94%9F%E6%88%90%E6%9C%80%E7%BB%88%E5%9B%9E%E5%A4%8D"><span class="toc-article-text">LM 生成最终回复:</span></a></li></ol></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-article-text">总结</span></a><ol class="toc-article-child"><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#LM-%E6%98%AF%E5%86%B3%E7%AD%96%E8%80%85%EF%BC%9A"><span class="toc-article-text">LM 是决策者：</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#LngChain4j-%E6%98%AF%E6%89%A7%E8%A1%8C%E8%80%85%E5%92%8C%E5%8D%8F%E8%B0%83%E8%80%85%EF%BC%9A"><span class="toc-article-text">LngChain4j 是执行者和协调者：</span></a></li></ol></li></ol>
+		</div>
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+	</div>
+		
+
+</div><!-- row -->
+
+
+
+
+    </div>
+  </div>
+  <div class="container-narrow">
+    <footer> <p>
+  &copy; 2025 shineXGO
+  
+      with help from <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a>. Theme by <a target="_blank" rel="noopener" href="http://github.com/wzpan/hexo-theme-freemind/">Freemind</a>.    
+</p> </footer>
+  </div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>▲</span> 
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+
+<!-- syntax highlighting -->
+
+
+</body>
+</html>

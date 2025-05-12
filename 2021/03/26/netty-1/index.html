@@ -1,0 +1,733 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Netty 源码解析（一） | pistachioss</title>
+  <meta name="author" content="shineXGO">
+  
+  <meta name="description" content="Netty 解析">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Netty 源码解析（一）"/>
+  <meta property="og:site_name" content="pistachioss"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="pistachioss" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/themes/cerulean.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight-default.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/comment.css" media="screen" type="text/css">
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.9/es5-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-sham.min.js"></script>
+  <![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+  
+  
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+	<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  
+  <!-- analytics -->
+  
+
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <nav id="main-nav" class="navbar navbar-inverse navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+	<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+       <a class="navbar-brand" href="/">pistachioss</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="about me">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+    <div class="content">
+      
+
+
+	
+		<div class="page-header page-header-inverse ">		
+			<h1 class="title title-inverse "> Netty 源码解析（一）</h1>
+		</div>		
+	
+
+
+
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  
+		 <div class="alert alert-success description">
+			<i class="fa fa-info-circle"></i> <p>Netty 解析</p>
+			
+		 </div> <!-- alert -->
+	  		
+
+	  <p>本文又是一篇源码分析文章，其实除了 Doug Lea 的并发包源码，我是真不太爱写源码分析。因为要花非常多的时间，而且很多地方需要反复组织语言。</p>
+<p>本文将介绍 Netty，Java 平台上使用最广泛的 NIO 包，它是对 JDK 中的 NIO 实现的一层封装，让我们能更方便地开发 NIO 程序。其实，Netty 不仅仅是 NIO 吧，但是，基本上大家都冲着 NIO 来的。</p>
+<p>个人感觉国内对于 Netty 的吹嘘是有点过了，主要是很多人靠它吃饭，要么是搞培训的，要么是出书的，恨不得把 Netty 吹上天去，这种现象也是挺不好的，反而使得初学者觉得 Netty 是什么高深的技术一样。</p>
+<p>Netty 的源码不是很简单，因为它比较多，而且各个类之间的关系错综复杂，很多人说它的源码很好，这点我觉得一般，真要说好代码，还得 Doug Lea 的并发源码比较漂亮，一行行都是精华，不过它们是不同类型的，也没什么好对比的。Netty 源码好就好在它的接口使用比较灵活，往往接口好用的框架，源码都不会太简单。</p>
+<p>本文将立足于源码分析，所以读者需要先掌握 NIO 的基础知识，至少我之前写的 <a href="/post/java-nio">《Java NIO：Buffer、Channel 和 Selector》</a> 中介绍的基础知识要清楚，如果读者已经对 Netty 有些了解，或者使用过，那就更好了。</p>
+<ul>
+<li>本文只介绍 TCP 相关的内容，Netty 对于其他协议的支持，不在本文的讨论范围内。</li>
+<li>和并发包的源码分析不一样，我不可能一行一行源码说，所以有些异常分支是会直接略过，除非我觉得需要介绍。</li>
+<li>Netty 源码一直在更新，各版本之间有些差异，我是按照 2018-09-06 的最新版本 <strong>4.1.25.Final</strong> 来进行介绍的。</li>
+</ul>
+<p>建议初学者在看完本文以后，可以去翻翻《Netty In Action》，网上也可以找到中文文字版的。</p>
+<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><p>学习源码，一开始肯定是准备环境。</p>
+<p>我喜欢用 maven，也喜欢 Spring Boot，所以我一般先到 <a target="_blank" rel="noopener" href="https://start.spring.io/">https://start.spring.io/</a> 准备一个最简单的脚手架。</p>
+<p>10 秒搞定脚手架，然后就是导入到 Intellij 中，如果用新版本的 Spring Boot，可能还需要等待下载依赖，期间打开 <a target="_blank" rel="noopener" href="https://mvnrepository.com/">https://mvnrepository.com/</a> 搜索马上要用到的 maven 依赖。</p>
+<p>Netty 分为好些模块，有 <a target="_blank" rel="noopener" href="https://mvnrepository.com/artifact/io.netty/netty-handler">netty-handler</a>、<a target="_blank" rel="noopener" href="https://mvnrepository.com/artifact/io.netty/netty-buffer">netty-buffer</a>、<a target="_blank" rel="noopener" href="https://mvnrepository.com/artifact/io.netty/netty-transport">netty-transport</a>、<a target="_blank" rel="noopener" href="https://mvnrepository.com/artifact/io.netty/netty-common">netty-common</a> 等等，也有一个 <a target="_blank" rel="noopener" href="https://mvnrepository.com/artifact/io.netty/netty-all">netty-all</a>，它包含了所有的模块。</p>
+<p>既然我们是源码分析，那么自然是用一个最简单的。netty-all 不是最好的选择，netty-example 才是：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.netty<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>netty-example<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.1.25.Final<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>它不仅可以解决我们的依赖，而且 example 里面的示例非常适合我们学习使用。</p>
+<h2 id="Echo-例子"><a href="#Echo-例子" class="headerlink" title="Echo 例子"></a>Echo 例子</h2><p>Netty 作为 NIO 的库，自然既可以作为服务端接受请求，也可以作为客户端发起请求。使用 Netty 开发客户端或服务端都是非常简单的，Netty 做了很好的封装，我们通常只要开发一个或多个 <strong>handler</strong> 用来处理我们的自定义逻辑就可以了。</p>
+<p>下面，我们来看一个经常会见到的例子，它叫 <strong>Echo</strong>，也就是<strong>回声</strong>，客户端传过去什么值，服务端原样返回什么值。</p>
+<blockquote>
+<p>打开 netty-example 的源码，把 <code>echo</code> 包下面的代码复制出来玩一玩。</p>
+</blockquote>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/5.png" alt="5"></p>
+<blockquote>
+<p>左边是服务端代码，右边是客户端代码。</p>
+</blockquote>
+<p>上面的代码基本就是模板代码，每次使用都是这一个套路，唯一需要我们开发的部分是 handler(…) 和 childHandler(…) 方法中指定的各个 handler，如 <strong>EchoServerHandler</strong> 和 <strong>EchoClientHandler</strong>，当然 Netty 源码也给我们提供了很多的 handler，比如上面的 LoggingHandler，它就是 Netty 源码中为我们提供的，需要的时候直接拿过来用就好了。</p>
+<p>我们先来看一下上述代码中涉及到的一些内容：</p>
+<ul>
+<li><p>ServerBootstrap 类用于创建服务端实例，Bootstrap 用于创建客户端实例。</p>
+</li>
+<li><p>两个 EventLoopGroup：bossGroup 和 workerGroup，它们涉及的是 Netty 的线程模型，可以看到服务端有两个 group，而客户端只有一个，它们就是 Netty 中的线程池。</p>
+</li>
+<li><p>Netty 中的 Channel，没有直接使用 Java 原生的 ServerSocketChannel 和 SocketChannel，而是包装了 NioServerSocketChannel 和 NioSocketChannel 与之对应。</p>
+<blockquote>
+<p>当然，也有对其他协议的支持，如支持 UDP 协议的 NioDatagramChannel，本文只关心 TCP 相关的。</p>
+</blockquote>
+</li>
+<li><p>左边 handler(…) 方法指定了一个 handler（LoggingHandler），这个 handler 是给服务端收到新的请求的时候处理用的。右边 handler(…) 方法指定了客户端处理请求过程中需要使用的 handlers。</p>
+<blockquote>
+<p>如果你想在 EchoServer 中也指定多个 handler，也可以像右边的 EchoClient 一样使用 ChannelInitializer</p>
+</blockquote>
+</li>
+<li><p>左边 childHandler(…) 指定了 childHandler，这边的 handlers 是给新创建的连接用的，我们知道服务端 ServerSocketChannel 在 accept 一个连接以后，需要创建 SocketChannel 的实例，childHandler(…) 中设置的 handler 就是用于处理新创建的 SocketChannel 的，而不是用来处理 ServerSocketChannel 实例的。</p>
+</li>
+<li><p>pipeline：handler 可以指定多个（需要上面的 ChannelInitializer 类辅助），它们会组成了一个 pipeline，它们其实就类似拦截器的概念，现在只要记住一点，每个 NioSocketChannel 或 NioServerSocketChannel 实例内部都会有一个 pipeline 实例。pipeline 中还涉及到 handler 的执行顺序。</p>
+</li>
+<li><p>ChannelFuture：这个涉及到 Netty 中的异步编程，和 JDK 中的 Future 接口类似。</p>
+</li>
+</ul>
+<p>对于不了解 Netty 的读者，也不要有什么压力，我会一一介绍它们，本文主要面向新手，我觉得比较难理解或比较重要的部分，会花比较大的篇幅来介绍清楚。</p>
+<p>上面的源码中没有展示消息发送和消息接收的处理，此部分我会在介绍完上面的这些内容以后再进行介绍。</p>
+<p>下面，将分块来介绍这些内容。鉴于读者对 NIO 或 Netty 的了解程度可能参差不齐，为了照顾初学者，很多地方需要啰嗦一些，所以希望读者一节一节往下看，对于自己熟悉的内容可以适当看快一些。</p>
+<h2 id="Netty-中的-Channel"><a href="#Netty-中的-Channel" class="headerlink" title="Netty 中的 Channel"></a>Netty 中的 Channel</h2><p>这节我们来看看 NioSocketChannel 是怎么和 JDK 底层的 SocketChannel 联系在一起的，它们是一对一的关系。NioServerSocketChannel 和 ServerSocketChannel 同理，也是一对一的关系。</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/3.png" alt="3"></p>
+<p>在 Bootstrap（客户端） 和 ServerBootstrap（服务端） 的启动过程中都会调用 channel(…) 方法：</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/10.png" alt="10"></p>
+<p>下面，我们来看 channel(…) 方法的源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// AbstractBootstrap</span></span><br><span class="line"><span class="keyword">public</span> B <span class="title function_">channel</span><span class="params">(Class&lt;? extends C&gt; channelClass)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (channelClass == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NullPointerException</span>(<span class="string">&quot;channelClass&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> channelFactory(<span class="keyword">new</span> <span class="title class_">ReflectiveChannelFactory</span>&lt;C&gt;(channelClass));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到，这个方法只是设置了 channelFactory 为 ReflectiveChannelFactory 的一个实例，然后我们看下这里的 ReflectiveChannelFactory 到底是什么：</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/1.png" alt="1"></p>
+<p><strong>newChannel()</strong> 方法是 ChannelFactory 接口中的唯一方法，<strong>工厂模式</strong>大家都很熟悉。我们可以看到，<code>ReflectiveChannelFactory#newChannel()</code> 方法中使用了反射调用 Channel 的无参构造方法来创建 Channel，我们只要知道，ChannelFactory 的 newChannel() 方法什么时候会被调用就可以了。</p>
+<ul>
+<li>对于 NioSocketChannel，由于它充当客户端的功能，它的创建时机在 <code>connect(…)</code> 的时候；</li>
+<li>对于 NioServerSocketChannel 来说，它充当服务端功能，它的创建时机在绑定端口 <code>bind(…)</code> 的时候。</li>
+</ul>
+<p>接下来，我们来简单追踪下充当客户端的 Bootstrap 中 NioSocketChannel 的创建过程，看看 NioSocketChannel 是怎么和 JDK 中的 SocketChannel 关联在一起的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Bootstrap</span></span><br><span class="line"><span class="keyword">public</span> ChannelFuture <span class="title function_">connect</span><span class="params">(String inetHost, <span class="type">int</span> inetPort)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> connect(InetSocketAddress.createUnresolved(inetHost, inetPort));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后再往里看，到这个方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> ChannelFuture <span class="title function_">connect</span><span class="params">(SocketAddress remoteAddress)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (remoteAddress == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NullPointerException</span>(<span class="string">&quot;remoteAddress&quot;</span>);</span><br><span class="line">    <span class="comment">// validate 只是校验一下各个参数是不是正确设置了</span></span><br><span class="line">    validate();</span><br><span class="line">    <span class="keyword">return</span> doResolveAndConnect(remoteAddress, config.localAddress());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>继续：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 再往里就到这里了</span></span><br><span class="line"><span class="keyword">private</span> ChannelFuture <span class="title function_">doResolveAndConnect</span><span class="params">(<span class="keyword">final</span> SocketAddress remoteAddress, <span class="keyword">final</span> SocketAddress localAddress)</span> &#123;</span><br><span class="line">    <span class="comment">// 我们要说的部分在这里</span></span><br><span class="line">    <span class="keyword">final</span> <span class="type">ChannelFuture</span> <span class="variable">regFuture</span> <span class="operator">=</span> initAndRegister();</span><br><span class="line">    <span class="keyword">final</span> <span class="type">Channel</span> <span class="variable">channel</span> <span class="operator">=</span> regFuture.channel();</span><br><span class="line">	......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后，我们看 <code>initAndRegister()</code> 方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> ChannelFuture <span class="title function_">initAndRegister</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">Channel</span> <span class="variable">channel</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 前面我们说过，这里会进行 Channel 的实例化</span></span><br><span class="line">        channel = channelFactory.newChannel();</span><br><span class="line">        init(channel);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">return</span> regFuture;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们找到了 <code>channel = channelFactory.newChannel()</code> 这行代码，根据前面说的，这里会调用相应 Channel 的无参构造方法。</p>
+<p>然后我们就可以去看 NioSocketChannel 的构造方法了：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="title function_">NioSocketChannel</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// SelectorProvider 实例用于创建 JDK 的 SocketChannel 实例</span></span><br><span class="line">    <span class="built_in">this</span>(DEFAULT_SELECTOR_PROVIDER);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="title function_">NioSocketChannel</span><span class="params">(SelectorProvider provider)</span> &#123;</span><br><span class="line">    <span class="comment">// 看这里，newSocket(provider) 方法会创建 JDK 的 SocketChannel</span></span><br><span class="line">    <span class="built_in">this</span>(newSocket(provider));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到，在调用 newSocket(provider) 的时候，会创建 JDK NIO 的一个 SocketChannel 实例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> SocketChannel <span class="title function_">newSocket</span><span class="params">(SelectorProvider provider)</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 创建 SocketChannel 实例</span></span><br><span class="line">        <span class="keyword">return</span> provider.openSocketChannel();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">ChannelException</span>(<span class="string">&quot;Failed to open a socket.&quot;</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>NioServerSocketChannel 同理，也非常简单，从 <code>ServerBootstrap#bind(...)</code> 方法一路点进去就清楚了。</p>
+<p>所以我们知道了，NioSocketChannel 在实例化过程中，会先实例化 JDK 底层的 SocketChannel，NioServerSocketChannel 也一样，会先实例化 ServerSocketChannel 实例：</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/18.png" alt="18"></p>
+<p>说到这里，我们顺便再继续往里看一下 NioSocketChannel 的构造方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="title function_">NioSocketChannel</span><span class="params">(SelectorProvider provider)</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>(newSocket(provider));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>刚才我们看到这里，newSocket(provider) 创建了底层的 SocketChannel 实例，我们继续往下看构造方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="title function_">NioSocketChannel</span><span class="params">(Channel parent, SocketChannel socket)</span> &#123;</span><br><span class="line">    <span class="built_in">super</span>(parent, socket);</span><br><span class="line">    config = <span class="keyword">new</span> <span class="title class_">NioSocketChannelConfig</span>(<span class="built_in">this</span>, socket.socket());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面有两行代码，第二行代码很简单，实例化了内部的 NioSocketChannelConfig 实例，它用于保存 channel 的配置信息，这里没有我们现在需要关心的内容，直接跳过。</p>
+<p>第一行调用父类构造器，除了设置属性外，还设置了 SocketChannel 的非阻塞模式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="title function_">AbstractNioByteChannel</span><span class="params">(Channel parent, SelectableChannel ch)</span> &#123;</span><br><span class="line">    <span class="comment">// 毫无疑问，客户端关心的是 OP_READ 事件，等待读取服务端返回数据</span></span><br><span class="line">    <span class="built_in">super</span>(parent, ch, SelectionKey.OP_READ);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 然后是到这里</span></span><br><span class="line"><span class="keyword">protected</span> <span class="title function_">AbstractNioChannel</span><span class="params">(Channel parent, SelectableChannel ch, <span class="type">int</span> readInterestOp)</span> &#123;</span><br><span class="line">    <span class="built_in">super</span>(parent);</span><br><span class="line">    <span class="built_in">this</span>.ch = ch;</span><br><span class="line">    <span class="comment">// 我们看到这里只是保存了 SelectionKey.OP_READ 这个信息，在后面的时候会用到</span></span><br><span class="line">    <span class="built_in">this</span>.readInterestOp = readInterestOp;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// ******设置 channel 的非阻塞模式******</span></span><br><span class="line">        ch.configureBlocking(<span class="literal">false</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        ......</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>NioServerSocketChannel 的构造方法类似，也设置了非阻塞，然后设置服务端关心的 SelectionKey.OP_ACCEPT 事件：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="title function_">NioServerSocketChannel</span><span class="params">(ServerSocketChannel channel)</span> &#123;</span><br><span class="line">    <span class="comment">// 对于服务端来说，关心的是 SelectionKey.OP_ACCEPT 事件，等待客户端连接</span></span><br><span class="line">    <span class="built_in">super</span>(<span class="literal">null</span>, channel, SelectionKey.OP_ACCEPT);</span><br><span class="line">    config = <span class="keyword">new</span> <span class="title class_">NioServerSocketChannelConfig</span>(<span class="built_in">this</span>, javaChannel().socket());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这节关于 Channel 的内容我们先介绍这么多，主要就是实例化了 JDK 层的 SocketChannel 或 ServerSocketChannel，然后设置了非阻塞模式，我们后面再继续深入下去。</p>
+<h2 id="Netty-中的-Future、Promise"><a href="#Netty-中的-Future、Promise" class="headerlink" title="Netty 中的 Future、Promise"></a>Netty 中的 Future、Promise</h2><p>Netty 中非常多的异步调用，所以在介绍更多 NIO 相关的内容之前，我们来看看它的异步接口是怎么使用的。</p>
+<p>前面我们在介绍 Echo 例子的时候，已经用过了 ChannelFuture 这个接口了：</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/6.png" alt="6"></p>
+<p>争取在看完本节后，读者能搞清楚上面的这几行划线部分是怎么走的。</p>
+<p>关于 Future 接口，我想大家应该都很熟悉，用得最多的就是在使用 Java 的线程池 ThreadPoolExecutor 的时候了。在 <strong>submit</strong> 一个任务到线程池中的时候，返回的就是一个 <strong>Future</strong> 实例，通过它来获取提交的任务的执行状态和最终的执行结果，我们最常用它的 <code>isDone()</code> 和 <code>get()</code> 方法。</p>
+<p>下面是 JDK  中的 Future 接口 java.util.concurrent.Future：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Future</span>&lt;V&gt; &#123;</span><br><span class="line">	<span class="comment">// 取消该任务</span></span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">cancel</span><span class="params">(<span class="type">boolean</span> mayInterruptIfRunning)</span>;</span><br><span class="line">    <span class="comment">// 任务是否已取消</span></span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">isCancelled</span><span class="params">()</span>;</span><br><span class="line">	<span class="comment">// 任务是否已完成</span></span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">isDone</span><span class="params">()</span>;</span><br><span class="line">    <span class="comment">// 阻塞获取任务执行结果</span></span><br><span class="line">    V <span class="title function_">get</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException, ExecutionException;</span><br><span class="line">    <span class="comment">// 带超时参数的获取任务执行结果</span></span><br><span class="line">    V <span class="title function_">get</span><span class="params">(<span class="type">long</span> timeout, TimeUnit unit)</span></span><br><span class="line">        <span class="keyword">throws</span> InterruptedException, ExecutionException, TimeoutException;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Netty 中的 Future 接口（同名）继承了 JDK 中的 Future 接口，然后添加了一些方法：</p>
+<p>&#x2F;&#x2F; io.netty.util.concurrent.Future</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Future</span>&lt;V&gt; <span class="keyword">extends</span> <span class="title class_">java</span>.util.concurrent.Future&lt;V&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 是否成功</span></span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">isSuccess</span><span class="params">()</span>;</span><br><span class="line">    </span><br><span class="line">	<span class="comment">// 是否可取消</span></span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">isCancellable</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果任务执行失败，这个方法返回异常信息</span></span><br><span class="line">    Throwable <span class="title function_">cause</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 添加 Listener 来进行回调</span></span><br><span class="line">    Future&lt;V&gt; <span class="title function_">addListener</span><span class="params">(GenericFutureListener&lt;? extends Future&lt;? <span class="built_in">super</span> V&gt;&gt; listener)</span>;</span><br><span class="line">    Future&lt;V&gt; <span class="title function_">addListeners</span><span class="params">(GenericFutureListener&lt;? extends Future&lt;? <span class="built_in">super</span> V&gt;&gt;... listeners)</span>;</span><br><span class="line"></span><br><span class="line">    Future&lt;V&gt; <span class="title function_">removeListener</span><span class="params">(GenericFutureListener&lt;? extends Future&lt;? <span class="built_in">super</span> V&gt;&gt; listener)</span>;</span><br><span class="line">    Future&lt;V&gt; <span class="title function_">removeListeners</span><span class="params">(GenericFutureListener&lt;? extends Future&lt;? <span class="built_in">super</span> V&gt;&gt;... listeners)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 阻塞等待任务结束，如果任务失败，将“导致失败的异常”重新抛出来</span></span><br><span class="line">    Future&lt;V&gt; <span class="title function_">sync</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException;</span><br><span class="line">    <span class="comment">// 不响应中断的 sync()，这个大家应该都很熟了</span></span><br><span class="line">    Future&lt;V&gt; <span class="title function_">syncUninterruptibly</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 阻塞等待任务结束，和 sync() 功能是一样的，不过如果任务失败，它不会抛出执行过程中的异常</span></span><br><span class="line">    Future&lt;V&gt; <span class="title function_">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException;</span><br><span class="line">    Future&lt;V&gt; <span class="title function_">awaitUninterruptibly</span><span class="params">()</span>;</span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">await</span><span class="params">(<span class="type">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException;</span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">await</span><span class="params">(<span class="type">long</span> timeoutMillis)</span> <span class="keyword">throws</span> InterruptedException;</span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">awaitUninterruptibly</span><span class="params">(<span class="type">long</span> timeout, TimeUnit unit)</span>;</span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">awaitUninterruptibly</span><span class="params">(<span class="type">long</span> timeoutMillis)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取执行结果，不阻塞。我们都知道 java.util.concurrent.Future 中的 get() 是阻塞的</span></span><br><span class="line">    V <span class="title function_">getNow</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 取消任务执行，如果取消成功，任务会因为 CancellationException 异常而导致失败</span></span><br><span class="line">    <span class="comment">//	  也就是 isSuccess()==false，同时上面的 cause() 方法返回 CancellationException 的实例。</span></span><br><span class="line">    <span class="comment">// mayInterruptIfRunning 说的是：是否对正在执行该任务的线程进行中断(这样才能停止该任务的执行)，</span></span><br><span class="line">    <span class="comment">// 	  似乎 Netty 中 Future 接口的各个实现类，都没有使用这个参数</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">cancel</span><span class="params">(<span class="type">boolean</span> mayInterruptIfRunning)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看完上面的 Netty 的 Future 接口，我们可以发现，它加了 sync() 和 await() 用于阻塞等待，还加了 Listeners，只要任务结束去回调 Listener 们就可以了，那么我们就不一定要主动调用 isDone() 来获取状态，或通过 get() 阻塞方法来获取值。</p>
+<blockquote>
+<p>所以它其实有两种使用范式</p>
+</blockquote>
+<p>顺便说下 sync() 和 await() 的区别：sync() 内部会先调用 await() 方法，等 await() 方法返回后，会检查下<strong>这个任务是否失败</strong>，如果失败，重新将导致失败的异常抛出来。也就是说，如果使用 await()，任务抛出异常后，await() 方法会返回，但是不会抛出异常，而 sync() 方法返回的同时会抛出异常。</p>
+<blockquote>
+<p>我们也可以看到，Future 接口没有和 IO 操作关联在一起，还是比较<em>纯净</em>的接口。</p>
+</blockquote>
+<p>接下来，我们来看 Future 接口的子接口 ChannelFuture，这个接口用得最多，它将和 IO 操作中的 Channel 关联在一起了，用于异步处理 Channel 中的事件。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ChannelFuture</span> <span class="keyword">extends</span> <span class="title class_">Future</span>&lt;Void&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ChannelFuture 关联的 Channel</span></span><br><span class="line">    Channel <span class="title function_">channel</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 覆写以下几个方法，使得它们返回值为 ChannelFuture 类型 </span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelFuture <span class="title function_">addListener</span><span class="params">(GenericFutureListener&lt;? extends Future&lt;? <span class="built_in">super</span> Void&gt;&gt; listener)</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelFuture <span class="title function_">addListeners</span><span class="params">(GenericFutureListener&lt;? extends Future&lt;? <span class="built_in">super</span> Void&gt;&gt;... listeners)</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelFuture <span class="title function_">removeListener</span><span class="params">(GenericFutureListener&lt;? extends Future&lt;? <span class="built_in">super</span> Void&gt;&gt; listener)</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelFuture <span class="title function_">removeListeners</span><span class="params">(GenericFutureListener&lt;? extends Future&lt;? <span class="built_in">super</span> Void&gt;&gt;... listeners)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelFuture <span class="title function_">sync</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelFuture <span class="title function_">syncUninterruptibly</span><span class="params">()</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelFuture <span class="title function_">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelFuture <span class="title function_">awaitUninterruptibly</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 用来标记该 future 是 void 的，</span></span><br><span class="line">    <span class="comment">// 这样就不允许使用 addListener(...), sync(), await() 以及它们的几个重载方法</span></span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">isVoid</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看到，ChannelFuture 接口相对于 Future 接口，除了将 channel 关联进来，没有增加什么东西。还有个 isVoid() 方法算是不那么重要的存在吧。其他几个都是方法覆写，为了让返回值类型变为 ChannelFuture，而不是原来的 Future。</p>
+<p>这里有点跳，我们来介绍下 Promise 接口，它和 ChannelFuture 接口无关，而是和前面的 Future 接口相关，Promise 这个接口非常重要。</p>
+<p>Promise 接口和 ChannelFuture 一样，也继承了 Netty 的 Future 接口，然后加了一些 Promise 的内容：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Promise</span>&lt;V&gt; <span class="keyword">extends</span> <span class="title class_">Future</span>&lt;V&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 标记该 future 成功及设置其执行结果，并且会通知所有的 listeners。</span></span><br><span class="line">    <span class="comment">// 如果该操作失败，将抛出异常(失败指的是该 future 已经有了结果了，成功的结果，或者失败的结果)</span></span><br><span class="line">    Promise&lt;V&gt; <span class="title function_">setSuccess</span><span class="params">(V result)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 和 setSuccess 方法一样，只不过如果失败，它不抛异常，返回 false</span></span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">trySuccess</span><span class="params">(V result)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 标记该 future 失败，及其失败原因。</span></span><br><span class="line">    <span class="comment">// 如果失败，将抛出异常(失败指的是已经有了结果了)</span></span><br><span class="line">    Promise&lt;V&gt; <span class="title function_">setFailure</span><span class="params">(Throwable cause)</span>;</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// 标记该 future 失败，及其失败原因。</span></span><br><span class="line">    <span class="comment">// 如果已经有结果，返回 false，不抛出异常</span></span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">tryFailure</span><span class="params">(Throwable cause)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 标记该 future 不可以被取消</span></span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">setUncancellable</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 这里和 ChannelFuture 一样，对这几个方法进行覆写，目的是为了返回 Promise 类型的实例</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    Promise&lt;V&gt; <span class="title function_">addListener</span><span class="params">(GenericFutureListener&lt;? extends Future&lt;? <span class="built_in">super</span> V&gt;&gt; listener)</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    Promise&lt;V&gt; <span class="title function_">addListeners</span><span class="params">(GenericFutureListener&lt;? extends Future&lt;? <span class="built_in">super</span> V&gt;&gt;... listeners)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    Promise&lt;V&gt; <span class="title function_">removeListener</span><span class="params">(GenericFutureListener&lt;? extends Future&lt;? <span class="built_in">super</span> V&gt;&gt; listener)</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    Promise&lt;V&gt; <span class="title function_">removeListeners</span><span class="params">(GenericFutureListener&lt;? extends Future&lt;? <span class="built_in">super</span> V&gt;&gt;... listeners)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    Promise&lt;V&gt; <span class="title function_">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    Promise&lt;V&gt; <span class="title function_">awaitUninterruptibly</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    Promise&lt;V&gt; <span class="title function_">sync</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    Promise&lt;V&gt; <span class="title function_">syncUninterruptibly</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可能有些读者对 Promise 的概念不是很熟悉，这里简单说两句。</p>
+<p>我觉得只要明白一点，Promise 实例内部是一个任务，任务的执行往往是异步的，通常是一个线程池来处理任务。Promise 提供的 setSuccess(V result) 或 setFailure(Throwable t) 将来会被某个执行任务的线程在执行完成以后调用，同时那个线程在调用 setSuccess(result) 或 setFailure(t) 后会回调 listeners 的回调函数（当然，回调的具体内容不一定要由执行任务的线程自己来执行，它可以创建新的线程来执行，也可以将回调任务提交到某个线程池来执行）。而且，一旦 setSuccess(…) 或 setFailure(…) 后，那些 await() 或 sync() 的线程就会从等待中返回。</p>
+<p><strong>所以这里就有两种编程方式，一种是用 await()，等 await() 方法返回后，得到 promise 的执行结果，然后处理它；另一种就是提供 Listener 实例，我们不太关心任务什么时候会执行完，只要它执行完了以后会去执行 listener 中的处理方法就行。</strong></p>
+<p>接下来，我们再来看下 <strong>ChannelPromise</strong>，它继承了前面介绍的 ChannelFuture 和 Promise 接口。</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/4.png" alt="4"></p>
+<p>ChannelPromise 接口在 Netty 中使用得比较多，因为它综合了 ChannelFuture 和 Promise 两个接口：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Special &#123;<span class="doctag">@link</span> ChannelFuture&#125; which is writable.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ChannelPromise</span> <span class="keyword">extends</span> <span class="title class_">ChannelFuture</span>, Promise&lt;Void&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 覆写 ChannelFuture 中的 channel() 方法，其实这个方法一点没变</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    Channel <span class="title function_">channel</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 下面几个方法是覆写 Promise 中的接口，为了返回值类型是 ChannelPromise</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelPromise <span class="title function_">setSuccess</span><span class="params">(Void result)</span>;</span><br><span class="line">    ChannelPromise <span class="title function_">setSuccess</span><span class="params">()</span>;</span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">trySuccess</span><span class="params">()</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelPromise <span class="title function_">setFailure</span><span class="params">(Throwable cause)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 到这里大家应该都熟悉了，下面几个方法的覆写也是为了得到 ChannelPromise 类型的实例</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelPromise <span class="title function_">addListener</span><span class="params">(GenericFutureListener&lt;? extends Future&lt;? <span class="built_in">super</span> Void&gt;&gt; listener)</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelPromise <span class="title function_">addListeners</span><span class="params">(GenericFutureListener&lt;? extends Future&lt;? <span class="built_in">super</span> Void&gt;&gt;... listeners)</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelPromise <span class="title function_">removeListener</span><span class="params">(GenericFutureListener&lt;? extends Future&lt;? <span class="built_in">super</span> Void&gt;&gt; listener)</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelPromise <span class="title function_">removeListeners</span><span class="params">(GenericFutureListener&lt;? extends Future&lt;? <span class="built_in">super</span> Void&gt;&gt;... listeners)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelPromise <span class="title function_">sync</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelPromise <span class="title function_">syncUninterruptibly</span><span class="params">()</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelPromise <span class="title function_">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    ChannelPromise <span class="title function_">awaitUninterruptibly</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Returns a new &#123;<span class="doctag">@link</span> ChannelPromise&#125; if &#123;<span class="doctag">@link</span> #isVoid()&#125; returns &#123;<span class="doctag">@code</span> true&#125; otherwise itself.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="comment">// 我们忽略这个方法吧。</span></span><br><span class="line">    ChannelPromise <span class="title function_">unvoid</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到，它综合了 ChannelFuture 和 Promise 中的方法，只不过通过覆写将返回值都变为 ChannelPromise 了而已，<strong>没有增加什么新的功能</strong>。</p>
+<p>小结一下，我们上面介绍了几个接口，Future 以及它的子接口 ChannelFuture 和 Promise，然后是 ChannelPromise 接口同时继承了 ChannelFuture 和 Promise。</p>
+<p>我把这几个接口的主要方法列在一起，这样大家看得清晰些：</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/7.png" alt="4"></p>
+<p>接下来，我们需要来一个实现类，这样才能比较直观地看出它们是怎么使用的，因为上面的这些都是接口定义，具体还得看实现类是怎么工作的。</p>
+<p>下面，我们来介绍下 <strong>DefaultPromise</strong> 这个实现类，这个类很常用，它的源码也不短，我们先介绍几个关键的内容，然后介绍一个示例使用。</p>
+<p>首先，我们看下它有哪些属性：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DefaultPromise</span>&lt;V&gt; <span class="keyword">extends</span> <span class="title class_">AbstractFuture</span>&lt;V&gt; <span class="keyword">implements</span> <span class="title class_">Promise</span>&lt;V&gt; &#123;</span><br><span class="line">	  <span class="comment">// 保存执行结果</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> Object result;</span><br><span class="line">    <span class="comment">// 执行任务的线程池，promise 持有 executor 的引用，这个其实有点奇怪了</span></span><br><span class="line">    <span class="comment">// 因为“任务”其实没必要知道自己在哪里被执行的</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> EventExecutor executor;</span><br><span class="line">	  <span class="comment">// 监听者，回调函数，任务结束后（正常或异常结束）执行</span></span><br><span class="line">    <span class="keyword">private</span> Object listeners;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 等待这个 promise 的线程数(调用sync()/await()进行等待的线程数量)</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">short</span> waiters;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 是否正在唤醒等待线程，用于防止重复执行唤醒，不然会重复执行 listeners 的回调方法</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> notifyingListeners;</span><br><span class="line">    ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>可以看出，此类实现了 Promise，但是没有实现 ChannelFuture，所以它和 Channel 联系不起来。</p>
+<p>别急，我们后面会碰到另一个类 DefaultChannelPromise 的使用，这个类是综合了 ChannelFuture 和 Promise 的，但是它的实现其实大部分都是继承自这里的 DefaultPromise 类的。</p>
+</blockquote>
+<p>说完上面的属性以后，大家可以看下 <code>setSuccess(V result)</code> 、<code>trySuccess(V result)</code> 和 <code>setFailure(Throwable cause)</code> 、 <code>tryFailure(Throwable cause)</code> 这几个方法：</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/8.png" alt="8"></p>
+<blockquote>
+<p>看出 setSuccess(result) 和 trySuccess(result) 的区别了吗？</p>
+</blockquote>
+<p>上面几个方法都非常简单，先设置好值，然后执行监听者们的回调方法。notifyListeners() 方法感兴趣的读者也可以看一看，不过它还涉及到 Netty 线程池的一些内容，我们还没有介绍到线程池，这里就不展开了。上面的代码，在 setSuccess0 或 setFailure0 方法中都会唤醒阻塞在 sync() 或 await() 的线程</p>
+<p>另外，就是可以看下 sync() 和 await() 的区别，其他的我觉得随便看看就好了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> Promise&lt;V&gt; <span class="title function_">sync</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">    await();</span><br><span class="line">    <span class="comment">// 如果任务是失败的，重新抛出相应的异常</span></span><br><span class="line">    rethrowIfFailed();</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下来，我们来写个实例代码吧：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 构造线程池</span></span><br><span class="line">    <span class="type">EventExecutor</span> <span class="variable">executor</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DefaultEventExecutor</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建 DefaultPromise 实例</span></span><br><span class="line">    <span class="type">Promise</span> <span class="variable">promise</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DefaultPromise</span>(executor);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 下面给这个 promise 添加两个 listener</span></span><br><span class="line">    promise.addListener(<span class="keyword">new</span> <span class="title class_">GenericFutureListener</span>&lt;Future&lt;Integer&gt;&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">operationComplete</span><span class="params">(Future future)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">            <span class="keyword">if</span> (future.isSuccess()) &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;任务结束，结果：&quot;</span> + future.get());</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;任务失败，异常：&quot;</span> + future.cause());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;).addListener(<span class="keyword">new</span> <span class="title class_">GenericFutureListener</span>&lt;Future&lt;Integer&gt;&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">operationComplete</span><span class="params">(Future future)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;任务结束，balabala...&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 提交任务到线程池，五秒后执行结束，设置执行 promise 的结果</span></span><br><span class="line">    executor.submit(<span class="keyword">new</span> <span class="title class_">Runnable</span>() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">5000</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 设置 promise 的结果</span></span><br><span class="line">            <span class="comment">// promise.setFailure(new RuntimeException());</span></span><br><span class="line">            promise.setSuccess(<span class="number">123456</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// main 线程阻塞等待执行结果</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        promise.sync();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行代码，两个 listener 将在 5 秒后将输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">任务结束，结果：123456</span><br><span class="line">任务结束，balabala...</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>读者这里可以试一下 sync() 和 await() 的区别，在任务中调用 promise.setFailure(new RuntimeException()) 试试看。</p>
+</blockquote>
+<p>上面的代码中，大家可能会对线程池 executor 和 promise 之间的关系感到有点迷惑。读者应该也要清楚，具体的任务不一定就要在这个 executor 中被执行。任务结束以后，需要调用 promise.setSuccess(result) 作为通知。</p>
+<p>通常来说，promise 代表的 future 是不需要和线程池搅在一起的，future 只关心任务是否结束以及任务的执行结果，至于是哪个线程或哪个线程池执行的任务，future 其实是不关心的。</p>
+<p>不过 Netty 毕竟不是要创建一个通用的线程池实现，而是和它要处理的 IO 息息相关的，所以我们只不过要理解它就好了。</p>
+<p>这节就说这么多吧，我们回过头来再看一下这张图，看看大家是不是看懂了这节内容：</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/6.png" alt="6"></p>
+<p>我们就说说上图左边的部分吧，虽然我们还不知道 bind() 操作中具体会做什么工作，但是我们应该可以猜出一二。</p>
+<p>显然，main 线程调用 b.bind(port) 这个方法会返回一个 ChannelFuture，bind() 是一个异步方法，当某个执行线程执行了真正的绑定操作后，那个执行线程一定会标记这个 future 为成功（我们假定 bind 会成功），然后这里的 sync() 方法（main 线程）就会返回了。</p>
+<blockquote>
+<p>如果 bind(port) 失败，我们知道，sync() 方法会将异常抛出来，然后就会执行到 finally 块了。 </p>
+</blockquote>
+<p>一旦绑定端口 bind 成功，进入下面一行，f.channel() 方法会返回该 future 关联的 channel。</p>
+<p>channel.closeFuture() 也会返回一个 ChannelFuture，然后调用了 sync() 方法，这个 sync() 方法返回的条件是：<strong>有其他的线程关闭了 NioServerSocketChannel</strong>，往往是因为需要停掉服务了，然后那个线程会设置 future 的状态（ setSuccess(result) 或 setFailure(cause) ），这个 sync() 方法才会返回。</p>
+<p>这节就到这里，希望大家对 Netty 中的异步编程有些了解，后续碰到源码的时候能知道是怎么使用的了。</p>
+<h2 id="ChannelPipeline，和-Inbound、Outbound"><a href="#ChannelPipeline，和-Inbound、Outbound" class="headerlink" title="ChannelPipeline，和 Inbound、Outbound"></a>ChannelPipeline，和 Inbound、Outbound</h2><p>我想很多读者应该或多或少都有 Netty 中 pipeline 的概念。前面我们说了，使用 Netty 的时候，我们通常就只要写一些自定义的 handler 就可以了，我们定义的这些 handler 会组成一个 pipeline，用于处理 IO 事件，这个和我们平时接触的 Filter 或 Interceptor 表达的差不多是一个意思。</p>
+<p>每个 Channel 内部都有一个 pipeline，pipeline 由多个 handler 组成，handler 之间的顺序是很重要的，因为 IO 事件将按照顺序顺次经过 pipeline 上的 handler，这样每个 handler 可以专注于做一点点小事，由多个 handler 组合来完成一些复杂的逻辑。</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/11.png" alt="11"></p>
+<p>从图中，我们知道这是一个双向链表。</p>
+<p>首先，我们看两个重要的概念：<strong>Inbound</strong> 和 <strong>Outbound</strong>。在 Netty 中，IO 事件被分为 Inbound 事件和 Outbound 事件。</p>
+<p><strong>Outbound</strong> 的 <strong>out</strong> 指的是 <strong>出去</strong>，有哪些 IO 事件属于此类呢？比如 connect、write、flush 这些 IO 操作是往外部方向进行的，它们就属于 Outbound 事件。</p>
+<p>其他的，诸如 accept、read 这种就属于 Inbound 事件。</p>
+<blockquote>
+<p>比如客户端在发起请求的时候，需要 1️⃣connect 到服务器，然后 2️⃣write 数据传到服务器，再然后 3️⃣read 服务器返回的数据，前面的 connect 和 write 就是 <strong>out</strong> 事件，后面的 read 就是 <strong>in</strong> 事件。</p>
+</blockquote>
+<p>比如很多初学者看不懂下面的这段代码，这段代码用于服务端的 childHandler 中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> pipeline.addLast(<span class="keyword">new</span> <span class="title class_">StringDecoder</span>());</span><br><span class="line"><span class="number">2.</span> pipeline.addLast(<span class="keyword">new</span> <span class="title class_">StringEncoder</span>());</span><br><span class="line"><span class="number">3.</span> pipeline.addLast(<span class="keyword">new</span> <span class="title class_">BizHandler</span>());</span><br></pre></td></tr></table></figure>
+
+<p>初学者肯定都纳闷，以为这个顺序写错了，应该是先 decode 客户端过来的数据，然后用 BizHandler 处理业务逻辑，最后再 encode 数据然后返回给客户端，所以添加的顺序应该是 <strong>1 -&gt; 3 -&gt; 2</strong> 才对。</p>
+<p>其实这里的三个 handler 是分组的，分为 Inbound（1 和 3） 和 Outbound（2）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> pipeline.addLast(<span class="keyword">new</span> <span class="title class_">StringDecoder</span>());</span><br><span class="line"><span class="number">2.</span> pipeline.addLast(<span class="keyword">new</span> <span class="title class_">StringEncoder</span>());</span><br><span class="line"><span class="number">3.</span> pipeline.addLast(<span class="keyword">new</span> <span class="title class_">BizHandler</span>());</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>客户端连接进来的时候，读取（read）客户端请求数据的操作是 Inbound 的，所以会先使用 1，然后是 3 对处理进行处理；</li>
+<li>处理完数据后，返回给客户端数据的 write 操作是 Outbound 的，此时使用的是 2。</li>
+</ul>
+<p>所以虽然添加顺序有点怪，但是执行顺序其实是按照 1 -&gt; 3 -&gt; 2 进行的。</p>
+<blockquote>
+<p>如果我们在上面的基础上，加上下面的第四行，这是一个 OutboundHandler：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">4.</span> pipeline.addLast(<span class="keyword">new</span> <span class="title class_">OutboundHandlerA</span>());</span><br></pre></td></tr></table></figure>
+
+<p>那么执行顺序是不是就是 1 -&gt; 3 -&gt; 2 -&gt; 4 呢？答案是：不是的。</p>
+<p>对于 Inbound 操作，按照添加顺序执行每个 Inbound 类型的 handler；而对于 Outbound 操作，是反着来的，从后往前，顺次执行 Outbound 类型的 handler。</p>
+<p>所以，上面的顺序应该是先 1 后 3，它们是 Inbound 的，然后是 4，最后才是 2，它们两个是 Outbound 的。说实话，我真不喜欢这种组织方式。</p>
+</blockquote>
+<p>到这里，我想大家应该都知道 Inbound 和 Outbound 了吧？下面我们来介绍它们的接口使用。</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/9.png" alt="9"></p>
+<p>定义处理 Inbound 事件的 handler 需要实现 ChannelInboundHandler，定义处理 Outbound 事件的 handler 需要实现 ChannelOutboundHandler。最下面的三个类，是 Netty 提供的适配器，特别的，如果我们希望定义一个 handler 能同时处理 Inbound 和 Outbound 事件，可以通过继承中间的 <strong>ChannelDuplexHandler</strong> 的方式，比如 <strong>LoggingHandler</strong> 这种既可以用来处理 Inbound 也可以用来处理 Outbound 事件的 handler。</p>
+<p>有了 Inbound 和 Outbound 的概念以后，我们来开始介绍 Pipeline 的源码。</p>
+<p>我们说过，一个 Channel 关联一个 pipeline，NioSocketChannel 和 NioServerSocketChannel 在执行构造方法的时候，都会走到它们的父类 AbstractChannel 的构造方法中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="title function_">AbstractChannel</span><span class="params">(Channel parent)</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>.parent = parent;</span><br><span class="line">    <span class="comment">// 给每个 channel 分配一个唯一 id</span></span><br><span class="line">    id = newId();</span><br><span class="line">    <span class="comment">// 每个 channel 内部需要一个 Unsafe 的实例</span></span><br><span class="line">    unsafe = newUnsafe();</span><br><span class="line">    <span class="comment">// 每个 channel 内部都会创建一个 pipeline</span></span><br><span class="line">    pipeline = newChannelPipeline();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的三行代码中，id 比较不重要，Netty 中的 Unsafe 实例其实挺重要的，这里简单介绍一下。</p>
+<p>在 JDK 的源码中，sun.misc.Unsafe 类提供了一些底层操作的能力，它设计出来是给 JDK 中的源码使用的，比如 AQS、ConcurrentHashMap 等，我们在之前的并发包的源码分析中也看到了很多它们使用 Unsafe 的场景，这个 Unsafe 类不是给我们的代码使用的，是给 JDK 源码使用的（需要的话，我们也是可以获取它的实例的）。</p>
+<blockquote>
+<p>Unsafe 类的构造方法是 private 的，但是它提供了 getUnsafe() 这个静态方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Unsafe</span> <span class="variable">unsafe</span> <span class="operator">=</span> Unsafe.getUnsafe();</span><br></pre></td></tr></table></figure>
+<p>大家可以试一下，上面这行代码编译没有问题，但是执行的时候会抛 <code>java.lang.SecurityException</code> 异常，因为它就不是给我们的代码用的。</p>
+<p>但是如果你就是想获取 Unsafe 的实例，可以通过下面这个代码获取到:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Field</span> <span class="variable">f</span> <span class="operator">=</span> Unsafe.class.getDeclaredField(<span class="string">&quot;theUnsafe&quot;</span>);</span><br><span class="line">f.setAccessible(<span class="literal">true</span>);</span><br><span class="line"><span class="type">Unsafe</span> <span class="variable">unsafe</span> <span class="operator">=</span> (Unsafe) f.get(<span class="literal">null</span>);</span><br></pre></td></tr></table></figure></blockquote>
+<p>Netty 中的 Unsafe 也是同样的意思，它封装了 Netty 中会使用到的 JDK 提供的 NIO 接口，比如将 channel 注册到 selector 上，比如 bind 操作，比如 connect 操作等，<strong>这些操作都是稍微偏底层一些</strong>。Netty 同样也是不希望我们的业务代码使用 Unsafe 的实例，它是提供给 Netty 中的源码使用的。</p>
+<blockquote>
+<p>不过，对于我们源码分析来说，我们还是会有很多时候需要分析 Unsafe 中的源码的</p>
+</blockquote>
+<p>关于 Unsafe，我们后面用到了再说，这里只要知道，它封装了大部分需要访问 JDK 的 NIO 接口的操作就好了。这里我们继续将焦点放在实例化 pipeline 上：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> DefaultChannelPipeline <span class="title function_">newChannelPipeline</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">DefaultChannelPipeline</span>(<span class="built_in">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里开始调用 DefaultChannelPipeline 的构造方法，并把当前 channel 的引用传入：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="title function_">DefaultChannelPipeline</span><span class="params">(Channel channel)</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>.channel = ObjectUtil.checkNotNull(channel, <span class="string">&quot;channel&quot;</span>);</span><br><span class="line">    succeededFuture = <span class="keyword">new</span> <span class="title class_">SucceededChannelFuture</span>(channel, <span class="literal">null</span>);</span><br><span class="line">    voidPromise =  <span class="keyword">new</span> <span class="title class_">VoidChannelPromise</span>(channel, <span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line">    tail = <span class="keyword">new</span> <span class="title class_">TailContext</span>(<span class="built_in">this</span>);</span><br><span class="line">    head = <span class="keyword">new</span> <span class="title class_">HeadContext</span>(<span class="built_in">this</span>);</span><br><span class="line"></span><br><span class="line">    head.next = tail;</span><br><span class="line">    tail.prev = head;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里实例化了 tail 和 head 这两个 handler。tail 实现了 ChannelInboundHandler 接口，而 head 实现了 ChannelOutboundHandler 和 ChannelInboundHandler 两个接口，并且最后两行代码将 tail 和 head 连接起来:</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/12.png" alt="12"></p>
+<blockquote>
+<p>注意，在不同的版本中，源码也略有差异，head 不一定是 in + out，大家知道这点就好了。</p>
+<p>还有，从上面的 head 和 tail 我们也可以看到，其实 pipeline 中的每个元素是 <strong>ChannelHandlerContext</strong> 的实例，而不是 ChannelHandler 的实例，context 包装了一下 handler，但是，后面我们都会用 handler 来描述一个 pipeline 上的节点，而不是使用 context，希望读者知道这一点。</p>
+</blockquote>
+<p>这里只是构造了 pipeline，并且添加了两个固定的 handler 到其中（head + tail），还不涉及到自定义的 handler 代码执行。我们回过头来看下面这段代码：</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/13.png" alt="13"></p>
+<blockquote>
+<p>我们说过 childHandler 中指定的 handler 不是给 NioServerSocketChannel 使用的，是给 NioSocketChannel 使用的，所以这里我们不看它。</p>
+</blockquote>
+<p>这里调用 handler(…) 方法指定了一个 LoggingHandler 的实例，然后我们再进去下面的 bind(…) 方法中看看这个 LoggingHandler 实例是怎么进入到我们之前构造的 pipeline 内的。</p>
+<p>顺着 bind() 一直往前走，bind() -&gt; doBind() -&gt; initAndRegister()：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> ChannelFuture <span class="title function_">initAndRegister</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">Channel</span> <span class="variable">channel</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 1. 构造 channel 实例，同时会构造 pipeline 实例，</span></span><br><span class="line">        <span class="comment">// 现在 pipeline 中有 head 和 tail 两个 handler 了</span></span><br><span class="line">        channel = channelFactory.newChannel();</span><br><span class="line">        <span class="comment">// 2. 看这里</span></span><br><span class="line">        init(channel);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">    ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的两行代码，第一行实现了构造 channel 和 channel 内部的 pipeline，我们来看第二行 init 代码：</p>
+<p>&#x2F;&#x2F; ServerBootstrap：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">init</span><span class="params">(Channel channel)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    ......</span><br><span class="line">    <span class="comment">// 拿到刚刚创建的 channel 内部的 pipeline 实例</span></span><br><span class="line">    <span class="type">ChannelPipeline</span> <span class="variable">p</span> <span class="operator">=</span> channel.pipeline();</span><br><span class="line">	...</span><br><span class="line">    <span class="comment">// 开始往 pipeline 中添加一个 handler，这个 handler 是 ChannelInitializer 的实例</span></span><br><span class="line">    p.addLast(<span class="keyword">new</span> <span class="title class_">ChannelInitializer</span>&lt;Channel&gt;() &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 我们以后会看到，下面这个 initChannel 方法何时会被调用</span></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">initChannel</span><span class="params">(<span class="keyword">final</span> Channel ch)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">            <span class="keyword">final</span> <span class="type">ChannelPipeline</span> <span class="variable">pipeline</span> <span class="operator">=</span> ch.pipeline();</span><br><span class="line">            <span class="comment">// 这个方法返回我们最开始指定的 LoggingHandler 实例</span></span><br><span class="line">            <span class="type">ChannelHandler</span> <span class="variable">handler</span> <span class="operator">=</span> config.handler();</span><br><span class="line">            <span class="keyword">if</span> (handler != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="comment">// 添加 LoggingHandler</span></span><br><span class="line">                pipeline.addLast(handler);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 先不用管这里的 eventLoop</span></span><br><span class="line">            ch.eventLoop().execute(<span class="keyword">new</span> <span class="title class_">Runnable</span>() &#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">                    <span class="comment">// 添加一个 handler 到 pipeline 中：ServerBootstrapAcceptor</span></span><br><span class="line">                    <span class="comment">// 从名字可以看到，这个 handler 的目的是用于接收客户端请求</span></span><br><span class="line">                    pipeline.addLast(<span class="keyword">new</span> <span class="title class_">ServerBootstrapAcceptor</span>(</span><br><span class="line">                            ch, currentChildGroup, currentChildHandler, currentChildOptions, currentChildAttrs));</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里涉及到 pipeline 中的辅助类 ChannelInitializer，我们看到，它本身是一个 handler（Inbound 类型），但是它的作用和普通 handler 有点不一样，它纯碎是用来辅助将其他的 handler 加入到 pipeline 中的。</p>
+<p>大家可以稍微看一下 ChannelInitializer 的 initChannel 方法，有个简单的认识就好，此时的 pipeline 应该是这样的：</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/14.png" alt="14"></p>
+<p>ChannelInitializer 的 initChannel(channel) 方法被调用的时候，会往 pipeline 中添加我们最开始指定的 <strong>LoggingHandler</strong> 和添加一个 <strong>ServerBootstrapAcceptor</strong>。但是我们现在还不知道这个 initChannel 方法何时会被调用。</p>
+<p>上面我们说的是作为服务端的 NioServerSocketChannel 的 pipeline，NioSocketChannel 也是差不多的，我们可以看一下 Bootstrap 类的 init(channel) 方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">init</span><span class="params">(Channel channel)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="type">ChannelPipeline</span> <span class="variable">p</span> <span class="operator">=</span> channel.pipeline();</span><br><span class="line">    p.addLast(config.handler());</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/23.png" alt="23"></p>
+<p>它和服务端 ServerBootstrap 要添加 ServerBootstrapAcceptor 不一样，它只需要将 EchoClient 类中的 ChannelInitializer 实例加进来就可以了，它的 ChannelInitializer 中添加了两个 handler，LoggingHandler 和 EchoClientHandler：</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/16.png" alt="16"></p>
+<p>很显然，我们需要的是像 LoggingHandler 和 EchoClientHandler 这样的 handler，但是，它们现在还不在 pipeline 中，那么它们什么时候会真正进入到 pipeline 中呢？以后我们再揭晓。</p>
+<p>还有，为什么 Server 端我们指定的是一个 handler 实例，而 Client 指定的是一个 ChannelInitializer 实例？其实它们是可以随意搭配使用的，你甚至可以在 ChannelInitializer 实例中添加 ChannelInitializer 的实例。</p>
+<p>非常抱歉，这里又要断了，下面要先介绍线程池了，大家要记住 pipeline 现在的样子，<strong>head + channelInitializer + tail</strong>。</p>
+<p>本节没有介绍 handler 的向后传播，就是一个 handler 处理完了以后，怎么传递给下一个 handler 来处理？比如我们熟悉的 JavaEE 中的 Filter 是采用在一个 Filter 实例中调用 chain.doFilter(request, response) 来传递给下一个 Filter 这种方式的。</p>
+<p>我们用下面这张图结束本节。下图展示了传播的方法，但我其实是更想让大家看一下，哪些事件是 Inbound 类型的，哪些是 Outbound 类型的：</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/19.png" alt="19"></p>
+<p>Outbound 类型的几个事件大家应该比较好认，注意 bind 也是 Outbound 类型的。</p>
+<h2 id="Netty-中的线程池-EventLoopGroup"><a href="#Netty-中的线程池-EventLoopGroup" class="headerlink" title="Netty 中的线程池 EventLoopGroup"></a>Netty 中的线程池 EventLoopGroup</h2><p>接下来，我们来分析 Netty 中的线程池。Netty 中的线程池比较不好理解，因为它的类比较多，而且它们之间的关系错综复杂。看下图，感受下 NioEventLoop 类和 NioEventLoopGroup 类的继承结构：</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/netty-source/2.png" alt="2"></p>
+<p>这张图我按照继承关系整理而来，大家仔细看一下就会发现，涉及到的类确实挺多的。本节来给大家理理清楚这部分内容。</p>
+<p>首先，我们说的 Netty 的线程池，指的就是 <strong>NioEventLoopGroup</strong> 的实例；线程池中的单个线程，指的是右边 <strong>NioEventLoop</strong> 的实例。</p>
+<p>我们第一节介绍的 Echo 例子，客户端和服务端的启动代码中，最开始我们总是先实例化 NioEventLoopGroup：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// EchoClient 代码最开始：</span></span><br><span class="line"><span class="type">EventLoopGroup</span> <span class="variable">group</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">NioEventLoopGroup</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// EchoServer 代码最开始：</span></span><br><span class="line"><span class="type">EventLoopGroup</span> <span class="variable">bossGroup</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">NioEventLoopGroup</span>(<span class="number">1</span>);</span><br><span class="line"><span class="type">EventLoopGroup</span> <span class="variable">workerGroup</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">NioEventLoopGroup</span>();</span><br></pre></td></tr></table></figure>
+
+<p>下面，我们就从 NioEventLoopGroup 的源码开始进行分析。</p>
+<p>我们打开 NioEventLoopGroup 的源码，可以看到，NioEventLoopGroup 有多个构造方法用于参数设置，最简单地，我们采用无参构造函数，或仅仅设置线程数量就可以了，其他的参数采用默认值。</p>
+<blockquote>
+<p>比如上面的代码中，我们只在实例化 bossGroup 的时候指定了参数，代表该线程池需要一个线程。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="title function_">NioEventLoopGroup</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="title function_">NioEventLoopGroup</span><span class="params">(<span class="type">int</span> nThreads)</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>(nThreads, (Executor) <span class="literal">null</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">  </span><br><span class="line"><span class="comment">// 参数最全的构造方法</span></span><br><span class="line"><span class="keyword">public</span> <span class="title function_">NioEventLoopGroup</span><span class="params">(<span class="type">int</span> nThreads, Executor executor, EventExecutorChooserFactory chooserFactory,</span></span><br><span class="line"><span class="params">                         <span class="keyword">final</span> SelectorProvider selectorProvider,</span></span><br><span class="line"><span class="params">                         <span class="keyword">final</span> SelectStrategyFactory selectStrategyFactory,</span></span><br><span class="line"><span class="params">                         <span class="keyword">final</span> RejectedExecutionHandler rejectedExecutionHandler)</span> &#123;</span><br><span class="line">    <span class="comment">// 调用父类的构造方法</span></span><br><span class="line">    <span class="built_in">super</span>(nThreads, executor, chooserFactory, selectorProvider, selectStrategyFactory, rejectedExecutionHandler);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们来稍微看一下构造方法中的各个参数：</p>
+<ul>
+<li>nThreads：这个最简单，就是线程池中的线程数，也就是 NioEventLoop 的实例数量。</li>
+<li>executor：我们知道，我们本身就是要构造一个线程池（Executor），为什么这里传一个 executor 实例呢？它其实不是给线程池用的，而是给 NioEventLoop 用的，以后再说。</li>
+<li>chooserFactory：当我们提交一个任务到线程池的时候，线程池需要选择（choose）其中的一个线程来执行这个任务，这个就是用来实现选择策略的。</li>
+<li>selectorProvider：这个简单，我们需要通过它来实例化 JDK 的 Selector，可以看到每个线程池都持有一个 selectorProvider 实例。</li>
+<li>selectStrategyFactory：这个涉及到的是线程池中线程的工作流程，在介绍 NioEventLoop 的时候会说。</li>
+<li>rejectedExecutionHandler：这个也是线程池的好朋友了，用于处理线程池中没有可用的线程来执行任务的情况。在 Netty 中稍微有一点点不一样，这个是给 NioEventLoop 实例用的，以后我们再详细介绍。</li>
+</ul>
+<p>这里介绍这些参数是希望大家有个印象而已，大家发现没有，在构造 NioEventLoopGroup 实例时的好几个参数，都是用来构造 NioEventLoop 用的。</p>
+<p>下面，我们从 NioEventLoopGroup 的无参构造方法开始，跟着源码走：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="title function_">NioEventLoopGroup</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后一步步走下去，到这个构造方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="title function_">NioEventLoopGroup</span><span class="params">(<span class="type">int</span> nThreads, ThreadFactory threadFactory, <span class="keyword">final</span> SelectorProvider selectorProvider, <span class="keyword">final</span> SelectStrategyFactory selectStrategyFactory)</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">super</span>(nThreads, threadFactory, selectorProvider, selectStrategyFactory, RejectedExecutionHandlers.reject());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>大家自己要去跟一下源码，这样才知道中间设置了哪些默认值，下面这几个参数都被设置了默认值： </p>
+<ul>
+<li><p>selectorProvider &#x3D; SelectorProvider.provider()</p>
+<blockquote>
+<p>这个没什么好说的，调用了 JDK 提供的方法</p>
+</blockquote>
+</li>
+<li><p>selectStrategyFactory &#x3D; DefaultSelectStrategyFactory.INSTANCE</p>
+<blockquote>
+<p>这个涉及到的是线程在做 select 操作和执行任务过程中的策略选择问题，在介绍 NioEventLoop 的时候会用到。 </p>
+</blockquote>
+</li>
+<li><p>rejectedExecutionHandler &#x3D; RejectedExecutionHandlers.reject()</p>
+<blockquote>
+<p>大家进去看一下 reject() 方法，也就是说，Netty 选择的默认拒绝策略是：抛出异常</p>
+</blockquote>
+</li>
+</ul>
+<p>跟着源码走，我们会来到父类 MultithreadEventLoopGroup 的构造方法中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="title function_">MultithreadEventLoopGroup</span><span class="params">(<span class="type">int</span> nThreads, ThreadFactory threadFactory, Object... args)</span> &#123;</span><br><span class="line">    <span class="built_in">super</span>(nThreads == <span class="number">0</span> ? DEFAULT_EVENT_LOOP_THREADS : nThreads, threadFactory, args);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里我们发现，如果采用无参构造函数，那么到这里的时候，默认地 nThreads 会被设置为 *<em>CPU 核心数 <em>2</em></em>。大家可以看下 DEFAULT_EVENT_LOOP_THREADS 的默认值，以及 static 代码块的设值逻辑。</p>
+<p>我们继续往下走：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="title function_">MultithreadEventExecutorGroup</span><span class="params">(<span class="type">int</span> nThreads, ThreadFactory threadFactory, Object... args)</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>(nThreads, threadFactory == <span class="literal">null</span> ? <span class="literal">null</span> : <span class="keyword">new</span> <span class="title class_">ThreadPerTaskExecutor</span>(threadFactory), args);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>到这一步的时候，<code>new ThreadPerTaskExecutor(threadFactory)</code> 会构造一个 executor。</p>
+<blockquote>
+<p>我们现在还不知道这个 executor 怎么用。这里我们先看下它的源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">ThreadPerTaskExecutor</span> <span class="keyword">implements</span> <span class="title class_">Executor</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ThreadFactory threadFactory;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ThreadPerTaskExecutor</span><span class="params">(ThreadFactory threadFactory)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (threadFactory == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NullPointerException</span>(<span class="string">&quot;threadFactory&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">this</span>.threadFactory = threadFactory;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">execute</span><span class="params">(Runnable command)</span> &#123;</span><br><span class="line">        <span class="comment">// 为每个任务新建一个线程</span></span><br><span class="line">        threadFactory.newThread(command).start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Executor 作为线程池的最顶层接口， 我们知道，它只有一个 execute(runnable) 方法，从上面我们可以看到，实现类 ThreadPerTaskExecutor 的逻辑就是<strong>每来一个任务，新建一个线程</strong>。</p>
+<p>我们先记住这个，前面也说了，它是给 NioEventLoop 用的，不是给 NioEventLoopGroup 用的。</p>
+</blockquote>
+<p>上一步设置完了 executor，我们继续往下看：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="title function_">MultithreadEventExecutorGroup</span><span class="params">(<span class="type">int</span> nThreads, Executor executor, Object... args)</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>(nThreads, executor, DefaultEventExecutorChooserFactory.INSTANCE, args);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这一步设置了 chooserFactory，用来实现从线程池中选择一个线程的选择策略。</p>
+<blockquote>
+<p>ChooserFactory 的逻辑比较简单，我们看下 DefaultEventExecutorChooserFactory 的实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> EventExecutorChooser <span class="title function_">newChooser</span><span class="params">(EventExecutor[] executors)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (isPowerOfTwo(executors.length)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">PowerOfTwoEventExecutorChooser</span>(executors);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">GenericEventExecutorChooser</span>(executors);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里设置的策略也很简单：</p>
+<p>1、如果线程池的线程数量是 2^n，采用下面的方式会高效一些：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> EventExecutor <span class="title function_">next</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> executors[idx.getAndIncrement() &amp; executors.length - <span class="number">1</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2、如果不是，用取模的方式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> EventExecutor <span class="title function_">next</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> executors[Math.abs(idx.getAndIncrement() % executors.length)];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></blockquote>
+<p>走了这么久，我们终于到了一个<strong>干实事</strong>的构造方法中了：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="title function_">MultithreadEventExecutorGroup</span><span class="params">(<span class="type">int</span> nThreads, Executor executor,</span></span><br><span class="line"><span class="params">                                        EventExecutorChooserFactory chooserFactory, Object... args)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (nThreads &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(String.format(<span class="string">&quot;nThreads: %d (expected: &gt; 0)&quot;</span>, nThreads));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// executor 如果是 null，做一次和前面一样的默认设置。</span></span><br><span class="line">    <span class="keyword">if</span> (executor == <span class="literal">null</span>) &#123;</span><br><span class="line">        executor = <span class="keyword">new</span> <span class="title class_">ThreadPerTaskExecutor</span>(newDefaultThreadFactory());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 这里的 children 数组非常重要，它就是线程池中的线程数组，这么说不太严谨，但是就大概这个意思</span></span><br><span class="line">    children = <span class="keyword">new</span> <span class="title class_">EventExecutor</span>[nThreads];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 下面这个 for 循环将实例化 children 数组中的每一个元素</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; nThreads; i ++) &#123;</span><br><span class="line">        <span class="type">boolean</span> <span class="variable">success</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 实例化！！！！！！</span></span><br><span class="line">            children[i] = newChild(executor, args);</span><br><span class="line">            success = <span class="literal">true</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            <span class="comment">// <span class="doctag">TODO:</span> Think about if this is a good exception type</span></span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(<span class="string">&quot;failed to create a child event loop&quot;</span>, e);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="comment">// 如果有一个 child 实例化失败，那么 success 就会为 false，然后进入下面的失败处理逻辑</span></span><br><span class="line">            <span class="keyword">if</span> (!success) &#123;</span><br><span class="line">                <span class="comment">// 把已经成功实例化的“线程” shutdown，shutdown 是异步操作</span></span><br><span class="line">                <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> <span class="number">0</span>; j &lt; i; j ++) &#123;</span><br><span class="line">                    children[j].shutdownGracefully();</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 等待这些线程成功 shutdown</span></span><br><span class="line">                <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> <span class="number">0</span>; j &lt; i; j ++) &#123;</span><br><span class="line">                    <span class="type">EventExecutor</span> <span class="variable">e</span> <span class="operator">=</span> children[j];</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        <span class="keyword">while</span> (!e.isTerminated()) &#123;</span><br><span class="line">                            e.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException interrupted) &#123;</span><br><span class="line">                        <span class="comment">// 把中断状态设置回去，交给关心的线程来处理.</span></span><br><span class="line">                        Thread.currentThread().interrupt();</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// ================================================</span></span><br><span class="line">    <span class="comment">// === 到这里，就是代表上面的实例化所有线程已经成功结束 ===</span></span><br><span class="line">    <span class="comment">// ================================================</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 通过之前设置的 chooserFactory 来实例化 Chooser，把线程池数组传进去，</span></span><br><span class="line">    <span class="comment">//     这就不必再说了吧，实现线程选择策略</span></span><br><span class="line">    chooser = chooserFactory.newChooser(children);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 设置一个 Listener 用来监听该线程池的 termination 事件</span></span><br><span class="line">    <span class="comment">// 下面的代码逻辑是：给池中每一个线程都设置这个 listener，当监听到所有线程都 terminate 以后，这个线程池就算真正的 terminate 了。</span></span><br><span class="line">    <span class="keyword">final</span> FutureListener&lt;Object&gt; terminationListener = <span class="keyword">new</span> <span class="title class_">FutureListener</span>&lt;Object&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">operationComplete</span><span class="params">(Future&lt;Object&gt; future)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">            <span class="keyword">if</span> (terminatedChildren.incrementAndGet() == children.length) &#123;</span><br><span class="line">                terminationFuture.setSuccess(<span class="literal">null</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">for</span> (EventExecutor e: children) &#123;</span><br><span class="line">        e.terminationFuture().addListener(terminationListener);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 设置 readonlyChildren，它是只读集合，以后用到再说</span></span><br><span class="line">    Set&lt;EventExecutor&gt; childrenSet = <span class="keyword">new</span> <span class="title class_">LinkedHashSet</span>&lt;EventExecutor&gt;(children.length);</span><br><span class="line">    Collections.addAll(childrenSet, children);</span><br><span class="line">    readonlyChildren = Collections.unmodifiableSet(childrenSet);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码非常简单吧，没有什么需要特别说的，接下来，我们来看看 newChild() 这个方法，这个方法非常重要，它将创建线程池中的线程。</p>
+<blockquote>
+<p>我上面已经用过很多次”线程”这个词了，它可不是 Thread 的意思，而是指池中的个体，后面我们会看到每个”线程”在什么时候会真正创建 Thread 实例。反正每个 NioEventLoop 实例内部都会有一个自己的 Thread 实例，所以把这两个概念混在一起也无所谓吧。</p>
+</blockquote>
+<p><code>newChild(…)</code> 方法在 NioEventLoopGroup 中覆写了，上面说的”线程”其实就是 NioEventLoop：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">protected</span> EventLoop <span class="title function_">newChild</span><span class="params">(Executor executor, Object... args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">NioEventLoop</span>(<span class="built_in">this</span>, executor, (SelectorProvider) args[<span class="number">0</span>],</span><br><span class="line">        ((SelectStrategyFactory) args[<span class="number">1</span>]).newSelectStrategy(), (RejectedExecutionHandler) args[<span class="number">2</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>它调用了 NioEventLoop 的构造方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">NioEventLoop(NioEventLoopGroup parent, Executor executor, SelectorProvider selectorProvider,</span><br><span class="line">             SelectStrategy strategy, RejectedExecutionHandler rejectedExecutionHandler) &#123;</span><br><span class="line">    <span class="comment">// 调用父类构造器</span></span><br><span class="line">    <span class="built_in">super</span>(parent, executor, <span class="literal">false</span>, DEFAULT_MAX_PENDING_TASKS, rejectedExecutionHandler);</span><br><span class="line">    <span class="keyword">if</span> (selectorProvider == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NullPointerException</span>(<span class="string">&quot;selectorProvider&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (strategy == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NullPointerException</span>(<span class="string">&quot;selectStrategy&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    provider = selectorProvider;</span><br><span class="line">    <span class="comment">// 开启 NIO 中最重要的组件：Selector</span></span><br><span class="line">    <span class="keyword">final</span> <span class="type">SelectorTuple</span> <span class="variable">selectorTuple</span> <span class="operator">=</span> openSelector();</span><br><span class="line">    selector = selectorTuple.selector;</span><br><span class="line">    unwrappedSelector = selectorTuple.unwrappedSelector;</span><br><span class="line">    selectStrategy = strategy;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们先粗略观察一下，然后再往下看：</p>
+<ul>
+<li>在 Netty 中，NioEventLoopGroup 代表线程池，NioEventLoop 就是其中的线程。</li>
+<li>线程池 NioEventLoopGroup 是池中的线程 NioEventLoop 的 <strong>parent</strong>，从上面的代码中的取名可以看出。</li>
+<li>每个 NioEventLoop 都有自己的 Selector，上面的代码也反应了这一点，这和 Tomcat 中的 NIO 模型有点区别。</li>
+<li>executor、selectStrategy 和 rejectedExecutionHandler 从 NioEventLoopGroup 中一路传到了 NioEventLoop 中。</li>
+</ul>
+<p>这个时候，我们来看一下 NioEventLoop 类的属性都有哪些，我们先忽略它继承自父类的属性，单单看它自己的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> Selector selector;</span><br><span class="line"><span class="keyword">private</span> Selector unwrappedSelector;</span><br><span class="line"><span class="keyword">private</span> SelectedSelectionKeySet selectedKeys;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> SelectorProvider provider;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="type">AtomicBoolean</span> <span class="variable">wakenUp</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AtomicBoolean</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> SelectStrategy selectStrategy;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">volatile</span> <span class="type">int</span> <span class="variable">ioRatio</span> <span class="operator">=</span> <span class="number">50</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="type">int</span> cancelledKeys;</span><br><span class="line"><span class="keyword">private</span> <span class="type">boolean</span> needsToSelectAgain;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>结合它的构造方法我们来总结一下：</p>
+<ul>
+<li>provider：它由 NioEventLoopGroup 传进来，前面我们说了一个线程池有一个 selectorProvider，用于创建 Selector 实例</li>
+<li>selector：虽然我们还没看创建 selector 的代码，但我们已经知道，在 Netty 中 Selector 是跟着线程池中的线程走的。也就是说，并非一个线程池一个 Selector 实例，而是线程池中每一个线程都有一个 Selector 实例。</li>
+<li>selectStrategy：select 操作的策略，这个不急。</li>
+<li>ioRatio：这是 IO 任务的执行时间比例，因为每个线程既有 IO 任务执行，也有非 IO 任务需要执行，所以该参数为了保证有足够时间是给 IO 的。这里也不需要急着去理解什么 IO 任务、什么非 IO 任务。</li>
+</ul>
+<p>然后我们继续走它的构造方法，我们看到上面的构造方法调用了父类的构造器，它的父类是 SingleThreadEventLoop。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="title function_">SingleThreadEventLoop</span><span class="params">(EventLoopGroup parent, Executor executor,</span></span><br><span class="line"><span class="params">                                <span class="type">boolean</span> addTaskWakesUp, <span class="type">int</span> maxPendingTasks,</span></span><br><span class="line"><span class="params">                                RejectedExecutionHandler rejectedExecutionHandler)</span> &#123;</span><br><span class="line">    <span class="built_in">super</span>(parent, executor, addTaskWakesUp, maxPendingTasks, rejectedExecutionHandler);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 我们可以直接忽略这个东西，以后我们也不会再介绍它</span></span><br><span class="line">    tailTasks = newTaskQueue(maxPendingTasks);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>SingleThreadEventLoop 这个名字很诡异有没有？然后它的构造方法又调用了父类 SingleThreadEventExecutor 的构造方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="title function_">SingleThreadEventExecutor</span><span class="params">(EventExecutorGroup parent, Executor executor,</span></span><br><span class="line"><span class="params">                                    <span class="type">boolean</span> addTaskWakesUp, <span class="type">int</span> maxPendingTasks,</span></span><br><span class="line"><span class="params">                                    RejectedExecutionHandler rejectedHandler)</span> &#123;</span><br><span class="line">    <span class="built_in">super</span>(parent);</span><br><span class="line">    <span class="built_in">this</span>.addTaskWakesUp = addTaskWakesUp;</span><br><span class="line">    <span class="built_in">this</span>.maxPendingTasks = Math.max(<span class="number">16</span>, maxPendingTasks);</span><br><span class="line">    <span class="built_in">this</span>.executor = ObjectUtil.checkNotNull(executor, <span class="string">&quot;executor&quot;</span>);</span><br><span class="line">    <span class="comment">// taskQueue，这个东西很重要，提交给 NioEventLoop 的任务都会进入到这个 taskQueue 中等待被执行</span></span><br><span class="line">    <span class="comment">// 这个 queue 的默认容量是 16</span></span><br><span class="line">    taskQueue = newTaskQueue(<span class="built_in">this</span>.maxPendingTasks);</span><br><span class="line">    rejectedExecutionHandler = ObjectUtil.checkNotNull(rejectedHandler, <span class="string">&quot;rejectedHandler&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>到这里就更加诡异了，NioEventLoop 的父类是 SingleThreadEventLoop，而 SingleThreadEventLoop 的父类是 <strong>SingleThreadEventExecutor</strong>，它的名字告诉我们，它是一个 Executor，是一个线程池，而且是 Single Thread 单线程的。</p>
+<p>也就是说，线程池 NioEventLoopGroup 中的每一个线程 NioEventLoop 也可以当做一个线程池来用，只不过它只有一个线程。这种设计虽然看上去很巧妙，不过有点反人类的样子。</p>
+<p>上面这个构造函数比较简单：</p>
+<ul>
+<li><p>设置了 parent，也就是之前创建的线程池 NioEventLoopGroup 实例</p>
+</li>
+<li><p>executor：它是我们之前实例化的 ThreadPerTaskExecutor，我们说过，这个东西在线程池中没有用，它是给 NioEventLoop 用的，马上我们就要看到它了。提前透露一下，它用来开启 NioEventLoop 中的线程（Thread 实例）。</p>
+</li>
+<li><p>taskQueue：这算是该构造方法中新的东西，它是任务队列。我们前面说过，NioEventLoop 需要负责 IO 事件和非 IO 事件，通常它都在执行 selector 的 select 方法或者正在处理 selectedKeys，如果我们要 submit 一个任务给它，任务就会被放到 taskQueue 中，等它来轮询。该队列是线程安全的 LinkedBlockingQueue，默认容量为 16。</p>
+</li>
+<li><p>rejectedExecutionHandler：taskQueue 的默认容量是 16，所以，如果 submit 的任务堆积了到了 16，再往里面提交任务会触发 rejectedExecutionHandler 的执行策略。</p>
+<blockquote>
+<p>还记得默认策略吗：抛出RejectedExecutionException 异常。</p>
+<p>在 NioEventLoopGroup 的默认构造中，它的实现是这样的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">RejectedExecutionHandler</span> <span class="variable">REJECT</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">RejectedExecutionHandler</span>() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">rejected</span><span class="params">(Runnable task, SingleThreadEventExecutor executor)</span> &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RejectedExecutionException</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></blockquote>
+</li>
+</ul>
+<p>然后，我们再回到 NioEventLoop 的构造方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">NioEventLoop(NioEventLoopGroup parent, Executor executor, SelectorProvider selectorProvider,</span><br><span class="line">             SelectStrategy strategy, RejectedExecutionHandler rejectedExecutionHandler) &#123;</span><br><span class="line">    <span class="comment">// 我们刚刚说完了这个</span></span><br><span class="line">    <span class="built_in">super</span>(parent, executor, <span class="literal">false</span>, DEFAULT_MAX_PENDING_TASKS, rejectedExecutionHandler);</span><br><span class="line">    <span class="keyword">if</span> (selectorProvider == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NullPointerException</span>(<span class="string">&quot;selectorProvider&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (strategy == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NullPointerException</span>(<span class="string">&quot;selectStrategy&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    provider = selectorProvider;</span><br><span class="line">    <span class="comment">// 创建 selector 实例</span></span><br><span class="line">    <span class="keyword">final</span> <span class="type">SelectorTuple</span> <span class="variable">selectorTuple</span> <span class="operator">=</span> openSelector();</span><br><span class="line">    selector = selectorTuple.selector;</span><br><span class="line">    unwrappedSelector = selectorTuple.unwrappedSelector;</span><br><span class="line">    </span><br><span class="line">    selectStrategy = strategy;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，最重要的方法其实就是 openSelector() 方法，它将创建 NIO 中最重要的一个组件 <strong>Selector</strong>。在这个方法中，Netty 也做了一些优化，这部分我们就不去分析它了。</p>
+<p>到这里，我们的线程池 NioEventLoopGroup 创建完成了，并且实例化了池中的所有 NioEventLoop 实例。</p>
+<p>同时，大家应该已经看到，上面并没有真正创建 NioEventLoop 中的线程（没有创建 Thread 实例）。</p>
+<p>提前透露一下，创建线程的时机在第一个任务提交过来的时候，那么第一个任务是什么呢？是我们马上要说的 channel 的 <strong>register</strong> 操作。</p>
+	  
+	</div>
+
+	<!-- recommended posts -->
+	
+
+	<div>
+  	<center>
+	<div class="pagination">
+<ul class="pagination">
+	 
+				
+		<li class="prev"><a href="/2021/06/14/Threads-And-Locks-md/" class="alignleft prev"><i class="fa fa-arrow-circle-o-left"></i>Prev</a></li>
+  		
+
+        <li><a href="/archives"><i class="fa fa-archive"></i>Archive</a></li>
+
+		
+          <li class="next"><a href="/2020/09/20/reentrant-read-write-lock/" class="alignright next">Next<i class="fa fa-arrow-circle-o-right"></i></a></li>
+        
+	
+</ul>
+</div>
+
+    </center>
+	</div>
+
+    <!-- share -->
+    
+        
+    <div class="bdsharebuttonbox">
+        <a href="#" class="bds_more" data-cmd="more"></a>
+        <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+        <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+        <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+        <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+        <a href="#" class="bds_linkedin" data-cmd="linkedin" title="分享到linkedin"></a>
+        <a href="#" class="bds_evernotecn" data-cmd="evernotecn" title="分享到印象笔记"></a>
+        <a href="#" class="bds_youdao" data-cmd="youdao" title="分享到有道云笔记"></a>
+        <a href="#" class="bds_copy" data-cmd="copy" title="分享到复制网址"></a>
+    </div>
+    <script>
+        window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"24"},"share":{}};
+        with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+    </script>
+
+
+        
+
+    
+	
+	<!-- comment -->
+	
+<section id="comment">
+  <h2 class="title">Comments</h2>
+  
+     <div id="gitalk-container"></div>
+	 <script type="text/javascript">
+	 // 拼接 body 内容
+	    const decodedPageUrl = decodeURI(location.href)
+		const issueBody = `${decodedPageUrl} \n\n Netty 解析`;
+        const gitalk = new Gitalk({
+           clientID: 'Ov23liTbPXkD3NfIs0KX',
+           clientSecret: '4e727600e55d74a25577449de551363030ee5a0e',
+           repo: 'pistachioss.github.io',      // The repository of store comments,
+           owner: 'pistachioss',
+           admin: ['pistachioss'],
+           id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50 
+		   title: 'Netty 源码解析（一）', // 使用文章标题作为 Issue 的标题
+		   body: issueBody, // 拼接好的 body
+		   distractionFreeMode: false  // Facebook-like distraction free mode
+         });
+
+         gitalk.render('gitalk-container');
+	 </script>
+  
+</section>
+
+
+	</div> <!-- col-md-9/col-md-12 -->
+		
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2021-03-26 
+	</div>
+	
+
+	<!-- categories -->
+    
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
+    <ul id="categorys" class="tag_box list-unstyled collapse in">
+          
+  <li>
+    <li><a href="/categories/netty/">netty<span>1</span></a></li>
+  </li>
+
+    </ul>
+	</div>
+	
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/wiki/">wiki<span>16</span></a></li>
+
+    </ul>
+	</div>
+	
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	   <a data-toggle="collapse" data-target="#toc"><i class="fa fa-bars"></i></a>
+	   <div id="toc" class="toc collapse in">
+			<ol class="toc-article"><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#%E5%87%86%E5%A4%87"><span class="toc-article-text">准备</span></a></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#Echo-%E4%BE%8B%E5%AD%90"><span class="toc-article-text">Echo 例子</span></a></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#Netty-%E4%B8%AD%E7%9A%84-Channel"><span class="toc-article-text">Netty 中的 Channel</span></a></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#Netty-%E4%B8%AD%E7%9A%84-Future%E3%80%81Promise"><span class="toc-article-text">Netty 中的 Future、Promise</span></a></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#ChannelPipeline%EF%BC%8C%E5%92%8C-Inbound%E3%80%81Outbound"><span class="toc-article-text">ChannelPipeline，和 Inbound、Outbound</span></a></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#Netty-%E4%B8%AD%E7%9A%84%E7%BA%BF%E7%A8%8B%E6%B1%A0-EventLoopGroup"><span class="toc-article-text">Netty 中的线程池 EventLoopGroup</span></a></li></ol>
+		</div>
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+	</div>
+		
+
+</div><!-- row -->
+
+
+
+
+    </div>
+  </div>
+  <div class="container-narrow">
+    <footer> <p>
+  &copy; 2025 shineXGO
+  
+      with help from <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a>. Theme by <a target="_blank" rel="noopener" href="http://github.com/wzpan/hexo-theme-freemind/">Freemind</a>.    
+</p> </footer>
+  </div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>▲</span> 
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+
+<!-- syntax highlighting -->
+
+
+</body>
+</html>

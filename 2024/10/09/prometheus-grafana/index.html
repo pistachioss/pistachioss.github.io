@@ -1,0 +1,549 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Prometheus 数据类型解析与 Grafana 制图 | pistachioss</title>
+  <meta name="author" content="shineXGO">
+  
+  <meta name="description" content="Prometheus、Grafana ">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Prometheus 数据类型解析与 Grafana 制图"/>
+  <meta property="og:site_name" content="pistachioss"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="pistachioss" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/themes/cerulean.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight-default.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/comment.css" media="screen" type="text/css">
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.9/es5-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-sham.min.js"></script>
+  <![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+  
+  
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+	<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  
+  <!-- analytics -->
+  
+
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <nav id="main-nav" class="navbar navbar-inverse navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+	<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+       <a class="navbar-brand" href="/">pistachioss</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="about me">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+    <div class="content">
+      
+
+
+	
+		<div class="page-header page-header-inverse ">		
+			<h1 class="title title-inverse "> Prometheus 数据类型解析与 Grafana 制图</h1>
+		</div>		
+	
+
+
+
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  
+		 <div class="alert alert-success description">
+			<i class="fa fa-info-circle"></i> <p>Prometheus、Grafana </p>
+			
+		 </div> <!-- alert -->
+	  		
+
+	  <p>阅读本文的前提是你分别知道 Grafana 和 Prometheus 是什么，要有一些最基本的了解。</p>
+<p>本文会用一些比较接近实际情况的例子来帮助初学者理解 Prometheus 的数据类型，读完本文，你应该能充分了解 Prometheus 中主要数据类型的工作原理，以及能根据自己的需要使用合适的函数配置出相应的 Grafana 图表。</p>
+<p>如果你没有环境进行实操，建议自己用 docker 搞一下，花点时间准备环境还是值得投入的。所以为了写本文，我提前写了一篇非常简单的文章，介绍如何搭建环境，大家可以参考。</p>
+<h2 id="数据上报"><a href="#数据上报" class="headerlink" title="数据上报"></a>数据上报</h2><p>Prometheus 和一般的 APM 工具不一样，它采用的是由 server 端主动 pull 的交互模型，就是你准备好本地数据，然后在 Prometheus server 上配置好数据所在的地址，接下来就是等 Prometheus 来主动、定期拉取数据。</p>
+<p>想要看到本地数据非常容易，对于 Spring Boot 应用来说，通常是访问 &#x2F;actuator&#x2F;prometheus 就可以了，当然不同的配置可能导致不同的地址，这里就不详述了。接口数据是纯文本的，采用 OpenMetrics 标准来组织内容。</p>
+<p>内容类似如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># HELP executor_queued_tasks The approximate number <span class="keyword">of</span> tasks that <span class="keyword">are</span> queued <span class="keyword">for</span> execution</span><br><span class="line"># TYPE executor_queued_tasks gauge</span><br><span class="line">executor_queued_tasks&#123;name<span class="operator">=</span>&quot;applicationTaskExecutor&quot;&#125; <span class="number">0.0</span></span><br><span class="line"># HELP http_request_total  </span><br><span class="line"># TYPE http_request_total counter</span><br><span class="line">http_request_total&#123;application<span class="operator">=</span>&quot;order-service&quot;,ip<span class="operator">=</span>&quot;10.100.0.3&quot;,uri<span class="operator">=</span>&quot;/api/v1/order/crate&quot;&#125; <span class="number">2494624.0</span></span><br><span class="line">http_request_total&#123;application<span class="operator">=</span>&quot;order-service&quot;,ip<span class="operator">=</span>&quot;10.100.0.3&quot;,uri<span class="operator">=</span>&quot;/api/v1/order/query-detail&quot;&#125; <span class="number">2.1704952E7</span></span><br></pre></td></tr></table></figure>
+
+<p># 开头的行主要描述这个指标是干啥的，以及定义它的数据类型，然后紧跟着时间序列以及它们当前的值。</p>
+<blockquote>
+<p>这个 OpenMetrics 标准最早就是 Prometheus 的内部数据格式规范，但是后来想把这个数据标准推广出来，让其他的 apm 工具可以直接使用，所以成立了一个项目单独发展，但是最新消息是，OpenMetrics 又合并回了 Prometheus 项目。</p>
+</blockquote>
+<p>Prometheus 有好几种数据类型，但是通常我们只需要关注 counter、gauge、histogram、summary 这 4 种，对于初学者来说，counter 和 gauge 是比较容易理解的，可以先充分了解这两个类型以后再扩展到其他类型。</p>
+<p>在 Java 中，我们最常用到的客户端库是 MicroMeter，结合 spring boot actuator，能非常简单地进行打点。</p>
+<h2 id="基本概念解释"><a href="#基本概念解释" class="headerlink" title="基本概念解释"></a>基本概念解释</h2><p>理解 Prometheus 最好的方式是，可能是自己先想一想要实现类似的需求，你会怎么做？你需要怎么组织数据？</p>
+<p>本章对 Prometheus 的数据做一个抽象化的解释，这样可以帮助读者更容易理解后面的内容。</p>
+<p>Prometheus 的核心是一个时序数据库，它按照<strong>时间序列</strong>来存储数据，所以要先理解一个时间序列意味着什么。</p>
+<p>举个例子，我们要统计每个接口被访问的次数，那么可能会形成下面几条数据：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">http_request_total&#123;uri=&quot;/api/placeOrder&quot;,method=&quot;POST&quot;,application=&quot;xxx-dog&quot;,instance_ip=&quot;10.110.0.1&quot;,&#125; 10</span><br><span class="line"></span><br><span class="line">http_request_total&#123;uri=&quot;/api/placeOrder&quot;,method=&quot;POST&quot;,application=&quot;xxx-dog&quot;,instance_ip=&quot;10.110.0.2&quot;,&#125; 8</span><br><span class="line"></span><br><span class="line">http_request_total&#123;uri=&quot;/api/queryOrder&quot;,method=&quot;GET&quot;,application=&quot;xxx-dog&quot;,instance_ip=&quot;10.110.0.1&quot;,&#125; 25</span><br></pre></td></tr></table></figure>
+
+<p>在这个示例数据中，其中 <code>/api/placeOrder</code> 接口，在 10.110.0.1 实例上被访问了 10 次，在 10.110.0.2 实例上被访问了 8 次；而 <code>/api/queryOrder</code> 接口在 10.110.0.1 实例上被访问了 25 次。</p>
+<p>我们的每条数据包含了：</p>
+<ul>
+<li>指标名称 metric name：http_request_total</li>
+<li>标签 labels：uri, method, application, instance_ip <strong>以及它们的值</strong></li>
+<li>样本值：比如上面这个是 counter 类型的指标，它的值是不断累加上去的，那这个样本值就代表当前实例从启动开始累积到现在的某接口的请求次数</li>
+<li>隐式包含了时间戳 timestamp，因为数据是一直在变化的，当前数据仅代表当前时间的值</li>
+</ul>
+<p>我们把一个时间序列的存储看成 kv 存储，那么 key 就是 <strong>指标名称和标签键值对</strong>，它们定义了一个唯一的时间序列，而 value 则由时间戳和值组成。</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/26.jpg" alt="26"></p>
+<p>由于每个时间序列都需要单独储存时序数据，所以我们需要注意时间序列不能太多，对于某个指标名来说，标签键值对的不同组合就决定了时间序列的数量。</p>
+<p>最终，在 Prometheus 多次拉取数据以后，会得到类似下面的 key-value 数据：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">key: </span><br><span class="line">http_request_total&#123;uri=&quot;/api/placeOrder&quot;,method=&quot;POST&quot;,application=&quot;xxx-dog&quot;,instance_ip=&quot;10.110.0.1&quot;&#125;</span><br><span class="line"></span><br><span class="line">value:</span><br><span class="line">[</span><br><span class="line">	&#123;time: 2024-07-30 00:00:00, value: 10&#125;,</span><br><span class="line">	&#123;time: 2024-07-30 00:00:05, value: 15&#125;,</span><br><span class="line">	&#123;time: 2024-07-30 00:00:10, value: 20&#125;,</span><br><span class="line">	&#123;time: 2024-07-30 00:00:15, value: 33&#125;,</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>这里面 key 就是一个时间序列，然后 value 对应这个时间序列在每个时间点的值，后面要介绍的很多函数，无非就是取某些时间段的值出来做各种运算。</p>
+<p>当然，这是抽象化以后的解释，感兴趣的同学可以去研究一下它的 TSDB 设计。</p>
+<p>另外，通常我们不允许同一个指标，使用不同的 label names 组合，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">http_request_total&#123;uri=&quot;xx&quot;,method=&quot;xx&quot;&#125;</span><br><span class="line">http_request_total&#123;uri=&quot;xx&quot;,application=&quot;xx&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>第一个使用了 uri+method，第二个使用了 uri+application，可以参考这个 issue（<a target="_blank" rel="noopener" href="https://github.com/micrometer-metrics/micrometer/issues/877%EF%BC%89">https://github.com/micrometer-metrics/micrometer/issues/877）</a> </p>
+<h2 id="Counter-类型"><a href="#Counter-类型" class="headerlink" title="Counter 类型"></a>Counter 类型</h2><p>Counter 就是一个计数器，它的值是一直往上增加的（不重启的情况下）。</p>
+<p>首先我们先来一个例子，下面是测试代码：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/counter_mock.jpg" alt="counter_mock"></p>
+<p>在这里例子中，有 2 个应用 order-service 和 user-service，然后每个应用分别有 2 个实例，并且每个应用有 2 个接口，共 8 个时间序列。每次来一个请求，对相应的时间序列增加随机的数值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">user-service:</span><br><span class="line">  ip list: <span class="number">10.100</span><span class="number">.0</span><span class="number">.1</span>, <span class="number">10.100</span><span class="number">.0</span><span class="number">.2</span></span><br><span class="line">  api list: /api/v1/user/login, /api/v1/user/login</span><br><span class="line"></span><br><span class="line">order-service:</span><br><span class="line">  ip list: <span class="number">10.100</span><span class="number">.0</span><span class="number">.3</span>, <span class="number">10.100</span><span class="number">.0</span><span class="number">.4</span></span><br><span class="line">  api list: /api/v1/order/crate, /api/v1/order/query-detail</span><br></pre></td></tr></table></figure>
+
+<p>我们让它跑起来，每秒钟执行一次，然后我们一直刷新 &#x2F;actuator&#x2F;prometheus，可以看到这8个时间序列后面的数值一直在增长。</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/actuator.jpg" alt="actuator"></p>
+<p>我们在 Grafana 中展示它们，可以看到每个时间序列的值一直在增加，是一条条单调增加的折线：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/grafana_1.jpg" alt="grafana_1"></p>
+<p>单单看这个一直增长的图通常没什么意义，能用的场景太少了，所以我们要先来了解下面的几个函数</p>
+<ul>
+<li>rate: 计算每秒平均增长率</li>
+<li>increase: 计算总增长量</li>
+<li>irate: 计算瞬时增长率</li>
+</ul>
+<h3 id="rate-函数制图"><a href="#rate-函数制图" class="headerlink" title="rate 函数制图"></a>rate 函数制图</h3><p>rate 函数的含义是每秒的平均增长率，其实就类似 QPS 的意思。</p>
+<p>比如我随便取其中一个时间序列出来：<code>&#123;__name__=&quot;http_request_total&quot;, application=&quot;order-service&quot;, instance=&quot;host.docker.internal:8080&quot;, ip=&quot;10.100.0.3&quot;, job=&quot;java-app&quot;, uri=&quot;/api/v1/order/crate&quot;&#125;</code></p>
+<p>使用 table 展示出来原始的值：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/1.jpg" alt="1"></p>
+<p>从上图中可以看到，这个时间序列每15秒被采集一次，样本值一直在增长。</p>
+<p>下面这个图，能帮助你非常容易理解 rate 做出来的折线图代表什么含义：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/rate.jpg" alt="rate"></p>
+<p>所有的折线图是由一个个点连接起来的，我们需要关注每个点的数值是怎么计算出来的。</p>
+<p><strong>速率&#x3D;数量&#x2F;时间</strong>，所以我们在做图的时候，还需要考虑分母的时间取多长比较合适，比如下面我先使用 1 分钟作为一个统计区间，也就是说 <strong>图上每个时间点的数值 &#x3D; 这个时间点往前1分钟的数据增长量 &#x2F; 60秒</strong>。</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/2.jpg" alt="2"></p>
+<p>如果我使用 5 分钟作为一个统计区间，并且把它们放在一起对比：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/3.jpg" alt="2"></p>
+<p>可以看到用 5 分钟作为一个统计区间，画出来的图比较平滑，这个稍微想一下就很容易理解为什么了，因为图上每 2 个相邻的点，他们的时间区间几乎都是重叠的。根据公式 <strong>速率&#x3D;数量&#x2F;时间</strong>，分母相同，分子数量差异不大，所以就表现得比较平滑。</p>
+<p>如果只用 rate 函数，那么所有被搜索到的指标都会被展示出来，比如下面这个，它显示了 8 个时间序列：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/25.jpg" alt="25"></p>
+<p>所以我们通常需要对结果进行聚合，这里需要用到 <strong>sum</strong> 函数，它非常简单，就是把搜索到的满足条件的时间序列求和。</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/27.jpg" alt="27"></p>
+<p>比如我们可以按照 application 的维度，或者按照 application+ip+接口 的维度，如下：</p>
+<p>sum( rate(http_request_total[1m]) ) by(application)，这样我们可以看到每个应用的总体 QPS 了，而不是某个接口的 QPS：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/4.jpg" alt="4"></p>
+<p>sum( rate(http_request_total[1m]) ) by(application, uri)，这样我们可以看到每个接口的 QPS：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/5.jpg" alt="5"></p>
+<blockquote>
+<p>sum by 有两种写法，把 by 写在前面也是可以的，比如 sum by(application, uri) (rate(http_request_total[1m])) </p>
+</blockquote>
+<p>sum 函数还有一个特点，就是它的结果是分组数据，在一些场景中很适合用来做对比，也就是饼状图：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/12.jpg" alt="12"></p>
+<p>这个示例里面，可以看到流量分配是不均匀的，order-service 有两个实例，但是有一个实例明显有较多的流量。</p>
+<p>总结一下 rate 函数，它很适合用来制作代表速率的图，比如订单的创建速率、网络的速率、接口的 QPS 等等，同时它适合搭配 sum 函数一起使用。</p>
+<h3 id="irate-函数制图"><a href="#irate-函数制图" class="headerlink" title="irate 函数制图"></a>irate 函数制图</h3><p>有了 rate 函数的概念以后，理解 irate 就会容易很多。</p>
+<p>比如某个指标，每 10 秒被采集一次数据，有如下数据：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">2024-09-09 00:00:00 100</span><br><span class="line">2024-09-09 00:00:10 150</span><br><span class="line">2024-09-09 00:00:20 160</span><br><span class="line">2024-09-09 00:00:30 400</span><br><span class="line">2024-09-09 00:00:40 450</span><br><span class="line">2024-09-09 00:00:50 600</span><br><span class="line">2024-09-09 00:01:00 1000</span><br></pre></td></tr></table></figure>
+
+<p>先观察一下上面这组数据，每 10 秒增加的数量非常不均匀，有些时候只增加了 10 个，但是最后 10 秒一下子增加了 400 个。</p>
+<p>如果我们使用 rate 函数，每分钟作为一个统计区间，计算在 00:01:00 这个时间点的速率，得到的结果是 (1000-100)&#x2F;60&#x3D;15。</p>
+<p>但是如果我们使用 <strong>irate</strong> 函数，它只会考虑<strong>最后两个数据点的增长率</strong>，也就是说，在 00:01:00 这个时间点的<strong>瞬时</strong>增长率，为 (1000-600)&#x2F;10&#x3D;40。</p>
+<p>从这个例子，我们可以看到，虽然 rate 和 irate 都是描述增长率，但是 irate 对数据的增长速率非常敏感，而 rate 表现得比较平滑。</p>
+<p>同样的，下面这张图能帮助你非常容易理解 irate 函数的图表：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/irate.jpg" alt="irate"></p>
+<p>下面，我把其中的一个时间序列分别用 rate 函数和 irate 画一条折线出来，可以对比着看一下它们表现出来的信息：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/6.jpg" alt="6"></p>
+<p>黄色的线是 irate 函数画出来的，显然它的波动比较大，对数据的变化比较敏感。</p>
+<p>既然 irate 只取最后的两个数据，所以我们其实也可以猜到，下面的两个表达式，虽然时间范围看上去差异很大，一个 1m 一个 10m，但是基本上可以肯定，做出来的图是一样的，之所以要指定时间，是因为怕采样频率的问题，以及数据可能有丢失等。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">irate(http_request_total&#123;application=&quot;order-service&quot;, ip=&quot;10.100.0.3&quot;, uri=&quot;/api/v1/order/query-detail&quot;&#125;[1m])</span><br><span class="line"></span><br><span class="line">irate(http_request_total&#123;application=&quot;order-service&quot;, ip=&quot;10.100.0.3&quot;, uri=&quot;/api/v1/order/query-detail&quot;&#125;[10m])</span><br></pre></td></tr></table></figure>
+
+<h3 id="increase-函数制图"><a href="#increase-函数制图" class="headerlink" title="increase 函数制图"></a>increase 函数制图</h3><p>increase 非常容易理解，它代表在一段时间内，第一个数据到最后一个数据，它们之间的差值。</p>
+<p>比如我设置一个这种图：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">increase(http_request_total&#123;application=&quot;order-service&quot;, ip=&quot;10.100.0.3&quot;, uri=&quot;/api/v1/order/query-detail&quot;&#125;[5m])</span><br></pre></td></tr></table></figure>
+
+<p>图上出现的每个点，它代表这个时间点往前5分钟，这个时间序列总共增长了多少数值。</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/7.jpg" alt="7"></p>
+<p>其实大家应该很容易发现，increase 和 rate 函数用了一样的数据，都是一个时间区间的<strong>第一条</strong>和<strong>最后一条</strong>数据。</p>
+<p>所以从数学上，很容易推出：<strong>increase(v[t]) &#x3D; rate(v[t]) * t</strong>。因此，理论上我们是可以只使用它们之中的一个函数的。</p>
+<p>很多时候，我们想知道一段时间的总体变化，而不是变化速率，这个时候我们一般会使用 increase 函数。比如我想知道过去 24 小时内的新用户注册数、24 小时订单数等，这种图可以不局限于做折线图或者是柱状图，也可以做饼图。</p>
+<p>counter 类型大概就说这么多，最后需要指出的是，前面我们说过了 counter 的数据是一直增长的，但是如果我们的应用重启了，也就是说，本地的数据发生了重置，Prometheus 会记录新的从 0 开始的样本值，但是对 rate, irate, increase 这些函数，会特殊处理，看下面这两个图就清楚了。</p>
+<p>首先我们不使用任何函数，先把原始数据展示出来：</p>
+<p><strong>http_request_total{application&#x3D;”order-service”, ip&#x3D;”10.100.0.3”, uri&#x3D;”&#x2F;api&#x2F;v1&#x2F;order&#x2F;query-detail”}</strong></p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/13.jpg" alt="13"></p>
+<p>从上图可以看到，这个时间序列是发生过 reset 的，下面我们用 rate 函数画图：</p>
+<p><strong>rate(http_request_total{application&#x3D;”order-service”, ip&#x3D;”10.100.0.3”, uri&#x3D;”&#x2F;api&#x2F;v1&#x2F;order&#x2F;query-detail”}[2m])</strong></p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/14.jpg" alt="14"></p>
+<p>可以看到，rate 函数自动处理了 reset 的情况。</p>
+<h2 id="Gauge-类型"><a href="#Gauge-类型" class="headerlink" title="Gauge 类型"></a>Gauge 类型</h2><p>Gauge 类型非常简单，它就是代表某个指标在某个时间点的数值，基本上每个点的数值都是独立的，前后之前没什么关联。</p>
+<p>它的使用场景也非常多，比如当前的 CPU 使用率、内存使用率、kafka 的 consumer lag、当前线程数等等。</p>
+<p>比如下面是我的 cpu 使用率的几次采样数据：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">2024-09-11 22:14:45    0.212</span><br><span class="line">2024-09-11 22:15:00    0.165</span><br><span class="line">2024-09-11 22:15:15    0.189</span><br><span class="line">2024-09-11 22:15:30    0.257</span><br><span class="line">2024-09-11 22:15:45    0.207</span><br></pre></td></tr></table></figure>
+
+<p>接下来，我们考虑 gauge 数据通常的呈现方式。</p>
+<p>首先是，它非常适合用来做一些仪表盘的图，比如下面这种状态图，我们想看到现在的系统的实时信息：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/8.jpg" alt="8"></p>
+<p>当然，把它们做成折线图也很有用，可以看到数据的变化趋势，比如下面这个 cpu 使用率的趋势图：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/9.jpg" alt="9"></p>
+<p>另一个很好用的图，是 stat panel，也就是把上面两个结合在一起，既可以看到趋势，也可以看到当前最新值。</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/10.jpg" alt="10"></p>
+<p>这里要强调一下，如果你觉得有需要，你依然可以使用前面介绍的 rate、irate、increase 等这些函数在 gauge 类型上，虽然很奇怪。对这些函数而言，gauge 和 counter 都是一样的时序数据，只不过 counter 类型的数据有可能要处理数据重置的情况，而 gauge 不存在。</p>
+<h2 id="Summary-类型"><a href="#Summary-类型" class="headerlink" title="Summary 类型"></a>Summary 类型</h2><p>接下来我们要进入到 Summary 类型的介绍，它比 counter 和 gauge 稍微复杂一些，我们要介绍一些内部细节，才能帮助大家理解它，进而更容易理解后面要介绍的 Histogram 类型。</p>
+<p>首先，我们需要在 application.properties 文件中配置下面这 3 个属性（当然你也可以通过 @Configuration 来配置），这里指明我们要统计 <strong>http.request</strong> 的 P90 和 P99，另外指定了使用 3 个时间窗口，每个窗口是 1 分钟，后面会解释它们的作用。</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">management.metrics.distribution.percentiles.[http.request]</span>=<span class="string">0.9, 0.99</span></span><br><span class="line"><span class="attr">management.metrics.distribution.buffer-length.[http.request]</span>=<span class="string">3</span></span><br><span class="line"><span class="attr">management.metrics.distribution.expiry.[http.request]</span>=<span class="string">1m</span></span><br></pre></td></tr></table></figure>
+
+<p>它的 API 也非常简单，下面我模拟这些接口，每秒钟被请求一次，每次耗时几十到几百毫秒：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/15.jpg" alt="15"></p>
+<p>请注意这里我使用的 API，我调用了 Metrics#timer 方法，name 我使用的是 <strong>http.request</strong>，labels 还是和其他数据类型一致。</p>
+<p>下面是从本地获取到的数据：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"># HELP http_request_seconds  </span><br><span class="line"># TYPE http_request_seconds summary</span><br><span class="line">http_request_seconds&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.3&quot;,uri=&quot;/api/v1/order/create&quot;,quantile=&quot;0.9&quot;&#125; 0.788529152</span><br><span class="line">http_request_seconds&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.3&quot;,uri=&quot;/api/v1/order/create&quot;,quantile=&quot;0.99&quot;&#125; 0.788529152</span><br><span class="line">http_request_seconds_count&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.3&quot;,uri=&quot;/api/v1/order/create&quot;&#125; 11</span><br><span class="line">http_request_seconds_sum&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.3&quot;,uri=&quot;/api/v1/order/create&quot;&#125; 6.382</span><br><span class="line">http_request_seconds&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.3&quot;,uri=&quot;/api/v1/order/query-detail&quot;,quantile=&quot;0.9&quot;&#125; 0.074448896</span><br><span class="line">http_request_seconds&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.3&quot;,uri=&quot;/api/v1/order/query-detail&quot;,quantile=&quot;0.99&quot;&#125; 0.0786432</span><br><span class="line">http_request_seconds_count&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.3&quot;,uri=&quot;/api/v1/order/query-detail&quot;&#125; 11</span><br><span class="line">http_request_seconds_sum&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.3&quot;,uri=&quot;/api/v1/order/query-detail&quot;&#125; 0.619</span><br><span class="line">http_request_seconds&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.4&quot;,uri=&quot;/api/v1/order/create&quot;,quantile=&quot;0.9&quot;&#125; 0.956301312</span><br><span class="line">http_request_seconds&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.4&quot;,uri=&quot;/api/v1/order/create&quot;,quantile=&quot;0.99&quot;&#125; 0.956301312</span><br><span class="line">http_request_seconds_count&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.4&quot;,uri=&quot;/api/v1/order/create&quot;&#125; 11</span><br><span class="line">http_request_seconds_sum&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.4&quot;,uri=&quot;/api/v1/order/create&quot;&#125; 8.571</span><br><span class="line">http_request_seconds&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.4&quot;,uri=&quot;/api/v1/order/query-detail&quot;,quantile=&quot;0.9&quot;&#125; 0.038797312</span><br><span class="line">http_request_seconds&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.4&quot;,uri=&quot;/api/v1/order/query-detail&quot;,quantile=&quot;0.99&quot;&#125; 0.038797312</span><br><span class="line">http_request_seconds_count&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.4&quot;,uri=&quot;/api/v1/order/query-detail&quot;&#125; 11</span><br><span class="line">http_request_seconds_sum&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.4&quot;,uri=&quot;/api/v1/order/query-detail&quot;&#125; 0.333</span><br><span class="line">http_request_seconds&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.1&quot;,uri=&quot;/api/v1/user/login&quot;,quantile=&quot;0.9&quot;&#125; 0.281018368</span><br><span class="line">http_request_seconds&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.1&quot;,uri=&quot;/api/v1/user/login&quot;,quantile=&quot;0.99&quot;&#125; 0.297795584</span><br><span class="line">http_request_seconds_count&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.1&quot;,uri=&quot;/api/v1/user/login&quot;&#125; 11</span><br><span class="line">http_request_seconds_sum&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.1&quot;,uri=&quot;/api/v1/user/login&quot;&#125; 2.166</span><br><span class="line">http_request_seconds&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.1&quot;,uri=&quot;/api/v1/user/user-info&quot;,quantile=&quot;0.9&quot;&#125; 0.025690112</span><br><span class="line">http_request_seconds&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.1&quot;,uri=&quot;/api/v1/user/user-info&quot;,quantile=&quot;0.99&quot;&#125; 0.025690112</span><br><span class="line">http_request_seconds_count&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.1&quot;,uri=&quot;/api/v1/user/user-info&quot;&#125; 11</span><br><span class="line">http_request_seconds_sum&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.1&quot;,uri=&quot;/api/v1/user/user-info&quot;&#125; 0.211</span><br><span class="line">http_request_seconds&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.2&quot;,uri=&quot;/api/v1/user/login&quot;,quantile=&quot;0.9&quot;&#125; 0.360710144</span><br><span class="line">http_request_seconds&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.2&quot;,uri=&quot;/api/v1/user/login&quot;,quantile=&quot;0.99&quot;&#125; 0.37748736</span><br><span class="line">http_request_seconds_count&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.2&quot;,uri=&quot;/api/v1/user/login&quot;&#125; 11</span><br><span class="line">http_request_seconds_sum&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.2&quot;,uri=&quot;/api/v1/user/login&quot;&#125; 3.292</span><br><span class="line">http_request_seconds&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.2&quot;,uri=&quot;/api/v1/user/user-info&quot;,quantile=&quot;0.9&quot;&#125; 0.070254592</span><br><span class="line">http_request_seconds&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.2&quot;,uri=&quot;/api/v1/user/user-info&quot;,quantile=&quot;0.99&quot;&#125; 0.0786432</span><br><span class="line">http_request_seconds_count&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.2&quot;,uri=&quot;/api/v1/user/user-info&quot;&#125; 11</span><br><span class="line">http_request_seconds_sum&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.2&quot;,uri=&quot;/api/v1/user/user-info&quot;&#125; 0.552</span><br><span class="line"># HELP http_request_seconds_max  </span><br><span class="line"># TYPE http_request_seconds_max gauge</span><br><span class="line">http_request_seconds_max&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.3&quot;,uri=&quot;/api/v1/order/create&quot;&#125; 0.788</span><br><span class="line">http_request_seconds_max&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.3&quot;,uri=&quot;/api/v1/order/query-detail&quot;&#125; 0.079</span><br><span class="line">http_request_seconds_max&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.4&quot;,uri=&quot;/api/v1/order/create&quot;&#125; 0.948</span><br><span class="line">http_request_seconds_max&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.4&quot;,uri=&quot;/api/v1/order/query-detail&quot;&#125; 0.039</span><br><span class="line">http_request_seconds_max&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.1&quot;,uri=&quot;/api/v1/user/login&quot;&#125; 0.294</span><br><span class="line">http_request_seconds_max&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.1&quot;,uri=&quot;/api/v1/user/user-info&quot;&#125; 0.026</span><br><span class="line">http_request_seconds_max&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.2&quot;,uri=&quot;/api/v1/user/login&quot;&#125; 0.372</span><br><span class="line">http_request_seconds_max&#123;application=&quot;user-service&quot;,ip=&quot;10.100.0.2&quot;,uri=&quot;/api/v1/user/user-info&quot;&#125; 0.078</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>上面的数据乱了点，我们挑其中一个序列出来看：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/24.jpg" alt="24"></p>
+<p>我们可以看到，一个 summary 类型包含好几个时间序列，另外还有一个 gauge 类型的时间序列。</p>
+<p>我们分别来看：</p>
+<p>http_request_seconds{quantile&#x3D;”0.9”}，这个记录的是当前的 P90 数据</p>
+<p>http_request_seconds{quantile&#x3D;”0.99”}，这个记录的是当前的 P99 数据</p>
+<p>http_request_seconds_count：请求次数的总和，它和我们前面介绍 counter 类型的时候的 http_request_total 其实就是一个东西，记录累计访问次数。</p>
+<p>http_request_seconds_sum：响应时间的总和，单位是秒，对接口的每次访问都会增加这个值，也是一个 counter 类型。</p>
+<p>http_request_seconds_max：这个更好理解了，就是记录最大响应时间，它是 gauge 类型。</p>
+<h3 id="summary-数据计算细节"><a href="#summary-数据计算细节" class="headerlink" title="summary 数据计算细节"></a>summary 数据计算细节</h3><p>下面我们要来说一下 summary 的数据计算原理，这样有助于帮助我们理解它，并知道它适用的场景以及它的不足之处。</p>
+<p>其实我们只需要知道分位数是怎么计算的就行了，至于 http_request_seconds_count、http_request_seconds_sum 和 http_request_seconds_max，这个非常简单，我们前面已经介绍过 counter 和 gauge 了。</p>
+<p>下面介绍 P90 和 P99 是怎么计算出来的，也就是下面这两个数值怎么得出来：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">http_request_seconds&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.3&quot;,uri=&quot;/api/v1/order/create&quot;,quantile=&quot;0.9&quot;&#125; 0.788529152</span><br><span class="line">http_request_seconds&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.3&quot;,uri=&quot;/api/v1/order/create&quot;,quantile=&quot;0.99&quot;&#125; 0.788529152</span><br></pre></td></tr></table></figure>
+
+<p>对于每个 summary 时间序列，micrometer 内部维护了 3 个时间窗口，每个窗口 1 分钟，轮转使用。</p>
+<blockquote>
+<p>还记得我一开始做的配置吗？就是用在这个地方的。</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">management.metrics.distribution.buffer-length.[http.request]</span>=<span class="string">3</span></span><br><span class="line"><span class="attr">management.metrics.distribution.expiry.[http.request]</span>=<span class="string">1m</span></span><br></pre></td></tr></table></figure></blockquote>
+<p>在开始的时候，先使用 0 号窗口，每次接口请求的耗时数据都扔到这个窗口里面，如果此时 prometheus 来拉取数据，那就从 0 号窗口计算一下 P90 和 P99 返回。</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/17.jpg" alt="17"></p>
+<p>下一分钟的时候，使用 1 号窗口：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/18.jpg" alt="18"></p>
+<p>此时如果 prometheus 来拉取，那么 micrometer 会聚合 0 号窗口和 1 号窗口，计算出 P90 和 P99。</p>
+<p>再下一分钟，启用 2 号窗口：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/19.jpg" alt="19"></p>
+<p>再往后一分钟，就轮转重新使用 0 号窗口，先把里面的值清空再重新使用：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/20.jpg" alt="20"></p>
+<p>所以每次 prometheus 来拉取数据的时候，其实 micrometer 都是把 3 个窗口的数据进行聚合以后计算出 P90 和 P99 返回。</p>
+<p>这里需要非常注意的一个点，这个 summary 数据是客户端计算出来的，仅代表当前实例的数据，所以 <strong>summary 数据不能跨实例聚合</strong>。</p>
+<p>比如在机器 10.10.0.1 上，&#x2F;order&#x2F;query-order 的 P90 是 50ms，在 10.10.0.2 上，它的 P90 是150ms，我们是没法计算出这两个实例的综合 P90 的，想一想 P90 数据代表什么意思就知道为什么不能做到了。甚至它也不支持多个时间窗口聚合，比如计算某个接口 1h 的 P90。</p>
+<p>类似的问题，需要使用 histogram 类型进行解决。但是 summary 依然有它的实用之处，因为它相比 histogram，需要消耗的资源更少。</p>
+<h3 id="summary-类型数据制图"><a href="#summary-类型数据制图" class="headerlink" title="summary 类型数据制图"></a>summary 类型数据制图</h3><p>虽然说 summary 不能用来计算某个接口最近 1h 的 P90 这类需求，但是有一类需求通常用 summary 就能很好满足了，比如我们经常只需要关注最慢的 50 个接口：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">topk(50, </span><br><span class="line">    max by (uri)</span><br><span class="line">        (http_request_seconds&#123;application=&quot;order-service&quot;, quantile=&quot;0.9&quot;&#125;)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://assets.javadoop.com/blogimages/grafana/21.jpg" alt="21"></p>
+<p>因为我就两个接口，top 50 没什么意义，你们可以在实际的环境中试试。</p>
+<p>另外就是前面说过了，summary 额外提供了 count、sum、max 这三个数据，那么就能很好地满足诸如接口平均响应时间这种需求：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sum(increase(http_request_seconds_sum&#123;application=&#x27;order-service&#x27;&#125;[2m]))by(uri) </span><br><span class="line">/ sum(increase(http_request_seconds_count&#123;application=&#x27;order-service&#x27;&#125;[2m]))by(uri)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://assets.javadoop.com/blogimages/grafana/22.jpg" alt="22"></p>
+<p>这个非常简单，就是利用过去 2 分钟耗时的总和除以 2 分钟内的总访问次数。</p>
+<p>限于篇幅，max 这种 gauge 数据就不再展示了，过于简单。</p>
+<p>我们再简单讨论下滑动时间窗口的数量，以及每个窗口的长度怎么配置。</p>
+<p>如果我们想要快速检测到变化，那么可以考虑缩短每个窗口的时长，此时要相应增加窗口数量，以确保有足够的数据采样，比如：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">management.metrics.distribution.buffer-length</span>=<span class="string">5</span></span><br><span class="line"><span class="attr">management.metrics.distribution.expiry</span>=<span class="string">30s</span></span><br></pre></td></tr></table></figure>
+
+<p>而如果我们只是需要关注长期趋势，不需要对短期波动那么敏感，那么可以考虑降低窗口数量，增加窗口时长，比如：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">management.metrics.distribution.buffer-length</span>=<span class="string">2</span></span><br><span class="line"><span class="attr">management.metrics.distribution.expiry</span>=<span class="string">5m</span></span><br></pre></td></tr></table></figure>
+
+<p>由于我们减少了窗口数量，所以可以降低一些内存使用。</p>
+<p>再回头看 summary 数据类型，如果我们把下面这种 P90、P99 的时间序列看成是 gauge 类型，每个值都代表那个时间点的“状态”，是不是就容易理解多了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http_request_seconds&#123;application=&quot;order-service&quot;,ip=&quot;10.100.0.3&quot;,uri=&quot;/api/v1/order/create&quot;,quantile=&quot;0.9&quot;&#125; 0.788529152</span><br></pre></td></tr></table></figure>
+
+<h2 id="Histogram-类型"><a href="#Histogram-类型" class="headerlink" title="Histogram 类型"></a>Histogram 类型</h2><p>前面介绍完了 summary，我们再介绍 histogram 就会好理解很多，它就是用来解决 summary 的不足的，因为 summary 没法做多实例聚合和多时间窗口聚合。</p>
+<p>summary 主要使用的是客户端的资源来计算结果，而 histogram 使用的是服务端计算，客户端只负责上报数据。</p>
+<p>首先，我们来看它的配置：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 histogram 类型，而不是 summary 类型</span></span><br><span class="line"><span class="attr">management.metrics.distribution.percentiles-histogram.[http.server.requests]</span>=<span class="string">true</span></span><br><span class="line"><span class="attr">management.metrics.distribution.minimum-expected-value.[http.server.requests]</span>=<span class="string">200ms</span></span><br><span class="line"><span class="attr">management.metrics.distribution.maximum-expected-value.[http.server.requests]</span>=<span class="string">1s</span></span><br></pre></td></tr></table></figure>
+
+<p>根据这个配置，我使用下面这行测试代码跑一些测试数据：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Metrics.timer(<span class="string">&quot;http.request&quot;</span>, <span class="string">&quot;uri&quot;</span>, <span class="string">&quot;/api/v1/user/test&quot;</span>)</span><br><span class="line">  .record(RandomUtils.nextInt(<span class="number">300</span>, <span class="number">2000</span>), TimeUnit.MILLISECONDS);</span><br></pre></td></tr></table></figure>
+
+<p>这里模拟接口 &#x2F;api&#x2F;v1&#x2F;user&#x2F;test 的 RT 在 300ms-2000ms 之间，我们跑 100 次得到下面的结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"># HELP http_request_seconds  </span><br><span class="line"># TYPE http_request_seconds histogram</span><br><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;0.2&quot;&#125; 0</span><br><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;0.20132659&quot;&#125; 0</span><br><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;0.223696211&quot;&#125; 0</span><br><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;0.246065832&quot;&#125; 0</span><br><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;0.268435456&quot;&#125; 0</span><br><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;0.357913941&quot;&#125; 6 # 有 6 次请求低于 357ms</span><br><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;0.447392426&quot;&#125; 10 # 有 10 次请求低于 447ms</span><br><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;0.536870911&quot;&#125; 14</span><br><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;0.626349396&quot;&#125; 21</span><br><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;0.715827881&quot;&#125; 25</span><br><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;0.805306366&quot;&#125; 29</span><br><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;0.894784851&quot;&#125; 33</span><br><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;0.984263336&quot;&#125; 38</span><br><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;1.0&quot;&#125; 39 # 有 39 次请求低于 1s</span><br><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;+Inf&quot;&#125; 100</span><br><span class="line">http_request_seconds_count&#123;uri=&quot;/api/v1/user/test&quot;&#125; 100</span><br><span class="line">http_request_seconds_sum&#123;uri=&quot;/api/v1/user/test&quot;&#125; 119.601</span><br><span class="line"># HELP http_request_seconds_max  </span><br><span class="line"># TYPE http_request_seconds_max gauge</span><br><span class="line">http_request_seconds_max&#123;uri=&quot;/api/v1/user/test&quot;&#125; 1.997</span><br></pre></td></tr></table></figure>
+
+<p>这里设置了 15 个桶，le 分别为 0.2, 0.20132659, 0.223696211, …, 1.0, +Inf。</p>
+<p>le 是 <strong>l</strong>ess than or <strong>e</strong>qual to 的缩写，每个桶是一个 counter，用于记录 RT 小于等于该值的数量。比如某次请求的 RT 是 500ms，那么前面的几个桶不用动，从 le&#x3D;”0.536870911” 开始的后面所有的桶，都需要增加 1。</p>
+<p>第一个桶的 le 是 “0.2”, 最后两个桶的 le 是 “1.0” 和 “+Inf”，这个是因为我们配置了 minimum 和 maximum，这两个值会影响数据结果的精度以及桶的数量。</p>
+<p>下面我简单列一下 minimum 和 maximum 的值，对桶数量的影响：</p>
+<p><img src="https://assets.javadoop.com/blogimages/grafana/23.jpg" alt="23"></p>
+<p>如果你的时间序列非常多的话，是需要考虑它们对服务端的性能消耗的，比如上面这个图中 200ms-1s 的设置只需要 15 个桶就可以了，但是使用 1ms-1s 的设置，需要 48 个桶，</p>
+<p>对于单个桶内部，prometheus 使用<strong>线性插值</strong>的方式来处理，举个例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;0.894784851&quot;&#125; 33</span><br><span class="line">http_request_seconds_bucket&#123;uri=&quot;/api/v1/user/test&quot;,le=&quot;0.984263336&quot;&#125; 38</span><br></pre></td></tr></table></figure>
+
+<p>我从上面取了两行相邻的数据下来，根据前面说的，我们可以知道，有 38 - 33 &#x3D; 5 个请求落在了 (0.894784851, 0.984263336] 之间，但是具体落在哪里，这个信息 prometheus 是不知道的，对于 prometheus 来说，它是处理成让这 5 个值均匀分布在这个区间里面，这样就可以算 percentile 数据了。</p>
+<p>到这里，基本上就清楚了 histogram 计算分位数的原理了，它就是根据各个桶里面的样本数量来计算的。</p>
+<h3 id="Histogram-类型制图"><a href="#Histogram-类型制图" class="headerlink" title="Histogram 类型制图"></a>Histogram 类型制图</h3><p>从前面的例子中，我们可以看到 histogram 和 summary 一样，也包含了下面几个指标：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">http_request_seconds_count&#123;uri=&quot;/api/v1/user/test&quot;&#125; 100</span><br><span class="line">http_request_seconds_sum&#123;uri=&quot;/api/v1/user/test&quot;&#125; 119.601</span><br><span class="line"></span><br><span class="line">http_request_seconds_max&#123;uri=&quot;/api/v1/user/test&quot;&#125; 1.997</span><br></pre></td></tr></table></figure>
+
+<p>它们的命名规则是一致的，这里也是两个 counter 和一个 gauge，所以诸如接口 QPS、平均访问时间、最大访问时间这类图，能非常容易做出来，这里就不再演示了。</p>
+<p>我们需要了解的，无非就是怎么做分位数图就可以了，比如 P95:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">histogram_quantile(0.95, </span><br><span class="line">   sum(rate(http_request_seconds_bucket[5m])) by (le, uri)</span><br><span class="line">) * 1000</span><br></pre></td></tr></table></figure>
+
+<p>这里先使用 sum 函数根据 le 和 uri 先聚合一下，然后在这个基础上取 P95，这样就能得到各个接口的 P95 了。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本文主要源自于团队内技术分享，希望这类文章可以帮助你解决一些日常碰到的疑惑。</p>
+<p>对于业务开发者来说，平时更多的只是看看监控大盘，但是不太了解内部机制，很多时候可能想知道这个图表的数据是怎么算出来的，或者想要自己实现一些业务监控，希望本文能提供一些帮助。</p>
+<p>如果只是为了配置各种中间件的监控图表，从 <a target="_blank" rel="noopener" href="https://grafana.com/grafana/dashboards/">Grafana 社区</a>就可以拿到大量的模板，而不需要大家自己重复造轮子。</p>
+<p>欢迎大家留言区讨论交流，我会尽量解答大家的疑问。</p>
+<p>（全文完）</p>
+	  
+	</div>
+
+	<!-- recommended posts -->
+	
+
+	<div>
+  	<center>
+	<div class="pagination">
+<ul class="pagination">
+	 
+				
+		<li class="prev"><a href="/2025/03/11/llm-agent-java/" class="alignleft prev"><i class="fa fa-arrow-circle-o-left"></i>Prev</a></li>
+  		
+
+        <li><a href="/archives"><i class="fa fa-archive"></i>Archive</a></li>
+
+		
+          <li class="next"><a href="/2024/02/04/zgc/" class="alignright next">Next<i class="fa fa-arrow-circle-o-right"></i></a></li>
+        
+	
+</ul>
+</div>
+
+    </center>
+	</div>
+
+    <!-- share -->
+    
+        
+    <div class="bdsharebuttonbox">
+        <a href="#" class="bds_more" data-cmd="more"></a>
+        <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+        <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+        <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+        <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+        <a href="#" class="bds_linkedin" data-cmd="linkedin" title="分享到linkedin"></a>
+        <a href="#" class="bds_evernotecn" data-cmd="evernotecn" title="分享到印象笔记"></a>
+        <a href="#" class="bds_youdao" data-cmd="youdao" title="分享到有道云笔记"></a>
+        <a href="#" class="bds_copy" data-cmd="copy" title="分享到复制网址"></a>
+    </div>
+    <script>
+        window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"24"},"share":{}};
+        with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+    </script>
+
+
+        
+
+    
+	
+	<!-- comment -->
+	
+<section id="comment">
+  <h2 class="title">Comments</h2>
+  
+     <div id="gitalk-container"></div>
+	 <script type="text/javascript">
+	 // 拼接 body 内容
+	    const decodedPageUrl = decodeURI(location.href)
+		const issueBody = `${decodedPageUrl} \n\n Prometheus、Grafana `;
+        const gitalk = new Gitalk({
+           clientID: 'Ov23liTbPXkD3NfIs0KX',
+           clientSecret: '4e727600e55d74a25577449de551363030ee5a0e',
+           repo: 'pistachioss.github.io',      // The repository of store comments,
+           owner: 'pistachioss',
+           admin: ['pistachioss'],
+           id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50 
+		   title: 'Prometheus 数据类型解析与 Grafana 制图', // 使用文章标题作为 Issue 的标题
+		   body: issueBody, // 拼接好的 body
+		   distractionFreeMode: false  // Facebook-like distraction free mode
+         });
+
+         gitalk.render('gitalk-container');
+	 </script>
+  
+</section>
+
+
+	</div> <!-- col-md-9/col-md-12 -->
+		
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2024-10-09 
+	</div>
+	
+
+	<!-- categories -->
+    
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
+    <ul id="categorys" class="tag_box list-unstyled collapse in">
+          
+  <li>
+    <li><a href="/categories/%E7%9B%91%E6%8E%A7/">监控<span>1</span></a></li>
+  </li>
+
+    </ul>
+	</div>
+	
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/wiki/">wiki<span>16</span></a></li>
+
+    </ul>
+	</div>
+	
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	   <a data-toggle="collapse" data-target="#toc"><i class="fa fa-bars"></i></a>
+	   <div id="toc" class="toc collapse in">
+			<ol class="toc-article"><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#%E6%95%B0%E6%8D%AE%E4%B8%8A%E6%8A%A5"><span class="toc-article-text">数据上报</span></a></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E8%A7%A3%E9%87%8A"><span class="toc-article-text">基本概念解释</span></a></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#Counter-%E7%B1%BB%E5%9E%8B"><span class="toc-article-text">Counter 类型</span></a><ol class="toc-article-child"><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#rate-%E5%87%BD%E6%95%B0%E5%88%B6%E5%9B%BE"><span class="toc-article-text">rate 函数制图</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#irate-%E5%87%BD%E6%95%B0%E5%88%B6%E5%9B%BE"><span class="toc-article-text">irate 函数制图</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#increase-%E5%87%BD%E6%95%B0%E5%88%B6%E5%9B%BE"><span class="toc-article-text">increase 函数制图</span></a></li></ol></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#Gauge-%E7%B1%BB%E5%9E%8B"><span class="toc-article-text">Gauge 类型</span></a></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#Summary-%E7%B1%BB%E5%9E%8B"><span class="toc-article-text">Summary 类型</span></a><ol class="toc-article-child"><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#summary-%E6%95%B0%E6%8D%AE%E8%AE%A1%E7%AE%97%E7%BB%86%E8%8A%82"><span class="toc-article-text">summary 数据计算细节</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#summary-%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%88%B6%E5%9B%BE"><span class="toc-article-text">summary 类型数据制图</span></a></li></ol></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#Histogram-%E7%B1%BB%E5%9E%8B"><span class="toc-article-text">Histogram 类型</span></a><ol class="toc-article-child"><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#Histogram-%E7%B1%BB%E5%9E%8B%E5%88%B6%E5%9B%BE"><span class="toc-article-text">Histogram 类型制图</span></a></li></ol></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-article-text">小结</span></a></li></ol>
+		</div>
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+	</div>
+		
+
+</div><!-- row -->
+
+
+
+
+    </div>
+  </div>
+  <div class="container-narrow">
+    <footer> <p>
+  &copy; 2025 shineXGO
+  
+      with help from <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a>. Theme by <a target="_blank" rel="noopener" href="http://github.com/wzpan/hexo-theme-freemind/">Freemind</a>.    
+</p> </footer>
+  </div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>▲</span> 
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+
+<!-- syntax highlighting -->
+
+
+</body>
+</html>

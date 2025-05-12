@@ -1,0 +1,338 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Java | pistachioss</title>
+  <meta name="author" content="shineXGO">
+  
+  <meta name="description" content="pistachioss delicious">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="pistachioss"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="pistachioss" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/themes/cerulean.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight-default.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/comment.css" media="screen" type="text/css">
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.9/es5-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-sham.min.js"></script>
+  <![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+  
+  
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+	<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  
+  <!-- analytics -->
+  
+
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <nav id="main-nav" class="navbar navbar-inverse navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+	<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+       <a class="navbar-brand" href="/">pistachioss</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="about me">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+    <div class="content">
+      
+
+<!-- title -->
+<div class="page-header page-header-inverse ">
+  <h1 class="archive-title-category title title-inverse ">Java</h1>
+</div>
+
+<div class="row page">
+  <!-- cols -->
+  
+  <div class="col-md-9">
+	
+
+	  <div id="top_search"></div>
+
+      
+         <!-- display as entry -->
+	     <div class="mypage">
+	       
+		     
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2024-02-04 </div>
+			<div class="article-title"><a href="/2024/02/04/zgc/" title="ZGC">ZGC 介绍</a></div>
+		</h3>
+	
+
+
+		     
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>ZGC 于 2017 由 Oracle 贡献给社区，在 JDK 11 及以上版本的各种 release 中几乎都包含该 GC。</p>
+<p><a target="_blank" rel="noopener" href="https://wiki.openjdk.org/display/shenandoah/Main">Shenandoah</a> 是 Red Hat 主导的另一个低延迟的 GC，也承诺 pause time 低于 10ms，这两个项目目前处于竞争状态。该 GC 在 Oracle JDK 中不存在，但是在其他几个主流厂商的 JDK 中都包含，具体内容请参考项目主页。</p>
+<h3 id="ZGC-的-“Z”-代表什么？"><a href="#ZGC-的-“Z”-代表什么？" class="headerlink" title="ZGC 的 “Z” 代表什么？"></a>ZGC 的 “Z” 代表什么？</h3><p>ZGC 只是一个名字，<strong>Z</strong> 不代表任何含义，不要把它理解为最后一代 GC，随着大家的探索，技术总是存在更优解。</p>
+<p>It doesn’t stand for anything, ZGC is just a name. It was originally inspired by, or a homage to, ZFS (the filesystem) which in many ways was revolutionary when it first came out. Originally, ZFS was an acronym for “Zettabyte File System”, but that meaning was abandoned and it was later said to not stand for anything. It’s just a name. See <a target="_blank" rel="noopener" href="https://web.archive.org/web/20170223222515/https://blogs.oracle.com/bonwick/en_US/entry/you_say_zeta_i_say">Jeff Bonwick’s Blog</a> for more details.</p>
+<h3 id="ZGC-的读法，”zed-gee-see”-or-“zee-gee-see”"><a href="#ZGC-的读法，”zed-gee-see”-or-“zee-gee-see”" class="headerlink" title="ZGC 的读法，”zed gee see” or “zee gee see”?"></a>ZGC 的读法，”zed gee see” or “zee gee see”?</h3><p>怎么读都行，无所谓。</p>
+<p>There’s no preferred pronunciation, both are fine.</p>
+<h2 id="ZGC-简单介绍"><a href="#ZGC-简单介绍" class="headerlink" title="ZGC 简单介绍"></a>ZGC 简单介绍</h2>
+	
+	</div>
+  <a type="button" href="/2024/02/04/zgc/#more" class="btn btn-default more">Read More</a>
+</div>
+
+	       
+		     
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2021-06-14 </div>
+			<div class="article-title"><a href="/2021/06/14/Threads-And-Locks-md/" title="Threads-And-Locks">深入分析 java 8 编程语言规范：Threads and Locks</a></div>
+		</h3>
+	
+
+
+		     
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>在 java 并发编程中，线程和锁永远是最重要的概念。语言规范虽然是规范描述，但是其中也有非常多的知识和最佳实践是值得学习的，相信这篇文章还是可以给很多读者提供学习参考的。</p>
+<p>本文主要是<strong>翻译 + 解释</strong> Oracle《<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/index.html">The Java Language Specification, Java SE 8 Edition</a>》的第17章《<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html">Threads and Locks</a>》，原文大概30页pdf，我加入了很多自己的理解，希望能帮大家把规范看懂，并且从中得到很多你一直想要知道但是还不知道的知识。</p>
+<p>注意，本文在说 Java 语言规范，不是 JVM 规范，JVM 的实现需要满足语言规范中定义的内容，但是具体的实现细节由各 JVM 厂商自己来决定。所以，语言规范要尽可能严谨全面，但是也不能限制过多，不然会限制 JVM 厂商对很多细节进行性能优化。</p>
+<p>我能力有限，虽然已经很用心了，但有些地方我真的不懂，我已经在文中标记出来了。</p>
+<p>建议分 3 部分阅读。</p>
+<ol>
+<li>将 17.1、17.2、17.3 一起阅读，这里关于线程中的 wait、notify、中断有很多的知识；</li>
+<li>17.4 的内存模型比较长，重排序和 happens-before 关系是重点；</li>
+<li>剩下的 final、字分裂、double和long的非原子问题，这些都是相对独立的 topic。</li>
+</ol>
+<div style="text-align: center; font-size: 24px; font-weight: bold">Chapter 17. Threads and Locks</div>
+
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>在 java 中，线程由 Thread 类表示，用户创建线程的<strong>唯一方式</strong>是创建 Thread 类的一个实例，每一个线程都和这样的一个实例关联。在相应的 Thread 实例上调用 start() 方法将启动一个线程。</p>
+<p>如果没有正确使用同步，线程表现出来的现象将会是令人疑惑的、违反直觉的。这个章节将描述多线程编程的语义问题，包括一系列的规则，这些规则定义了<strong>在多线程环境中线程对共享内存中值的修改是否对其他线程立即可见</strong>。java编程语言内存模型定义了统一的内存模型用于屏蔽不同的硬件架构，在没有歧义的情况下，下面将用<strong>内存模型</strong>表示这个概念。</p>
+	
+	</div>
+  <a type="button" href="/2021/06/14/Threads-And-Locks-md/#more" class="btn btn-default more">Read More</a>
+</div>
+
+	       
+	     </div>
+	     <div>
+	       <center>
+	         <div class="pagination">
+<ul class="pagination">
+	 
+</ul>
+</div>
+
+	       </center>
+	     </div>	
+      
+
+</div> <!-- col-md-9/col-md-12 -->
+
+
+<div class="col-md-3">
+	<div id="sidebar">
+	
+			
+  <div id="site_search">
+   <div class="form-group">
+    <input type="text" id="local-search-input" name="q" results="0" placeholder="Search" class="st-search-input st-default-search-input form-control"/>
+   </div>  
+  <div id="local-search-result"></div>
+  </div>
+
+
+		
+			<div class="widget">
+    
+</div>
+
+		
+			
+	<div class="widget">
+		<h4>Categories</h4>
+		<ul class="tag_box inline list-unstyled">
+		
+			<li><a href="/categories/Java/">Java<span>2</span></a></li>
+		
+			<li><a href="/categories/Spring/">Spring<span>1</span></a></li>
+		
+			<li><a href="/categories/blog/">blog<span>1</span></a></li>
+		
+			<li><a href="/categories/llm/">llm<span>1</span></a></li>
+		
+			<li><a href="/categories/netty/">netty<span>1</span></a></li>
+		
+			<li><a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程<span>9</span></a></li>
+		
+			<li><a href="/categories/%E7%9B%91%E6%8E%A7/">监控<span>1</span></a></li>
+		
+		</ul>
+	</div>
+
+		
+			
+	<div class="widget">
+		<h4>Tag Cloud</h4>
+		<ul class="tag_box inline list-unstyled">		
+		
+			<li><a href="/tags/wiki/">wiki<span>16</span></a></li>
+		
+		 
+		</ul>
+	</div>
+
+
+		
+			
+<div class="widget">
+  <h4>Recent Posts</h4>
+  <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2025/03/11/llm-agent-java/"  title="基于springboot开发agent" ><i class="fa fa-file-o"></i>llm-agent工具开发</a>
+      </li>
+    
+      <li>
+        <a href="/2024/10/09/prometheus-grafana/"  title="Prometheus、Grafana " ><i class="fa fa-file-o"></i>Prometheus 数据类型解析与 Grafana 制图</a>
+      </li>
+    
+      <li>
+        <a href="/2024/02/04/zgc/"  title="ZGC" ><i class="fa fa-file-o"></i>ZGC 介绍</a>
+      </li>
+    
+      <li>
+        <a href="/2022/06/08/spring-ioc/"  title="Spring启动" ><i class="fa fa-file-o"></i>Spring IOC 容器源码分析</a>
+      </li>
+    
+      <li>
+        <a href="/2021/06/14/Threads-And-Locks-md/"  title="Threads-And-Locks" ><i class="fa fa-file-o"></i>深入分析 java 8 编程语言规范：Threads ...</a>
+      </li>
+    
+  </ul>
+</div>
+
+		
+	</div> <!-- sidebar -->
+</div> <!-- col-md-3 -->
+
+
+
+
+    </div>
+  </div>
+  <div class="container-narrow">
+    <footer> <p>
+  &copy; 2025 shineXGO
+  
+      with help from <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a>. Theme by <a target="_blank" rel="noopener" href="http://github.com/wzpan/hexo-theme-freemind/">Freemind</a>.    
+</p> </footer>
+  </div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>▲</span> 
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+
+<!-- syntax highlighting -->
+
+
+</body>
+</html>

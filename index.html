@@ -1,0 +1,697 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>pistachioss</title>
+  <meta name="author" content="shineXGO">
+  
+  <meta name="description" content="pistachioss delicious">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="pistachioss"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="pistachioss" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/themes/cerulean.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight-default.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/comment.css" media="screen" type="text/css">
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.9/es5-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-sham.min.js"></script>
+  <![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+  
+  
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+	<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  
+  <!-- analytics -->
+  
+
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <nav id="main-nav" class="navbar navbar-inverse navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+	<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+       <a class="navbar-brand" href="/">pistachioss</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="about me">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+    <div class="content">
+      <div class="page-header page-header-inverse ">
+  <h1 class="title title-inverse ">zz</h1>
+</div>
+
+<div class="row page">
+
+	
+	<div class="col-md-9">
+	
+
+		
+<div class="slogan">
+      <i class="fa fa-heart"></i>
+      Writing codes &amp; growing tao.
+</div>
+
+
+		<div id="top_search"></div>
+		<div class="mypage">
+		
+		<!-- title and entry -->
+        <!-- render top articles firstly -->
+        
+		
+            
+		
+            
+		
+            
+		
+            
+		
+            
+		
+            
+		
+            
+		
+            
+		
+            
+		
+            
+		
+            
+		
+            
+		
+            
+		
+            
+		
+            
+		
+            
+		
+        
+        <!-- render other articles -->
+        
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2025-03-11 </div>
+			<div class="article-title"><a href="/2025/03/11/llm-agent-java/" title="基于springboot开发agent">llm-agent工具开发</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>开发一个基于 Spring Boot 和 Vue 的大模型 Agent，按照以下提示开发，最后你需要尽量去优化我没想到的地方，优化页面，让大模型Agent功能和市面上通用智能体差不多</p>
+<h2 id="后端-Spring-Boot-编码提示词示例："><a href="#后端-Spring-Boot-编码提示词示例：" class="headerlink" title="后端 (Spring Boot) 编码提示词示例："></a>后端 (Spring Boot) 编码提示词示例：</h2><h3 id="建基础项目结构："><a href="#建基础项目结构：" class="headerlink" title="建基础项目结构："></a>建基础项目结构：</h3><ul>
+<li>“为我生成一个 Spring Boot 3.x 项目的骨架，包含 Web, Lombok, Spring Data JPA (使用 H2 内存数据库作为示例) 和 Spring Security (基础认证) 的依赖。项目使用 Maven 管理，Java 版本为 17。”</li>
+<li>“请为这个 Spring Boot 项目创建一个基础的目录结构，包括 controller, service, repository, model, config, dto 等包。”</li>
+</ul>
+<h3 id="义数据模型-Entity-DTO-："><a href="#义数据模型-Entity-DTO-：" class="headerlink" title="义数据模型 (Entity&#x2F;DTO)："></a>义数据模型 (Entity&#x2F;DTO)：</h3><ul>
+<li>“为一个大模型 Agent 创建一个 Spring Boot JPA 实体类 <code>AgentTask</code>，它应该包含以下字段：<code>id</code> (Long, 主键, 自增), <code>taskName</code> (String, 非空), <code>prompt</code> (String, 文本类型), <code>status</code> (枚举类型 <code>TaskStatus</code>: PENDING, RUNNING, COMPLETED, FAILED), <code>createdAt</code> (LocalDateTime, 自动生成创建时间), <code>updatedAt</code> (LocalDateTime, 自动生成更新时间)。请同时生成相应的 Lombok注解 (<code>@Data</code>, <code>@Entity</code> 等)。”</li>
+<li>“为 <code>AgentTask</code> 实体创建一个对应的 DTO 类 <code>AgentTaskDTO</code>，包含 <code>id</code>, <code>taskName</code>, <code>prompt</code>, <code>status</code> 字段。并为 <code>AgentTask</code> 和 <code>AgentTaskDTO</code> 之间编写一个 MapStruct 的映射接口。”</li>
+</ul>
+<h3 id="建-Repository-层："><a href="#建-Repository-层：" class="headerlink" title="建 Repository 层："></a>建 Repository 层：</h3><ul>
+<li>“为 <code>AgentTask</code> 实体创建一个 Spring Data JPA Repository 接口 <code>AgentTaskRepository</code>，继承自 <code>JpaRepository</code>。并添加一个根据 <code>status</code> 查询任务列表的方法。”</li>
+</ul>
+<h3 id="Service-层："><a href="#Service-层：" class="headerlink" title="Service 层："></a>Service 层：</h3><ul>
+<li><p>“创建一个 Spring Boot Service 类 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AgentTaskService</span><br></pre></td></tr></table></figure>
+
+<p>，注入 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AgentTaskRepository</span><br></pre></td></tr></table></figure>
+
+<p>。实现以下方法：</p>
+<ul>
+<li><code>createTask(AgentTaskDTO taskDTO)</code>: 创建一个新的 Agent 任务。</li>
+<li><code>getTaskById(Long id)</code>: 根据 ID 获取任务详情。</li>
+<li><code>getAllTasks()</code>: 获取所有任务列表。</li>
+<li><code>updateTaskStatus(Long id, TaskStatus status)</code>: 更新任务状态。</li>
+<li><code>deleteTask(Long id)</code>: 删除任务。”</li>
+</ul>
+</li>
+<li><p>“在 <code>AgentTaskService</code> 的 <code>createTask</code> 方法中，添加逻辑：在保存任务到数据库之前，记录一条 info 级别的日志，内容为 ‘Creating new agent task with name: [taskName]’。”</p>
+</li>
+</ul>
+	
+	</div>
+  <a type="button" href="/2025/03/11/llm-agent-java/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2024-10-09 </div>
+			<div class="article-title"><a href="/2024/10/09/prometheus-grafana/" title="Prometheus、Grafana ">Prometheus 数据类型解析与 Grafana 制图</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>阅读本文的前提是你分别知道 Grafana 和 Prometheus 是什么，要有一些最基本的了解。</p>
+<p>本文会用一些比较接近实际情况的例子来帮助初学者理解 Prometheus 的数据类型，读完本文，你应该能充分了解 Prometheus 中主要数据类型的工作原理，以及能根据自己的需要使用合适的函数配置出相应的 Grafana 图表。</p>
+<p>如果你没有环境进行实操，建议自己用 docker 搞一下，花点时间准备环境还是值得投入的。所以为了写本文，我提前写了一篇非常简单的文章，介绍如何搭建环境，大家可以参考。</p>
+<h2 id="数据上报"><a href="#数据上报" class="headerlink" title="数据上报"></a>数据上报</h2><p>Prometheus 和一般的 APM 工具不一样，它采用的是由 server 端主动 pull 的交互模型，就是你准备好本地数据，然后在 Prometheus server 上配置好数据所在的地址，接下来就是等 Prometheus 来主动、定期拉取数据。</p>
+<p>想要看到本地数据非常容易，对于 Spring Boot 应用来说，通常是访问 &#x2F;actuator&#x2F;prometheus 就可以了，当然不同的配置可能导致不同的地址，这里就不详述了。接口数据是纯文本的，采用 OpenMetrics 标准来组织内容。</p>
+<p>内容类似如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># HELP executor_queued_tasks The approximate number <span class="keyword">of</span> tasks that <span class="keyword">are</span> queued <span class="keyword">for</span> execution</span><br><span class="line"># TYPE executor_queued_tasks gauge</span><br><span class="line">executor_queued_tasks&#123;name<span class="operator">=</span>&quot;applicationTaskExecutor&quot;&#125; <span class="number">0.0</span></span><br><span class="line"># HELP http_request_total  </span><br><span class="line"># TYPE http_request_total counter</span><br><span class="line">http_request_total&#123;application<span class="operator">=</span>&quot;order-service&quot;,ip<span class="operator">=</span>&quot;10.100.0.3&quot;,uri<span class="operator">=</span>&quot;/api/v1/order/crate&quot;&#125; <span class="number">2494624.0</span></span><br><span class="line">http_request_total&#123;application<span class="operator">=</span>&quot;order-service&quot;,ip<span class="operator">=</span>&quot;10.100.0.3&quot;,uri<span class="operator">=</span>&quot;/api/v1/order/query-detail&quot;&#125; <span class="number">2.1704952E7</span></span><br></pre></td></tr></table></figure>
+
+<p># 开头的行主要描述这个指标是干啥的，以及定义它的数据类型，然后紧跟着时间序列以及它们当前的值。</p>
+<blockquote>
+<p>这个 OpenMetrics 标准最早就是 Prometheus 的内部数据格式规范，但是后来想把这个数据标准推广出来，让其他的 apm 工具可以直接使用，所以成立了一个项目单独发展，但是最新消息是，OpenMetrics 又合并回了 Prometheus 项目。</p>
+</blockquote>
+	
+	</div>
+  <a type="button" href="/2024/10/09/prometheus-grafana/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2024-02-04 </div>
+			<div class="article-title"><a href="/2024/02/04/zgc/" title="ZGC">ZGC 介绍</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>ZGC 于 2017 由 Oracle 贡献给社区，在 JDK 11 及以上版本的各种 release 中几乎都包含该 GC。</p>
+<p><a target="_blank" rel="noopener" href="https://wiki.openjdk.org/display/shenandoah/Main">Shenandoah</a> 是 Red Hat 主导的另一个低延迟的 GC，也承诺 pause time 低于 10ms，这两个项目目前处于竞争状态。该 GC 在 Oracle JDK 中不存在，但是在其他几个主流厂商的 JDK 中都包含，具体内容请参考项目主页。</p>
+<h3 id="ZGC-的-“Z”-代表什么？"><a href="#ZGC-的-“Z”-代表什么？" class="headerlink" title="ZGC 的 “Z” 代表什么？"></a>ZGC 的 “Z” 代表什么？</h3><p>ZGC 只是一个名字，<strong>Z</strong> 不代表任何含义，不要把它理解为最后一代 GC，随着大家的探索，技术总是存在更优解。</p>
+<p>It doesn’t stand for anything, ZGC is just a name. It was originally inspired by, or a homage to, ZFS (the filesystem) which in many ways was revolutionary when it first came out. Originally, ZFS was an acronym for “Zettabyte File System”, but that meaning was abandoned and it was later said to not stand for anything. It’s just a name. See <a target="_blank" rel="noopener" href="https://web.archive.org/web/20170223222515/https://blogs.oracle.com/bonwick/en_US/entry/you_say_zeta_i_say">Jeff Bonwick’s Blog</a> for more details.</p>
+<h3 id="ZGC-的读法，”zed-gee-see”-or-“zee-gee-see”"><a href="#ZGC-的读法，”zed-gee-see”-or-“zee-gee-see”" class="headerlink" title="ZGC 的读法，”zed gee see” or “zee gee see”?"></a>ZGC 的读法，”zed gee see” or “zee gee see”?</h3><p>怎么读都行，无所谓。</p>
+<p>There’s no preferred pronunciation, both are fine.</p>
+<h2 id="ZGC-简单介绍"><a href="#ZGC-简单介绍" class="headerlink" title="ZGC 简单介绍"></a>ZGC 简单介绍</h2>
+	
+	</div>
+  <a type="button" href="/2024/02/04/zgc/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2022-06-08 </div>
+			<div class="article-title"><a href="/2022/06/08/spring-ioc/" title="Spring启动">Spring IOC 容器源码分析</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>Spring 最重要的概念是 IOC 和 AOP，本篇文章其实就是要来分析下 Spring 的 IOC 容器。既然平时都要用到 Spring，怎么可以不好好了解 Spring 呢？阅读本文并不能让成为 Spring 专家，不过一定有助于理解 Spring 的很多概念，帮助排查应用中和 Spring 相关的一些问题。</p>
+<p>本文采用的源码版本是 4.3.11.RELEASE，算是 5.0.x 前比较新的版本了。为了降低难度，本文所说的所有的内容都是基于 xml 的配置的方式，实际使用已经很少人这么做了，至少不是纯 xml 配置，不过从理解源码的角度来看用这种方式来说无疑是最合适的。</p>
+<p>阅读建议：至少需要知道怎么配置 Spring，了解 Spring 中的各种概念，少部分内容假设我使用过 SpringMVC。本文要说的 IOC 总体来说有两处地方最重要，一个是创建 Bean 容器，一个是初始化 Bean，如果自己觉得一次性看完本文压力有点大，那么可以按这个思路分两次消化。不一定对 Spring 容器的源码感兴趣，也许附录部分介绍的知识对读者有些许作用。</p>
+<p>希望通过本文可以让自己不惧怕阅读 Spring 源码，也希望能反馈表述错误或不合理的地方。</p>
+<h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>先看下最基本的启动 Spring 容器的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">    <span class="type">ApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ClassPathXmlApplicationContext</span>(<span class="string">&quot;classpath:applicationfile.xml&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上代码就可以利用配置文件来启动一个 Spring 容器了，请使用 maven 的小伙伴直接在 dependencies 中加上以下依赖即可，个人比较反对那些不知道要添加什么依赖，然后把 Spring 的所有相关的东西都加进来的方式。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">  &lt;groupId&gt;org.springframework&lt;/groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;spring-context&lt;/artifactId&gt;</span><br><span class="line">  &lt;version&gt;<span class="number">4.3</span><span class="number">.11</span>.RELEASE&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>spring-context 会自动将 spring-core、spring-beans、spring-aop、spring-expression 这几个基础 jar 包带进来。</p>
+</blockquote>
+	
+	</div>
+  <a type="button" href="/2022/06/08/spring-ioc/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2021-06-14 </div>
+			<div class="article-title"><a href="/2021/06/14/Threads-And-Locks-md/" title="Threads-And-Locks">深入分析 java 8 编程语言规范：Threads and Locks</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>在 java 并发编程中，线程和锁永远是最重要的概念。语言规范虽然是规范描述，但是其中也有非常多的知识和最佳实践是值得学习的，相信这篇文章还是可以给很多读者提供学习参考的。</p>
+<p>本文主要是<strong>翻译 + 解释</strong> Oracle《<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/index.html">The Java Language Specification, Java SE 8 Edition</a>》的第17章《<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html">Threads and Locks</a>》，原文大概30页pdf，我加入了很多自己的理解，希望能帮大家把规范看懂，并且从中得到很多你一直想要知道但是还不知道的知识。</p>
+<p>注意，本文在说 Java 语言规范，不是 JVM 规范，JVM 的实现需要满足语言规范中定义的内容，但是具体的实现细节由各 JVM 厂商自己来决定。所以，语言规范要尽可能严谨全面，但是也不能限制过多，不然会限制 JVM 厂商对很多细节进行性能优化。</p>
+<p>我能力有限，虽然已经很用心了，但有些地方我真的不懂，我已经在文中标记出来了。</p>
+<p>建议分 3 部分阅读。</p>
+<ol>
+<li>将 17.1、17.2、17.3 一起阅读，这里关于线程中的 wait、notify、中断有很多的知识；</li>
+<li>17.4 的内存模型比较长，重排序和 happens-before 关系是重点；</li>
+<li>剩下的 final、字分裂、double和long的非原子问题，这些都是相对独立的 topic。</li>
+</ol>
+<div style="text-align: center; font-size: 24px; font-weight: bold">Chapter 17. Threads and Locks</div>
+
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>在 java 中，线程由 Thread 类表示，用户创建线程的<strong>唯一方式</strong>是创建 Thread 类的一个实例，每一个线程都和这样的一个实例关联。在相应的 Thread 实例上调用 start() 方法将启动一个线程。</p>
+<p>如果没有正确使用同步，线程表现出来的现象将会是令人疑惑的、违反直觉的。这个章节将描述多线程编程的语义问题，包括一系列的规则，这些规则定义了<strong>在多线程环境中线程对共享内存中值的修改是否对其他线程立即可见</strong>。java编程语言内存模型定义了统一的内存模型用于屏蔽不同的硬件架构，在没有歧义的情况下，下面将用<strong>内存模型</strong>表示这个概念。</p>
+	
+	</div>
+  <a type="button" href="/2021/06/14/Threads-And-Locks-md/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2021-03-26 </div>
+			<div class="article-title"><a href="/2021/03/26/netty-1/" title="Netty 解析">Netty 源码解析（一）</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>本文又是一篇源码分析文章，其实除了 Doug Lea 的并发包源码，我是真不太爱写源码分析。因为要花非常多的时间，而且很多地方需要反复组织语言。</p>
+<p>本文将介绍 Netty，Java 平台上使用最广泛的 NIO 包，它是对 JDK 中的 NIO 实现的一层封装，让我们能更方便地开发 NIO 程序。其实，Netty 不仅仅是 NIO 吧，但是，基本上大家都冲着 NIO 来的。</p>
+<p>个人感觉国内对于 Netty 的吹嘘是有点过了，主要是很多人靠它吃饭，要么是搞培训的，要么是出书的，恨不得把 Netty 吹上天去，这种现象也是挺不好的，反而使得初学者觉得 Netty 是什么高深的技术一样。</p>
+<p>Netty 的源码不是很简单，因为它比较多，而且各个类之间的关系错综复杂，很多人说它的源码很好，这点我觉得一般，真要说好代码，还得 Doug Lea 的并发源码比较漂亮，一行行都是精华，不过它们是不同类型的，也没什么好对比的。Netty 源码好就好在它的接口使用比较灵活，往往接口好用的框架，源码都不会太简单。</p>
+<p>本文将立足于源码分析，所以读者需要先掌握 NIO 的基础知识，至少我之前写的 <a href="/post/java-nio">《Java NIO：Buffer、Channel 和 Selector》</a> 中介绍的基础知识要清楚，如果读者已经对 Netty 有些了解，或者使用过，那就更好了。</p>
+<ul>
+<li>本文只介绍 TCP 相关的内容，Netty 对于其他协议的支持，不在本文的讨论范围内。</li>
+<li>和并发包的源码分析不一样，我不可能一行一行源码说，所以有些异常分支是会直接略过，除非我觉得需要介绍。</li>
+<li>Netty 源码一直在更新，各版本之间有些差异，我是按照 2018-09-06 的最新版本 <strong>4.1.25.Final</strong> 来进行介绍的。</li>
+</ul>
+<p>建议初学者在看完本文以后，可以去翻翻《Netty In Action》，网上也可以找到中文文字版的。</p>
+<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><p>学习源码，一开始肯定是准备环境。</p>
+<p>我喜欢用 maven，也喜欢 Spring Boot，所以我一般先到 <a target="_blank" rel="noopener" href="https://start.spring.io/">https://start.spring.io/</a> 准备一个最简单的脚手架。</p>
+	
+	</div>
+  <a type="button" href="/2021/03/26/netty-1/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2020-09-20 </div>
+			<div class="article-title"><a href="/2020/09/20/reentrant-read-write-lock/" title="Java 读写锁 ReentrantReadWriteLock 源码分析">读写锁ReentrantReadWriteLock</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>本文内容：读写锁 ReentrantReadWriteLock 的源码分析，基于 Java7&#x2F;Java8。</p>
+<p>阅读建议：虽然我这里会介绍一些 AQS 的知识，不过如果你完全不了解 AQS，看本文就有点吃力了。</p>
+<p><strong>目录</strong></p>
+<h2 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h2><p>下面这个例子非常实用，我是 javadoc 的搬运工：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这是一个关于缓存操作的故事</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">CachedData</span> &#123;</span><br><span class="line">    Object data;</span><br><span class="line">    <span class="keyword">volatile</span> <span class="type">boolean</span> cacheValid;</span><br><span class="line">    <span class="comment">// 读写锁实例</span></span><br><span class="line">    <span class="keyword">final</span> <span class="type">ReentrantReadWriteLock</span> <span class="variable">rwl</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantReadWriteLock</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">processCachedData</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 获取读锁</span></span><br><span class="line">        rwl.readLock().lock();</span><br><span class="line">        <span class="keyword">if</span> (!cacheValid) &#123; <span class="comment">// 如果缓存过期了，或者为 null</span></span><br><span class="line">            <span class="comment">// 释放掉读锁，然后获取写锁 (后面会看到，没释放掉读锁就获取写锁，会发生死锁情况)</span></span><br><span class="line">            rwl.readLock().unlock();</span><br><span class="line">            rwl.writeLock().lock();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (!cacheValid) &#123; <span class="comment">// 重新判断，因为在等待写锁的过程中，可能前面有其他写线程执行过了</span></span><br><span class="line">                    data = ...</span><br><span class="line">                    cacheValid = <span class="literal">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 获取读锁 (持有写锁的情况下，是允许获取读锁的，称为 “锁降级”，反之不行。)</span></span><br><span class="line">                rwl.readLock().lock();</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                <span class="comment">// 释放写锁，此时还剩一个读锁</span></span><br><span class="line">                rwl.writeLock().unlock(); <span class="comment">// Unlock write, still hold read</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            use(data);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="comment">// 释放读锁</span></span><br><span class="line">            rwl.readLock().unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ReentrantReadWriteLock 分为读锁和写锁两个实例，读锁是共享锁，可被多个线程同时使用，写锁是独占锁。持有写锁的线程可以继续获取读锁，反之不行。</p>
+<h2 id="ReentrantReadWriteLock-总览"><a href="#ReentrantReadWriteLock-总览" class="headerlink" title="ReentrantReadWriteLock 总览"></a>ReentrantReadWriteLock 总览</h2><p>这一节比较重要，我们要先看清楚 ReentrantReadWriteLock 的大框架，然后再到源码细节。</p>
+<p>首先，我们来看下 ReentrantReadWriteLock 的结构，它有好些嵌套类：</p>
+	
+	</div>
+  <a type="button" href="/2020/09/20/reentrant-read-write-lock/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2020-07-18 </div>
+			<div class="article-title"><a href="/2020/07/18/java-memory-model/" title="经典面试内存模型">Java的内存模型-并发</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>很久没更新文章了，对隔三差五过来刷更新的读者说声抱歉。</p>
+<p>关于 Java 并发也算是写了好几篇文章了，本文将介绍一些比较基础的内容，注意，阅读本文需要一定的并发基础。</p>
+<p>本文的主要目的是让大家对于并发程序中的重排序、内存可见性以及原子性有一定的了解，同时要能准确理解 synchronized、volatile、final 几个关键字的作用。</p>
+<p>另外，本文还对<strong>双重检查形式的单例模式为什么需要使用 volatile</strong> 做了深入的解释。</p>
+<h2 id="并发三问题"><a href="#并发三问题" class="headerlink" title="并发三问题"></a>并发三问题</h2><p>这节将介绍重排序、内存可见性以及原子性相关的知识，这些也是并发程序为什么难写的原因。</p>
+<h3 id="1-重排序"><a href="#1-重排序" class="headerlink" title="1. 重排序"></a>1. 重排序</h3><p>请读者先在自己的电脑上运行一下以下程序：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">x</span> <span class="operator">=</span> <span class="number">0</span>, y = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">0</span>, b =<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(;;) &#123;</span><br><span class="line">            i++;</span><br><span class="line">            x = <span class="number">0</span>; y = <span class="number">0</span>;</span><br><span class="line">            a = <span class="number">0</span>; b = <span class="number">0</span>;</span><br><span class="line">            <span class="type">CountDownLatch</span> <span class="variable">latch</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CountDownLatch</span>(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">            <span class="type">Thread</span> <span class="variable">one</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    latch.await();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                &#125;</span><br><span class="line">                a = <span class="number">1</span>;</span><br><span class="line">                x = b;</span><br><span class="line">            &#125;);</span><br><span class="line"></span><br><span class="line">            <span class="type">Thread</span> <span class="variable">other</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    latch.await();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                &#125;</span><br><span class="line">                b = <span class="number">1</span>;</span><br><span class="line">                y = a;</span><br><span class="line">            &#125;);</span><br><span class="line">            one.start();other.start();</span><br><span class="line">            latch.countDown();</span><br><span class="line">            one.join();other.join();</span><br><span class="line"></span><br><span class="line">            <span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> <span class="string">&quot;第&quot;</span> + i + <span class="string">&quot;次 (&quot;</span> + x + <span class="string">&quot;,&quot;</span> + y + <span class="string">&quot;）&quot;</span>;</span><br><span class="line">            <span class="keyword">if</span>(x == <span class="number">0</span> &amp;&amp; y == <span class="number">0</span>) &#123;</span><br><span class="line">                System.err.println(result);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                System.out.println(result);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>几秒后，我们就可以得到 x &#x3D;&#x3D; 0 &amp;&amp; y &#x3D;&#x3D; 0 这个结果，仔细看看代码就会知道，如果不发生重排序的话，这个结果是不可能出现的。</p>
+	
+	</div>
+  <a type="button" href="/2020/07/18/java-memory-model/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2020-06-25 </div>
+			<div class="article-title"><a href="/2020/06/25/java-thread-pool/" title="深度解读 java 线程池设计思想及源码实现">线程池如何理解</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>我相信大家都看过很多的关于线程池的文章，基本上也是面试的时候必问的，如果你在看过很多文章以后，还是一知半解的，那希望这篇文章能让你真正的掌握好 Java 线程池。</p>
+<p>本文一大重点是源码解析，同时会有少量篇幅介绍线程池设计思想以及作者 Doug Lea 实现过程中的一些巧妙用法。本文还是会一行行关键代码进行分析，目的是为了让那些自己看源码不是很理解的同学可以得到参考。</p>
+<p>线程池是非常重要的工具，如果你要成为一个好的工程师，还是得比较好地掌握这个知识，很多线上问题都是因为没有用好线程池导致的。即使你为了谋生，也要知道，这基本上是面试必问的题目，而且面试官很容易从被面试者的回答中捕捉到被面试者的技术水平。</p>
+<p>本文略长，建议在 pc 上阅读，边看文章边翻源码（Java7 和 Java8 都一样），建议想好好看的读者抽出至少 30 分钟的整块时间来阅读。当然，如果读者仅为面试准备，可以直接滑到最后的<strong>总结</strong>部分。</p>
+<h2 id="总览"><a href="#总览" class="headerlink" title="总览"></a>总览</h2><p>开篇来一些废话。下图是 java 线程池几个相关类的继承结构：</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/java-thread-pool/1.jpg" alt="1"></p>
+<p>先简单说说这个继承结构，Executor 位于最顶层，也是最简单的，就一个 execute(Runnable runnable) 接口方法定义。</p>
+<p>ExecutorService 也是接口，在 Executor 接口的基础上添加了很多的接口方法，所以<strong>一般来说我们会使用这个接口</strong>。</p>
+<p>然后再下来一层是 AbstractExecutorService，从名字我们就知道，这是抽象类，这里实现了非常有用的一些方法供子类直接使用，之后我们再细说。</p>
+	
+	</div>
+  <a type="button" href="/2020/06/25/java-thread-pool/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2020-06-10 </div>
+			<div class="article-title"><a href="/2020/06/10/java-concurrent-queue/" title="什么是队列">线程池队列</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>最近得空，想写篇文章好好说说 java 线程池问题，我相信很多人都一知半解的，包括我自己在仔仔细细看源码之前，也有许多的不解，甚至有些地方我一直都没有理解到位。</p>
+<p>说到线程池实现，那么就不得不涉及到各种 BlockingQueue 的实现，那么我想就 BlockingQueue 的问题和大家分享分享我了解的一些知识。</p>
+<p>本文没有像之前分析 AQS 那样一行一行源码分析了，不过还是把其中最重要和最难理解的代码说了一遍，所以不免篇幅略长。本文涉及到比较多的 Doug Lea 对 BlockingQueue 的设计思想，希望有心的读者真的可以有一些收获，我觉得自己还是写了一些干货的。</p>
+<p>本文直接参考 Doug Lea 写的 Java doc 和注释，这也是我们在学习 java 并发包时最好的材料了。希望大家能有所思、有所悟，学习 Doug Lea 的代码风格，并将其优雅、严谨的作风应用到我们写的每一行代码中。</p>
+<p><strong>目录：</strong></p>
+<h2 id="BlockingQueue"><a href="#BlockingQueue" class="headerlink" title="BlockingQueue"></a>BlockingQueue</h2><blockquote>
+<p>开篇先介绍下 BlockingQueue 这个接口的规则，后面再看其实现。</p>
+</blockquote>
+<p>首先，最基本的来说， BlockingQueue 是一个<strong>先进先出</strong>的队列（Queue），为什么说是阻塞（Blocking）的呢？是因为 BlockingQueue 支持当获取队列元素但是队列为空时，会阻塞等待队列中有元素再返回；也支持添加元素时，如果队列已满，那么等到队列可以放入新元素时再放入。</p>
+<p>BlockingQueue 是一个接口，继承自 Queue，所以其实现类也可以作为 Queue 的实现来使用，而 Queue 又继承自 Collection 接口。</p>
+<p>BlockingQueue 对插入操作、移除操作、获取元素操作提供了四种不同的方法用于不同的场景中使用：1、抛出异常；2、返回特殊值（null 或 true&#x2F;false，取决于具体的操作）；3、阻塞等待此操作，直到这个操作成功；4、阻塞等待此操作，直到成功或者超时指定时间。总结如下：</p>
+	
+	</div>
+  <a type="button" href="/2020/06/10/java-concurrent-queue/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+
+		</div>
+
+		<!-- pagination -->
+		<div>
+  		<center>
+		<div class="pagination">
+<ul class="pagination">
+	 
+		
+          <li class="prev disabled"><a><i class="fa fa-arrow-circle-o-left"></i>Prev</a></li>
+        
+
+        <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+
+		
+		   <li class="next"> <a href="/page/2/" class="alignright next">Next<i class="fa fa-arrow-circle-o-right"></i></a> </li>
+        
+	
+</ul>
+</div>
+
+  		</center>
+		</div>
+
+		
+		
+	</div> <!-- col-md-9 -->
+
+	
+		<div class="col-md-3">
+	<div id="sidebar">
+	
+			
+  <div id="site_search">
+   <div class="form-group">
+    <input type="text" id="local-search-input" name="q" results="0" placeholder="Search" class="st-search-input st-default-search-input form-control"/>
+   </div>  
+  <div id="local-search-result"></div>
+  </div>
+
+
+		
+			<div class="widget">
+    
+</div>
+
+		
+			
+	<div class="widget">
+		<h4>Categories</h4>
+		<ul class="tag_box inline list-unstyled">
+		
+			<li><a href="/categories/Java/">Java<span>2</span></a></li>
+		
+			<li><a href="/categories/Spring/">Spring<span>1</span></a></li>
+		
+			<li><a href="/categories/blog/">blog<span>1</span></a></li>
+		
+			<li><a href="/categories/llm/">llm<span>1</span></a></li>
+		
+			<li><a href="/categories/netty/">netty<span>1</span></a></li>
+		
+			<li><a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程<span>9</span></a></li>
+		
+			<li><a href="/categories/%E7%9B%91%E6%8E%A7/">监控<span>1</span></a></li>
+		
+		</ul>
+	</div>
+
+		
+			
+	<div class="widget">
+		<h4>Tag Cloud</h4>
+		<ul class="tag_box inline list-unstyled">		
+		
+			<li><a href="/tags/wiki/">wiki<span>16</span></a></li>
+		
+		 
+		</ul>
+	</div>
+
+
+		
+			
+<div class="widget">
+  <h4>Recent Posts</h4>
+  <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2025/03/11/llm-agent-java/"  title="基于springboot开发agent" ><i class="fa fa-file-o"></i>llm-agent工具开发</a>
+      </li>
+    
+      <li>
+        <a href="/2024/10/09/prometheus-grafana/"  title="Prometheus、Grafana " ><i class="fa fa-file-o"></i>Prometheus 数据类型解析与 Grafana 制图</a>
+      </li>
+    
+      <li>
+        <a href="/2024/02/04/zgc/"  title="ZGC" ><i class="fa fa-file-o"></i>ZGC 介绍</a>
+      </li>
+    
+      <li>
+        <a href="/2022/06/08/spring-ioc/"  title="Spring启动" ><i class="fa fa-file-o"></i>Spring IOC 容器源码分析</a>
+      </li>
+    
+      <li>
+        <a href="/2021/06/14/Threads-And-Locks-md/"  title="Threads-And-Locks" ><i class="fa fa-file-o"></i>深入分析 java 8 编程语言规范：Threads ...</a>
+      </li>
+    
+  </ul>
+</div>
+
+		
+	</div> <!-- sidebar -->
+</div> <!-- col-md-3 -->
+
+	
+
+</div> <!-- row-fluid -->
+
+
+    </div>
+  </div>
+  <div class="container-narrow">
+    <footer> <p>
+  &copy; 2025 shineXGO
+  
+      with help from <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a>. Theme by <a target="_blank" rel="noopener" href="http://github.com/wzpan/hexo-theme-freemind/">Freemind</a>.    
+</p> </footer>
+  </div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>▲</span> 
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+
+<!-- syntax highlighting -->
+
+
+</body>
+</html>
