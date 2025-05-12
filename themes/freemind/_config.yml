@@ -1,0 +1,94 @@
+slogan: "Writing codes & growing tao."
+
+theme: cerulean
+inverse: true
+# whether to show h2 and h3 titles in excerpts
+show_title_in_excerpt: false
+
+menu:
+  - title: Archives
+    url: archives
+    intro: "All the articles."
+    icon: "fa fa-archive"
+  - title: Categories
+    url: categories
+    intro: "All the categories."
+    icon: "fa fa-folder"
+  - title: Tags
+    url: tags
+    intro: "All the tags."
+    icon: "fa fa-tags"
+  - title: About
+    url: about
+    intro: "about me"
+    icon: "fa fa-user"
+
+links:
+  - title: Get_Jobs
+    url: https://github.com/loks666/get_jobs
+    intro: "Freemind's Github repository."
+    icon: "fa fa-github"
+  - title: "My Github"
+    url: https://github.com/pistachioss
+    intro: "My Github account."
+    icon: "fa fa-github"
+#  - title: "My LinkedIn"
+#    url: http://www.linkedin.com/in/hahack
+#    intro: "My Linkin account."
+#    icon: "fa fa-linkedin"
+
+widgets:
+- search
+- recent_comments
+- category
+- tagcloud
+- recent_posts
+#- links
+#- rss  # uncomment this to show an RSS button in the sidebar
+
+
+rss: atom.xml
+fancybox: true
+favicon: favicon.png
+duoshuo_shortname: #freemindtheme
+
+
+# Recommended posts
+# Dependency: https://github.com/huiwang/hexo-recommended-posts
+recommended_posts:
+  enabled: false
+
+# Analytics
+google_analytics:
+  enable: false
+  siteid:
+baidu_tongji:
+  enable: false
+  siteid:
+
+# search
+# swiftype_key: ZP2ZSuHgipSZfRyU8uTR
+
+# share widgets
+bdshare: true
+jiathis: false
+
+# built-in comment system
+#comment_js:
+#  type: "github"
+#  user: "pistachioss"
+#  repo: "pistachioss.github.io"
+#  client_id: "Iv23linQTKbXHHw2Rk2v"
+#  client_secret: "7748c82aff9f97061b071a46c18686b53efa220f"
+#  count: 5
+
+# If you want to use gitalk for comments, please uncomment the following, fill in the fields, and comment out the comment_js above.
+comment_gitalk:
+  enable: true
+  client_id: "Ov23liTbPXkD3NfIs0KX"
+  client_secret: "4e727600e55d74a25577449de551363030ee5a0e"
+  repo: "pistachioss.github.io"
+  user: "pistachioss"
+  owner: "pistachioss" # 使用 owner
+  admin: ["pistachioss"] # admin 是数组
+  language: zh-CN      # 推荐加上
