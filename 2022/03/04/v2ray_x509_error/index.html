@@ -1,0 +1,572 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>509 certificate signed by unknown authority | pistachioss</title>
+  <meta name="author" content="shineXGO">
+  
+  <meta name="description" content="Cloudflare v2ray一直 509 certificate signed by unknown authority">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="509 certificate signed by unknown authority"/>
+  <meta property="og:site_name" content="pistachioss"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="pistachioss" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/themes/cerulean.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight-default.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/comment.css" media="screen" type="text/css">
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.9/es5-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-sham.min.js"></script>
+  <![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+  
+  
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+	<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  
+  <!-- analytics -->
+  
+
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <nav id="main-nav" class="navbar navbar-inverse navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+	<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+       <a class="navbar-brand" href="/">pistachioss</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="about me">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+    <div class="content">
+      
+
+
+	
+		<div class="page-header page-header-inverse ">		
+			<h1 class="title title-inverse "> 509 certificate signed by unknown authority</h1>
+		</div>		
+	
+
+
+
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  
+		 <div class="alert alert-success description">
+			<i class="fa fa-info-circle"></i> <p>Cloudflare v2ray一直 509 certificate signed by unknown authority</p>
+			
+		 </div> <!-- alert -->
+	  		
+
+	  <p>“x509: certificate signed by unknown authority” 错误表明 Nginx 或 V2Ray 客户端在验证 Cloudflare 源服务器证书（Origin Server Certificate）时，无法信任该证书的颁发机构（CA）。这通常是因为证书配置不正确、Cloudflare 的 SSL&#x2F;TLS 设置有误，或者缺少必要的根证书&#x2F;中间证书。本回答将针对你的 Cloudflare + V2Ray 配置（基于 WebSocket + TLS），提供详细的排查和解决步骤，帮助你修复这个错误。</p>
+<h3 id="错误原因分析"><a href="#错误原因分析" class="headerlink" title="错误原因分析"></a><strong>错误原因分析</strong></h3><p>在 Cloudflare + V2Ray 的场景中，“certificate signed by unknown authority” 错误可能由以下原因引起：</p>
+<ol>
+<li><strong>源服务器证书未正确配置</strong>：Cloudflare 源服务器证书未正确安装到 Nginx，或文件内容有误。</li>
+<li><strong>SSL&#x2F;TLS 模式问题</strong>：Cloudflare 的 SSL&#x2F;TLS 模式设置为 <strong>Full (strict)</strong>，但 VPS 未使用 Cloudflare 签发的证书，或者证书链不完整。</li>
+<li><strong>缺少 Cloudflare 根证书</strong>：如果启用了 <strong>Authenticated Origin Pulls</strong>，Nginx 需要 Cloudflare 的根证书来验证边缘服务器的客户端证书。</li>
+<li><strong>客户端配置错误</strong>：V2Ray 客户端的 TLS 设置（如 SNI）与服务器证书不匹配。</li>
+<li><strong>证书和私钥不匹配</strong>：Nginx 使用的证书和私钥不对应，导致 TLS 握手失败。</li>
+</ol>
+<hr>
+<h3 id="修复步骤"><a href="#修复步骤" class="headerlink" title="修复步骤"></a><strong>修复步骤</strong></h3><p>以下是针对 Cloudflare + V2Ray 配置的逐步排查和解决方法，假设你的 VPS 使用 Nginx 和 V2Ray，域名是 <code>v2ray.example.com</code>。</p>
+<h4 id="步骤-1：检查-Nginx-错误日志"><a href="#步骤-1：检查-Nginx-错误日志" class="headerlink" title="步骤 1：检查 Nginx 错误日志"></a><strong>步骤 1：检查 Nginx 错误日志</strong></h4><ol>
+<li>查看 Nginx 错误日志，获取详细错误信息：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /var/log/nginx/error.log</span><br></pre></td></tr></table></figure></li>
+<li>查找类似以下的错误：<ul>
+<li><code>x509: certificate signed by unknown authority</code></li>
+<li><code>SSL: error:0B080074:x509 certificate routines</code></li>
+</ul>
+</li>
+<li>记录具体错误上下文（例如错误发生在 TLS 握手还是客户端验证阶段）。</li>
+</ol>
+<h4 id="步骤-2：验证-Cloudflare-源服务器证书"><a href="#步骤-2：验证-Cloudflare-源服务器证书" class="headerlink" title="步骤 2：验证 Cloudflare 源服务器证书"></a><strong>步骤 2：验证 Cloudflare 源服务器证书</strong></h4><p>你提到之前只看到需要复制粘贴的证书内容（例如 <code>example.com.pem</code>），可能未正确保存证书和私钥，或者证书格式有误。让我们重新生成并验证：</p>
+<ol>
+<li><p><strong>重新生成源服务器证书</strong>：</p>
+<ul>
+<li>登录 Cloudflare，进入 <strong>SSL&#x2F;TLS &gt; Origin Server</strong>。</li>
+<li>点击 <strong>Create Certificate</strong>：<ul>
+<li><strong>Key Type</strong>：选择 <strong>ECDSA</strong>（推荐）或 <strong>RSA</strong>。</li>
+<li><strong>Certificate Validity</strong>：默认 15 年。</li>
+<li><strong>Hostnames</strong>：输入 <code>v2ray.example.com</code> 或 <code>*.example.com</code>。</li>
+</ul>
+</li>
+<li>点击 <strong>Create</strong>，页面会显示：<ul>
+<li><strong>Origin Certificate</strong>：PEM 格式，包含 <code>-----BEGIN CERTIFICATE-----</code> 和 <code>-----END CERTIFICATE-----</code>。</li>
+<li><strong>Private Key</strong>：PEM 格式，包含 <code>-----BEGIN PRIVATE KEY-----</code> 和 <code>-----END PRIVATE KEY-----</code>（可能需点击“Show”）。</li>
+</ul>
+</li>
+<li><strong>保存证书</strong>：<ul>
+<li>复制 <strong>Origin Certificate</strong> 文本，保存到 VPS：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p /etc/ssl</span><br><span class="line">nano /etc/ssl/v2ray_example_com_cert.pem</span><br></pre></td></tr></table></figure></li>
+<li>粘贴证书内容，确保包括 <code>-----BEGIN CERTIFICATE-----</code> 和 <code>-----END CERTIFICATE-----</code>，保存。</li>
+</ul>
+</li>
+<li><strong>保存私钥</strong>：<ul>
+<li>复制 <strong>Private Key</strong> 文本，保存到：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nano /etc/ssl/v2ray_example_com_key.pem</span><br></pre></td></tr></table></figure></li>
+<li>粘贴私钥内容，确保包括 <code>-----BEGIN PRIVATE KEY-----</code> 和 <code>-----END PRIVATE KEY-----</code>，保存。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>检查文件格式</strong>：</p>
+<ul>
+<li>确保证书文件内容正确：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /etc/ssl/v2ray_example_com_cert.pem</span><br></pre></td></tr></table></figure>
+应显示：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-----BEGIN CERTIFICATE-----</span><br><span class="line">MIID... (Base64 编码)</span><br><span class="line">-----END CERTIFICATE-----</span><br></pre></td></tr></table></figure></li>
+<li>检查私钥：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /etc/ssl/v2ray_example_com_key.pem</span><br></pre></td></tr></table></figure>
+应显示：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-----BEGIN PRIVATE KEY-----</span><br><span class="line">MIIE... (Base64 编码)</span><br><span class="line">-----END PRIVATE KEY-----</span><br></pre></td></tr></table></figure></li>
+<li><strong>常见问题</strong>：<ul>
+<li>缺少 <code>-----BEGIN/END</code> 标记。</li>
+<li>多余的空行、空格或注释。</li>
+<li>证书和私钥合并在一个文件。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>验证证书和私钥匹配</strong>：</p>
+<ul>
+<li>检查证书和私钥是否匹配：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -noout -modulus -<span class="keyword">in</span> /etc/ssl/v2ray_example_com_cert.pem | openssl md5</span><br><span class="line">openssl rsa -noout -modulus -<span class="keyword">in</span> /etc/ssl/v2ray_example_com_key.pem | openssl md5</span><br></pre></td></tr></table></figure>
+<ul>
+<li>输出应相同，否则说明证书和私钥不匹配，需重新生成。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>设置文件权限</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">chmod</span> 600 /etc/ssl/v2ray_example_com_*.pem</span><br><span class="line"><span class="built_in">chown</span> root:root /etc/ssl/v2ray_example_com_*.pem</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="步骤-3：检查-Nginx-配置"><a href="#步骤-3：检查-Nginx-配置" class="headerlink" title="步骤 3：检查 Nginx 配置"></a><strong>步骤 3：检查 Nginx 配置</strong></h4><ol>
+<li><p><strong>验证 Nginx 配置文件</strong>：</p>
+<ul>
+<li>编辑配置文件（例如 <code>/etc/nginx/sites-available/v2ray</code>）：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nano /etc/nginx/sites-available/v2ray</span><br></pre></td></tr></table></figure></li>
+<li>确保内容正确：<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">    <span class="attribute">listen</span> <span class="number">80</span>;</span><br><span class="line">    <span class="attribute">server_name</span> v2ray.example.com;</span><br><span class="line">    <span class="attribute">return</span> <span class="number">301</span> https://<span class="variable">$server_name</span><span class="variable">$request_uri</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">    <span class="attribute">listen</span> <span class="number">443</span> ssl;</span><br><span class="line">    <span class="attribute">server_name</span> v2ray.example.com;</span><br><span class="line">    <span class="attribute">ssl_certificate</span> /etc/ssl/v2ray_example_com_cert.pem;</span><br><span class="line">    <span class="attribute">ssl_certificate_key</span> /etc/ssl/v2ray_example_com_key.pem;</span><br><span class="line">    <span class="attribute">ssl_protocols</span> TLSv1.<span class="number">2</span> TLSv1.<span class="number">3</span>;</span><br><span class="line">    <span class="attribute">ssl_ciphers</span> ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;</span><br><span class="line">    <span class="attribute">ssl_prefer_server_ciphers</span> <span class="literal">off</span>;</span><br><span class="line"></span><br><span class="line">    <span class="section">location</span> /ray &#123;</span><br><span class="line">        <span class="attribute">if</span> (<span class="variable">$http_upgrade</span> != <span class="string">&quot;websocket&quot;</span>) &#123;</span><br><span class="line">            <span class="attribute">return</span> <span class="number">404</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="attribute">proxy_redirect</span> <span class="literal">off</span>;</span><br><span class="line">        <span class="attribute">proxy_pass</span> http://127.0.0.1:12345;</span><br><span class="line">        <span class="attribute">proxy_http_version</span> <span class="number">1</span>.<span class="number">1</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> Upgrade <span class="variable">$http_upgrade</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> Connection <span class="string">&quot;upgrade&quot;</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> Host <span class="variable">$host</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><strong>关键检查</strong>：<ul>
+<li><code>ssl_certificate</code> 和 <code>ssl_certificate_key</code> 路径正确。</li>
+<li>没有重复的 <code>ssl_certificate</code> 指令。</li>
+<li>确保 <code>server_name</code> 与你的域名一致。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>测试配置</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nginx -t</span><br><span class="line">systemctl restart nginx</span><br></pre></td></tr></table></figure>
+<ul>
+<li>如果报错（例如 <code>cannot load certificate</code>），检查文件路径或内容。</li>
+</ul>
+</li>
+</ol>
+<h4 id="步骤-4：检查-Cloudflare-SSL-TLS-设置"><a href="#步骤-4：检查-Cloudflare-SSL-TLS-设置" class="headerlink" title="步骤 4：检查 Cloudflare SSL&#x2F;TLS 设置"></a><strong>步骤 4：检查 Cloudflare SSL&#x2F;TLS 设置</strong></h4><ol>
+<li><p><strong>确认 SSL&#x2F;TLS 模式</strong>：</p>
+<ul>
+<li>在 Cloudflare 的 <strong>SSL&#x2F;TLS &gt; Overview</strong>，确保模式为 <strong>Full</strong> 或 <strong>Full (strict)</strong>。</li>
+<li><strong>Full (strict)</strong> 要求 VPS 使用 Cloudflare 签发的源服务器证书（你已配置）。</li>
+<li>如果设置为 <strong>Flexible</strong>，可能会导致证书验证问题，需改为 <strong>Full</strong>。</li>
+</ul>
+</li>
+<li><p><strong>确认 DNS 设置</strong>：</p>
+<ul>
+<li>在 <strong>DNS</strong> 页面，检查 <code>v2ray.example.com</code> 的 A 记录：<ul>
+<li>指向 VPS IP。</li>
+<li><strong>Proxy status</strong> 为 <strong>Proxied</strong>（橙色云）。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>检查 Authenticated Origin Pulls</strong>：</p>
+<ul>
+<li>如果启用了 <strong>Authenticated Origin Pulls</strong>，可能导致 “unknown authority” 错误，因为 Nginx 需要验证 Cloudflare 边缘服务器的客户端证书。</li>
+<li><strong>临时禁用</strong>：<ul>
+<li>在 <strong>SSL&#x2F;TLS &gt; Overview</strong>，关闭 <strong>Authenticated Origin Pulls</strong>。</li>
+<li>重启 Nginx 和 V2Ray，测试是否解决问题。</li>
+</ul>
+</li>
+<li><strong>正确配置（如果需要启用）</strong>：<ul>
+<li>下载 Cloudflare 根证书（ECC 或 RSA）：<ul>
+<li>从 <a target="_blank" rel="noopener" href="https://developers.cloudflare.com/ssl/origin-configuration/authenticated-origin-pull/set-up/">https://developers.cloudflare.com/ssl/origin-configuration/authenticated-origin-pull/set-up/</a> 下载，保存为 <code>/etc/ssl/cloudflare_origin_ecc.pem</code>。</li>
+</ul>
+</li>
+<li>更新 Nginx 配置：<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">ssl_client_certificate</span> /etc/ssl/cloudflare_origin_ecc.pem;</span><br><span class="line"><span class="attribute">ssl_verify_client</span> <span class="literal">on</span>;</span><br></pre></td></tr></table></figure></li>
+<li>重启 Nginx：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart nginx</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h4 id="步骤-5：检查-V2Ray-配置"><a href="#步骤-5：检查-V2Ray-配置" class="headerlink" title="步骤 5：检查 V2Ray 配置"></a><strong>步骤 5：检查 V2Ray 配置</strong></h4><ol>
+<li><p><strong>验证 V2Ray 配置文件</strong>：</p>
+<ul>
+<li>编辑 <code>/usr/local/etc/v2ray/config.json</code>：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nano /usr/local/etc/v2ray/config.json</span><br></pre></td></tr></table></figure></li>
+<li>确保配置正确（替换 <code>your-uuid</code> 和路径）：<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;log&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;loglevel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;warning&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;inbounds&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">12345</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;listen&quot;</span><span class="punctuation">:</span> <span class="string">&quot;127.0.0.1&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;protocol&quot;</span><span class="punctuation">:</span> <span class="string">&quot;vless&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;settings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;clients&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">                    <span class="punctuation">&#123;</span></span><br><span class="line">                        <span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;your-uuid&quot;</span><span class="punctuation">,</span></span><br><span class="line">                        <span class="attr">&quot;email&quot;</span><span class="punctuation">:</span> <span class="string">&quot;user@example.com&quot;</span></span><br><span class="line">                    <span class="punctuation">&#125;</span></span><br><span class="line">                <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">                <span class="attr">&quot;decryption&quot;</span><span class="punctuation">:</span> <span class="string">&quot;none&quot;</span></span><br><span class="line">            <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;streamSettings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;network&quot;</span><span class="punctuation">:</span> <span class="string">&quot;ws&quot;</span><span class="punctuation">,</span></span><br><span class="line">                <span class="attr">&quot;wsSettings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                    <span class="attr">&quot;path&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/ray&quot;</span></span><br><span class="line">                <span class="punctuation">&#125;</span></span><br><span class="line">            <span class="punctuation">&#125;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;outbounds&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;protocol&quot;</span><span class="punctuation">:</span> <span class="string">&quot;freedom&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></li>
+<li>重启 V2Ray：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart v2ray</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>检查客户端配置</strong>：</p>
+<ul>
+<li>确保 V2Ray 客户端（例如 v2rayN、v2rayNG）配置正确：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vless://your-uuid@v2ray.example.com:443?encryption=none&amp;security=tls&amp;type=ws&amp;path=/ray&amp;sni=v2ray.example.com#V2Ray-WS-TLS</span><br></pre></td></tr></table></figure></li>
+<li><strong>关键点</strong>：<ul>
+<li><strong>SNI</strong>：必须设置为 <code>v2ray.example.com</code>，与证书的域名匹配。</li>
+<li><strong>TLS</strong>：启用。</li>
+<li><strong>Path</strong>：<code>/ray</code>，与服务器一致。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h4 id="步骤-6：测试-TLS-连接"><a href="#步骤-6：测试-TLS-连接" class="headerlink" title="步骤 6：测试 TLS 连接"></a><strong>步骤 6：测试 TLS 连接</strong></h4><ol>
+<li><p><strong>服务器端测试</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl s_client -connect v2ray.example.com:443 -servername v2ray.example.com</span><br></pre></td></tr></table></figure>
+<ul>
+<li>检查输出：<ul>
+<li>如果显示证书链且无 <code>verify error</code>，证书配置正确。</li>
+<li>如果报 <code>unknown CA</code>，说明证书链不完整或 Cloudflare 未信任。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>客户端测试</strong>：</p>
+<ul>
+<li>使用 V2Ray 客户端连接，检查是否仍报 “unknown authority”。</li>
+<li>如果客户端报错，尝试临时禁用 TLS 验证（仅用于调试，不推荐生产环境）：<ul>
+<li>在 v2rayN 或 v2rayNG 中，设置 “Allow Insecure” 为 true。</li>
+<li>如果连接成功，说明问题出在证书信任链。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h4 id="步骤-7：修复-“unknown-authority”-错误"><a href="#步骤-7：修复-“unknown-authority”-错误" class="headerlink" title="步骤 7：修复 “unknown authority” 错误"></a><strong>步骤 7：修复 “unknown authority” 错误</strong></h4><p>根据排查结果，针对具体原因修复：</p>
+<ol>
+<li><p><strong>证书文件错误</strong>：</p>
+<ul>
+<li>如果证书或私钥内容不完整，重新生成并保存（步骤 2）。</li>
+<li>使用 <code>openssl</code> 验证证书：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -<span class="keyword">in</span> /etc/ssl/v2ray_example_com_cert.pem -text -noout</span><br></pre></td></tr></table></figure>
+<ul>
+<li>如果报错，说明证书文件损坏，需重新复制。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>证书和私钥不匹配</strong>：</p>
+<ul>
+<li>重新生成证书，确保使用同一组证书和私钥。</li>
+<li>验证匹配（步骤 2.3）。</li>
+</ul>
+</li>
+<li><p><strong>Authenticated Origin Pulls 导致问题</strong>：</p>
+<ul>
+<li>如果启用了此功能但未配置根证书，Nginx 会报 “unknown authority”。</li>
+<li>按照步骤 4.3 正确配置，或临时禁用。</li>
+</ul>
+</li>
+<li><p><strong>Cloudflare SSL&#x2F;TLS 模式</strong>：</p>
+<ul>
+<li>确保模式为 <strong>Full (strict)</strong>，并使用 Cloudflare 源服务器证书。</li>
+<li>如果使用其他证书（如 Let’s Encrypt），需将模式设为 <strong>Full</strong>。</li>
+</ul>
+</li>
+<li><p><strong>客户端 SNI 错误</strong>：</p>
+<ul>
+<li>确保 V2Ray 客户端的 SNI 与证书的域名（<code>v2ray.example.com</code>）一致。</li>
+<li>检查证书的 Subject 和 SAN：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -<span class="keyword">in</span> /etc/ssl/v2ray_example_com_cert.pem -noout -text</span><br></pre></td></tr></table></figure>
+<ul>
+<li>确认 <code>Subject</code> 或 <code>Subject Alternative Name</code> 包含 <code>v2ray.example.com</code>。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="常见问题与解答"><a href="#常见问题与解答" class="headerlink" title="常见问题与解答"></a><strong>常见问题与解答</strong></h3><ul>
+<li><strong>Q：为什么总是报 “unknown authority”？</strong><ul>
+<li>可能是证书未由 Cloudflare 的 CA 签发，或 Nginx 未正确加载证书。重新生成并验证文件内容。</li>
+</ul>
+</li>
+<li><strong>Q：Authenticated Origin Pulls 必须启用吗？</strong><ul>
+<li>不必须。建议先解决证书问题，确认 V2Ray 正常工作后再启用以增强安全性。</li>
+</ul>
+</li>
+<li><strong>Q：可以用 Let’s Encrypt 证书吗？</strong><ul>
+<li>可以，但需将 Cloudflare 的 SSL&#x2F;TLS 模式设为 <strong>Full</strong>（非 strict），否则 Cloudflare 要求自己的源服务器证书。</li>
+</ul>
+</li>
+<li><strong>Q：客户端报错如何调试？</strong><ul>
+<li>临时启用 “Allow Insecure” 测试连接。</li>
+<li>检查客户端日志，确认 SNI 和 TLS 设置。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h3><ul>
+<li><strong>“x509: certificate signed by unknown authority”</strong> 通常由证书配置错误、SSL&#x2F;TLS 模式不匹配或 Authenticated Origin Pulls 配置不当引起。</li>
+<li><strong>修复步骤</strong>：<ol>
+<li>重新生成 Cloudflare 源服务器证书，正确保存证书和私钥。</li>
+<li>验证 Nginx 配置，确保证书路径和格式正确。</li>
+<li>检查 Cloudflare 的 SSL&#x2F;TLS 模式，临时禁用 Authenticated Origin Pulls。</li>
+<li>确保 V2Ray 客户端的 SNI 和 TLS 设置正确。</li>
+<li>测试 TLS 连接，必要时启用 Authenticated Origin Pulls。</li>
+</ol>
+</li>
+<li><strong>建议</strong>：<ul>
+<li>检查 Nginx 错误日志（<code>/var/log/nginx/error.log</code>）以获取详细信息。</li>
+<li>如果仍报错，请提供日志或具体错误描述，我可以进一步分析。</li>
+</ul>
+</li>
+</ul>
+<p>如果你有错误日志、Cloudflare 界面截图，或其他问题（例如 V2Ray 客户端的具体错误），请分享，我会为你提供更精准的解决方案！</p>
+	  
+	</div>
+
+	<!-- recommended posts -->
+	
+
+	<div>
+  	<center>
+	<div class="pagination">
+<ul class="pagination">
+	 
+				
+		<li class="prev"><a href="/2022/06/08/spring-ioc/" class="alignleft prev"><i class="fa fa-arrow-circle-o-left"></i>Prev</a></li>
+  		
+
+        <li><a href="/archives"><i class="fa fa-archive"></i>Archive</a></li>
+
+		
+          <li class="next"><a href="/2021/06/14/Threads-And-Locks-md/" class="alignright next">Next<i class="fa fa-arrow-circle-o-right"></i></a></li>
+        
+	
+</ul>
+</div>
+
+    </center>
+	</div>
+
+    <!-- share -->
+    
+        
+    <div class="bdsharebuttonbox">
+        <a href="#" class="bds_more" data-cmd="more"></a>
+        <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+        <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+        <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+        <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+        <a href="#" class="bds_linkedin" data-cmd="linkedin" title="分享到linkedin"></a>
+        <a href="#" class="bds_evernotecn" data-cmd="evernotecn" title="分享到印象笔记"></a>
+        <a href="#" class="bds_youdao" data-cmd="youdao" title="分享到有道云笔记"></a>
+        <a href="#" class="bds_copy" data-cmd="copy" title="分享到复制网址"></a>
+    </div>
+    <script>
+        window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"24"},"share":{}};
+        with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+    </script>
+
+
+        
+
+    
+	
+	<!-- comment -->
+	
+<section id="comment">
+  <h2 class="title">Comments</h2>
+  
+     <div id="gitalk-container"></div>
+	 <script type="text/javascript">
+	 // 拼接 body 内容
+	    const decodedPageUrl = decodeURI(location.href)
+		const issueBody = `${decodedPageUrl} \n\n Cloudflare v2ray一直 509 certificate signed by unknown authority`;
+        const gitalk = new Gitalk({
+           clientID: 'Ov23liTbPXkD3NfIs0KX',
+           clientSecret: '4e727600e55d74a25577449de551363030ee5a0e',
+           repo: 'pistachioss.github.io',      // The repository of store comments,
+           owner: 'pistachioss',
+           admin: ['pistachioss'],
+           id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50 
+		   title: '509 certificate signed by unknown authority', // 使用文章标题作为 Issue 的标题
+		   body: issueBody, // 拼接好的 body
+		   distractionFreeMode: false  // Facebook-like distraction free mode
+         });
+
+         gitalk.render('gitalk-container');
+	 </script>
+  
+</section>
+
+
+	</div> <!-- col-md-9/col-md-12 -->
+		
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2022-03-04 
+	</div>
+	
+
+	<!-- categories -->
+    
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
+    <ul id="categorys" class="tag_box list-unstyled collapse in">
+          
+  <li>
+    <li><a href="/categories/v2ray/">v2ray<span>1</span></a></li> <li><a href="/categories/v2ray/cloudflare/">cloudflare<span>1</span></a></li>
+  </li>
+
+    </ul>
+	</div>
+	
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/wiki/">wiki<span>19</span></a></li>
+
+    </ul>
+	</div>
+	
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	   <a data-toggle="collapse" data-target="#toc"><i class="fa fa-bars"></i></a>
+	   <div id="toc" class="toc collapse in">
+			<ol class="toc-article"><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#%E9%94%99%E8%AF%AF%E5%8E%9F%E5%9B%A0%E5%88%86%E6%9E%90"><span class="toc-article-text">错误原因分析</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#%E4%BF%AE%E5%A4%8D%E6%AD%A5%E9%AA%A4"><span class="toc-article-text">修复步骤</span></a><ol class="toc-article-child"><li class="toc-article-item toc-article-level-4"><a class="toc-article-link" href="#%E6%AD%A5%E9%AA%A4-1%EF%BC%9A%E6%A3%80%E6%9F%A5-Nginx-%E9%94%99%E8%AF%AF%E6%97%A5%E5%BF%97"><span class="toc-article-text">步骤 1：检查 Nginx 错误日志</span></a></li><li class="toc-article-item toc-article-level-4"><a class="toc-article-link" href="#%E6%AD%A5%E9%AA%A4-2%EF%BC%9A%E9%AA%8C%E8%AF%81-Cloudflare-%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%AF%81%E4%B9%A6"><span class="toc-article-text">步骤 2：验证 Cloudflare 源服务器证书</span></a></li><li class="toc-article-item toc-article-level-4"><a class="toc-article-link" href="#%E6%AD%A5%E9%AA%A4-3%EF%BC%9A%E6%A3%80%E6%9F%A5-Nginx-%E9%85%8D%E7%BD%AE"><span class="toc-article-text">步骤 3：检查 Nginx 配置</span></a></li><li class="toc-article-item toc-article-level-4"><a class="toc-article-link" href="#%E6%AD%A5%E9%AA%A4-4%EF%BC%9A%E6%A3%80%E6%9F%A5-Cloudflare-SSL-TLS-%E8%AE%BE%E7%BD%AE"><span class="toc-article-text">步骤 4：检查 Cloudflare SSL&#x2F;TLS 设置</span></a></li><li class="toc-article-item toc-article-level-4"><a class="toc-article-link" href="#%E6%AD%A5%E9%AA%A4-5%EF%BC%9A%E6%A3%80%E6%9F%A5-V2Ray-%E9%85%8D%E7%BD%AE"><span class="toc-article-text">步骤 5：检查 V2Ray 配置</span></a></li><li class="toc-article-item toc-article-level-4"><a class="toc-article-link" href="#%E6%AD%A5%E9%AA%A4-6%EF%BC%9A%E6%B5%8B%E8%AF%95-TLS-%E8%BF%9E%E6%8E%A5"><span class="toc-article-text">步骤 6：测试 TLS 连接</span></a></li><li class="toc-article-item toc-article-level-4"><a class="toc-article-link" href="#%E6%AD%A5%E9%AA%A4-7%EF%BC%9A%E4%BF%AE%E5%A4%8D-%E2%80%9Cunknown-authority%E2%80%9D-%E9%94%99%E8%AF%AF"><span class="toc-article-text">步骤 7：修复 “unknown authority” 错误</span></a></li></ol></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E4%B8%8E%E8%A7%A3%E7%AD%94"><span class="toc-article-text">常见问题与解答</span></a></li><li class="toc-article-item toc-article-level-3"><a class="toc-article-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-article-text">总结</span></a></li></ol>
+		</div>
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+	</div>
+		
+
+</div><!-- row -->
+
+
+
+
+    </div>
+  </div>
+  <div class="container-narrow">
+    <footer> <p>
+  &copy; 2025 shineXGO
+  
+      with help from <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a>. Theme by <a target="_blank" rel="noopener" href="http://github.com/wzpan/hexo-theme-freemind/">Freemind</a>.    
+</p> </footer>
+  </div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>▲</span> 
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+
+<!-- syntax highlighting -->
+
+
+</body>
+</html>

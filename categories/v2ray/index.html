@@ -1,0 +1,324 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>v2ray | pistachioss</title>
+  <meta name="author" content="shineXGO">
+  
+  <meta name="description" content="pistachioss delicious">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="pistachioss"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="pistachioss" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/themes/cerulean.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight-default.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/comment.css" media="screen" type="text/css">
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.9/es5-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-sham.min.js"></script>
+  <![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+  
+  
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+	<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  
+  <!-- analytics -->
+  
+
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <nav id="main-nav" class="navbar navbar-inverse navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+	<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+       <a class="navbar-brand" href="/">pistachioss</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="about me">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+    <div class="content">
+      
+
+<!-- title -->
+<div class="page-header page-header-inverse ">
+  <h1 class="archive-title-category title title-inverse ">v2ray</h1>
+</div>
+
+<div class="row page">
+  <!-- cols -->
+  
+  <div class="col-md-9">
+	
+
+	  <div id="top_search"></div>
+
+      
+         <!-- display as entry -->
+	     <div class="mypage">
+	       
+		     
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2022-03-04 </div>
+			<div class="article-title"><a href="/2022/03/04/v2ray_x509_error/" title="Cloudflare v2ray一直 509 certificate signed by unknown authority">509 certificate signed by unknown authority</a></div>
+		</h3>
+	
+
+
+		     
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>“x509: certificate signed by unknown authority” 错误表明 Nginx 或 V2Ray 客户端在验证 Cloudflare 源服务器证书（Origin Server Certificate）时，无法信任该证书的颁发机构（CA）。这通常是因为证书配置不正确、Cloudflare 的 SSL&#x2F;TLS 设置有误，或者缺少必要的根证书&#x2F;中间证书。本回答将针对你的 Cloudflare + V2Ray 配置（基于 WebSocket + TLS），提供详细的排查和解决步骤，帮助你修复这个错误。</p>
+<h3 id="错误原因分析"><a href="#错误原因分析" class="headerlink" title="错误原因分析"></a><strong>错误原因分析</strong></h3><p>在 Cloudflare + V2Ray 的场景中，“certificate signed by unknown authority” 错误可能由以下原因引起：</p>
+<ol>
+<li><strong>源服务器证书未正确配置</strong>：Cloudflare 源服务器证书未正确安装到 Nginx，或文件内容有误。</li>
+<li><strong>SSL&#x2F;TLS 模式问题</strong>：Cloudflare 的 SSL&#x2F;TLS 模式设置为 <strong>Full (strict)</strong>，但 VPS 未使用 Cloudflare 签发的证书，或者证书链不完整。</li>
+<li><strong>缺少 Cloudflare 根证书</strong>：如果启用了 <strong>Authenticated Origin Pulls</strong>，Nginx 需要 Cloudflare 的根证书来验证边缘服务器的客户端证书。</li>
+<li><strong>客户端配置错误</strong>：V2Ray 客户端的 TLS 设置（如 SNI）与服务器证书不匹配。</li>
+<li><strong>证书和私钥不匹配</strong>：Nginx 使用的证书和私钥不对应，导致 TLS 握手失败。</li>
+</ol>
+<hr>
+<h3 id="修复步骤"><a href="#修复步骤" class="headerlink" title="修复步骤"></a><strong>修复步骤</strong></h3><p>以下是针对 Cloudflare + V2Ray 配置的逐步排查和解决方法，假设你的 VPS 使用 Nginx 和 V2Ray，域名是 <code>v2ray.example.com</code>。</p>
+<h4 id="步骤-1：检查-Nginx-错误日志"><a href="#步骤-1：检查-Nginx-错误日志" class="headerlink" title="步骤 1：检查 Nginx 错误日志"></a><strong>步骤 1：检查 Nginx 错误日志</strong></h4><ol>
+<li>查看 Nginx 错误日志，获取详细错误信息：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /var/log/nginx/error.log</span><br></pre></td></tr></table></figure></li>
+<li>查找类似以下的错误：<ul>
+<li><code>x509: certificate signed by unknown authority</code></li>
+<li><code>SSL: error:0B080074:x509 certificate routines</code></li>
+</ul>
+</li>
+<li>记录具体错误上下文（例如错误发生在 TLS 握手还是客户端验证阶段）。</li>
+</ol>
+<h4 id="步骤-2：验证-Cloudflare-源服务器证书"><a href="#步骤-2：验证-Cloudflare-源服务器证书" class="headerlink" title="步骤 2：验证 Cloudflare 源服务器证书"></a><strong>步骤 2：验证 Cloudflare 源服务器证书</strong></h4>
+	
+	</div>
+  <a type="button" href="/2022/03/04/v2ray_x509_error/#more" class="btn btn-default more">Read More</a>
+</div>
+
+	       
+	     </div>
+	     <div>
+	       <center>
+	         <div class="pagination">
+<ul class="pagination">
+	 
+</ul>
+</div>
+
+	       </center>
+	     </div>	
+      
+
+</div> <!-- col-md-9/col-md-12 -->
+
+
+<div class="col-md-3">
+	<div id="sidebar">
+	
+			
+  <div id="site_search">
+   <div class="form-group">
+    <input type="text" id="local-search-input" name="q" results="0" placeholder="Search" class="st-search-input st-default-search-input form-control"/>
+   </div>  
+  <div id="local-search-result"></div>
+  </div>
+
+
+		
+			<div class="widget">
+    
+</div>
+
+		
+			
+	<div class="widget">
+		<h4>Categories</h4>
+		<ul class="tag_box inline list-unstyled">
+		
+			<li><a href="/categories/Hexo/">Hexo<span>1</span></a></li>
+		
+			<li><a href="/categories/Java/">Java<span>2</span></a></li>
+		
+			<li><a href="/categories/ShardingSphere/">ShardingSphere<span>1</span></a></li>
+		
+			<li><a href="/categories/Spring/">Spring<span>1</span></a></li>
+		
+			<li><a href="/categories/blog/">blog<span>1</span></a></li>
+		
+			<li><a href="/categories/v2ray/cloudflare/">cloudflare<span>1</span></a></li>
+		
+			<li><a href="/categories/llm/">llm<span>1</span></a></li>
+		
+			<li><a href="/categories/netty/">netty<span>1</span></a></li>
+		
+			<li><a href="/categories/v2ray/">v2ray<span>1</span></a></li>
+		
+			<li><a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程<span>9</span></a></li>
+		
+			<li><a href="/categories/%E7%9B%91%E6%8E%A7/">监控<span>1</span></a></li>
+		
+		</ul>
+	</div>
+
+		
+			
+	<div class="widget">
+		<h4>Tag Cloud</h4>
+		<ul class="tag_box inline list-unstyled">		
+		
+			<li><a href="/tags/wiki/">wiki<span>19</span></a></li>
+		
+		 
+		</ul>
+	</div>
+
+
+		
+			
+<div class="widget">
+  <h4>Recent Posts</h4>
+  <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2025/03/11/llm-agent-java/"  title="基于springboot开发agent" ><i class="fa fa-file-o"></i>llm-agent工具开发</a>
+      </li>
+    
+      <li>
+        <a href="/2024/10/09/prometheus-grafana/"  title="Prometheus、Grafana " ><i class="fa fa-file-o"></i>Prometheus 数据类型解析与 Grafana 制图</a>
+      </li>
+    
+      <li>
+        <a href="/2024/09/01/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/"  title="Sharding分库分表实践、主从读取" ><i class="fa fa-file-o"></i>Sharding分库分表实践</a>
+      </li>
+    
+      <li>
+        <a href="/2024/02/04/zgc/"  title="ZGC" ><i class="fa fa-file-o"></i>ZGC 介绍</a>
+      </li>
+    
+      <li>
+        <a href="/2022/06/08/spring-ioc/"  title="Spring启动" ><i class="fa fa-file-o"></i>Spring IOC 容器源码分析</a>
+      </li>
+    
+  </ul>
+</div>
+
+		
+	</div> <!-- sidebar -->
+</div> <!-- col-md-3 -->
+
+
+
+
+    </div>
+  </div>
+  <div class="container-narrow">
+    <footer> <p>
+  &copy; 2025 shineXGO
+  
+      with help from <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a>. Theme by <a target="_blank" rel="noopener" href="http://github.com/wzpan/hexo-theme-freemind/">Freemind</a>.    
+</p> </footer>
+  </div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>▲</span> 
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+
+<!-- syntax highlighting -->
+
+
+</body>
+</html>

@@ -1,0 +1,443 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Hexo Github Action部署 | pistachioss</title>
+  <meta name="author" content="shineXGO">
+  
+  <meta name="description" content="Hexo 迁移自动化部署">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Hexo Github Action部署"/>
+  <meta property="og:site_name" content="pistachioss"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="pistachioss" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/themes/cerulean.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight-default.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/comment.css" media="screen" type="text/css">
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.9/es5-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-sham.min.js"></script>
+  <![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+  
+  
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+	<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  
+  <!-- analytics -->
+  
+
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <nav id="main-nav" class="navbar navbar-inverse navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+	<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+       <a class="navbar-brand" href="/">pistachioss</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="about me">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+    <div class="content">
+      
+
+
+	
+		<div class="page-header page-header-inverse ">		
+			<h1 class="title title-inverse "> Hexo Github Action部署</h1>
+		</div>		
+	
+
+
+
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  
+		 <div class="alert alert-success description">
+			<i class="fa fa-info-circle"></i> <p>Hexo 迁移自动化部署</p>
+			
+		 </div> <!-- alert -->
+	  		
+
+	  <p>根据目前的状况和迁移需求，整理了一份迁移方案。</p>
+<p><strong>核心思路：</strong></p>
+<ol>
+<li><strong>备份</strong>：确保现有内容安全。</li>
+<li><strong>本地准备</strong>：将你的 Hexo 博客源代码目录初始化为 Git 仓库。</li>
+<li><strong>远程仓库准备</strong>：清理或重命名 <code>pistachioss.github.io</code> 仓库的 <code>main</code> 分支，因为它目前存放的是静态文件，未来要存放源代码。</li>
+<li><strong>推送源代码</strong>：将本地 Hexo 源代码推送到 <code>pistachioss.github.io</code> 仓库的 <code>main</code> 分支。</li>
+<li><strong>配置 GitHub Actions</strong>：创建 workflow 文件，实现自动拉取 <code>main</code> 分支代码、构建、然后推送到 <code>gh-pages</code> 分支。</li>
+<li><strong>GitHub Pages 设置</strong>：更改 GitHub Pages 的部署源为 <code>gh-pages</code> 分支。</li>
+<li><strong>CNAME 处理</strong>：确保自定义域名配置正确。</li>
+</ol>
+<hr>
+<p><strong>详细迁移步骤：</strong></p>
+<p><strong>阶段一：准备工作和备份</strong></p>
+<ol>
+<li><p><strong>备份现有已部署的网站（可选但推荐）</strong>：<br>虽然你的目标是 <code>gh-pages</code> 分支，但以防万一，可以先将 <code>pistachioss.github.io</code> 仓库 <code>main</code> 分支（当前存放静态文件的分支）的内容克隆到本地另一文件夹作为备份。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/pistachioss/pistachioss.github.io.git backup_deployed_site</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>备份你的 Hexo 博客根目录</strong>：<br>直接复制整个博客根目录文件夹到另一个安全位置。这是最重要的备份，包含了你的所有源文件。</p>
+</li>
+</ol>
+<p><strong>阶段二：本地 Hexo 源代码 Git 初始化与配置</strong></p>
+<ol>
+<li><p><strong>进入你的 Hexo 博客根目录</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /path/to/your/hexo-blog-root</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>删除 <code>.deploy_git</code> 文件夹（可选但推荐清理）</strong>：<br>既然不再使用 <code>hexo deploy</code> 的默认方式，可以删除这个文件夹。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">rm</span> -rf .deploy_git</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>初始化 Git 仓库</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git init</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>创建 <code>.gitignore</code> 文件</strong>：<br>在博客根目录下创建 <code>.gitignore</code> 文件，告诉 Git 哪些文件不需要版本控制。内容至少应包括：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">.DS_Store</span><br><span class="line">Thumbs.db</span><br><span class="line">db.json</span><br><span class="line">*.log</span><br><span class="line">node_modules/</span><br><span class="line">public/</span><br><span class="line">.deploy*/</span><br><span class="line"># 如果你的主题是通过 git clone 下载的，并且你不希望管理主题的 .git 历史，</span><br><span class="line"># 可以加上 themes/&lt;your-theme-name&gt;/.git/</span><br><span class="line"># 或者直接在添加主题时，删除主题文件夹内的 .git 文件夹</span><br></pre></td></tr></table></figure>
+<p><em>注意：如果你的主题是通过 <code>git submodule</code> 添加的，则不应忽略主题文件夹。但从你的描述看，似乎不是这种情况。</em></p>
+</li>
+<li><p><strong>添加 CNAME 文件到 <code>source</code> 目录</strong>：<br>为了让 Hexo 在生成静态文件时包含你的自定义域名配置，在博客根目录下的 <code>source</code> 文件夹中创建一个名为 <code>CNAME</code> (无后缀) 的文件。<br>文件内容就是你的自定义域名，例如：<br><code>your.custom.domain.com</code> (替换成你自己的域名)</p>
+</li>
+<li><p><strong>修改 Hexo 配置文件 <code>_config.yml</code> (可选，但建议检查)</strong>：<br>确保 <code>url</code> 和 <code>root</code> 配置正确，特别是 <code>url</code> 应该指向你的自定义域名。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">url:</span> <span class="string">https://your.custom.domain.com</span>  <span class="comment"># 替换成你的域名</span></span><br><span class="line"><span class="attr">root:</span> <span class="string">/</span></span><br></pre></td></tr></table></figure>
+<p><code>deploy</code> 部分的配置对于 GitHub Actions 来说不是必需的了，你可以注释掉或删除它。</p>
+</li>
+<li><p><strong>添加所有文件到 Git 并提交</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git add .</span><br><span class="line">git commit -m <span class="string">&quot;Initial commit of Hexo source code&quot;</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<p><strong>阶段三：远程 GitHub 仓库 (<code>pistachioss.github.io</code>) 配置</strong></p>
+<ol>
+<li><p><strong>处理 <code>pistachioss.github.io</code> 仓库的 <code>main</code> 分支</strong>：<br>目前这个分支存放的是已部署的静态文件。我们需要让它存放源代码。你有几个选择：</p>
+<ul>
+<li><strong>推荐做法：重命名远程 <code>main</code> 分支</strong><ol>
+<li>打开 GitHub 仓库 <code>pistachioss/pistachioss.github.io</code>。</li>
+<li>进入 “Settings” -&gt; “Branches”。</li>
+<li>在 “Default branch” 部分，你可能会看到一个切换默认分支的选项，或者直接找到 <code>main</code> 分支，看是否有重命名选项。如果操作不直观，可以先创建一个临时的新分支 (例如 <code>temp-main</code>)，将其设为默认分支，然后删除旧的 <code>main</code> 分支。</li>
+<li>或者，更简单的是，在本地推送前，先在 GitHub 上将 <code>main</code> 分支重命名为 <code>legacy-deployed-site</code> 或类似名称。这样可以保留旧的已部署内容以作参考。</li>
+</ol>
+</li>
+<li><strong>不推荐但可行：强制推送覆盖</strong> (如果你确定不再需要 <code>main</code> 分支上的旧静态文件历史)<br>这种方法会清除 <code>main</code> 分支的现有历史。</li>
+</ul>
+</li>
+<li><p><strong>关联本地仓库到远程</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git remote add origin https://github.com/pistachioss/pistachioss.github.io.git</span><br></pre></td></tr></table></figure>
+<p>如果提示 <code>remote origin already exists.</code>，说明之前 <code>.deploy_git</code> 可能已经设置过。你可以先移除旧的：<code>git remote rm origin</code>，然后再执行上面的 <code>add</code> 命令。</p>
+</li>
+<li><p><strong>推送源代码到 <code>main</code> 分支</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git push -u origin main</span><br></pre></td></tr></table></figure>
+<p>如果远程 <code>main</code> 分支不存在（因为你可能在上一步删除了或重命名了），这个命令会自动创建它。如果远程 <code>main</code> 存在且历史不同（比如你没有清空它），你可能需要强制推送 <code>git push -u -f origin main</code>，但请确保你明白强制推送的后果。</p>
+</li>
+</ol>
+<p><strong>阶段四：设置 GitHub Actions 自动部署</strong></p>
+<ol>
+<li><p><strong>在本地博客根目录创建 GitHub Actions workflow 文件</strong>：<br>创建文件夹和文件：<code>.github/workflows/deploy.yml</code></p>
+</li>
+<li><p><strong>编辑 <code>deploy.yml</code> 文件</strong>，填入以下内容：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Build</span> <span class="string">and</span> <span class="string">Deploy</span> <span class="string">Hexo</span> <span class="string">Blog</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">main</span> <span class="comment"># 当 main 分支有 push 操作时触发</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">build-and-deploy:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span> <span class="comment"># 使用最新的 ubuntu 系统作为运行环境</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Checkout</span> <span class="string">source</span> <span class="string">code</span> <span class="comment"># 步骤1: 拉取 main 分支的源代码</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/checkout@v3</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Setup</span> <span class="string">Node.js</span> <span class="comment"># 步骤2: 设置 Node.js 环境</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/setup-node@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">node-version:</span> <span class="string">&#x27;18&#x27;</span> <span class="comment"># 根据你的 Hexo 版本和依赖选择合适的 Node.js 版本 (e.g., 16, 18, 20)</span></span><br><span class="line">          <span class="attr">cache:</span> <span class="string">&#x27;npm&#x27;</span> <span class="comment"># 缓存 npm 依赖，加快后续构建速度</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Install</span> <span class="string">Dependencies</span> <span class="comment"># 步骤3: 安装项目依赖</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">npm</span> <span class="string">install</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Build</span> <span class="string">Hexo</span> <span class="comment"># 步骤4: 生成静态文件</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">npx</span> <span class="string">hexo</span> <span class="string">clean</span> <span class="string">&amp;&amp;</span> <span class="string">npx</span> <span class="string">hexo</span> <span class="string">generate</span> <span class="comment"># 或者 npm run build (如果你在 package.json 中定义了)</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">to</span> <span class="string">gh-pages</span> <span class="comment"># 步骤5: 部署到 gh-pages 分支</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">peaceiris/actions-gh-pages@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">github_token:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.GITHUB_TOKEN</span> <span class="string">&#125;&#125;</span> <span class="comment"># GitHub Action 自动提供的 token</span></span><br><span class="line">          <span class="attr">publish_dir:</span> <span class="string">./public</span> <span class="comment"># Hexo 生成的静态文件目录</span></span><br><span class="line">          <span class="attr">publish_branch:</span> <span class="string">gh-pages</span> <span class="comment"># 推送到的目标分支</span></span><br><span class="line">          <span class="comment"># cname: your.custom.domain.com # 如果你没有在 source/CNAME 添加文件，可以在这里指定</span></span><br><span class="line">                                          <span class="comment"># 但推荐使用 source/CNAME 文件的方式</span></span><br><span class="line">          <span class="attr">user_name:</span> <span class="string">&#x27;github-actions[bot]&#x27;</span> <span class="comment"># 提交者名称</span></span><br><span class="line">          <span class="attr">user_email:</span> <span class="string">&#x27;github-actions[bot]@users.noreply.github.com&#x27;</span> <span class="comment"># 提交者邮箱</span></span><br><span class="line">          <span class="attr">commit_message:</span> <span class="string">&#x27;Deploy: $&#123;&#123; github.event.head_commit.message &#125;&#125;&#x27;</span> <span class="comment"># 自定义提交信息</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>提交并推送 workflow 文件</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git add .github/workflows/deploy.yml</span><br><span class="line">git commit -m <span class="string">&quot;Add GitHub Actions workflow for deployment&quot;</span></span><br><span class="line">git push origin main</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p><strong>阶段五：GitHub Pages 设置和验证</strong></p>
+<ol>
+<li><p><strong>更改 GitHub Pages 部署源</strong>：</p>
+<ul>
+<li>进入你的 GitHub 仓库 <code>pistachioss/pistachioss.github.io</code>。</li>
+<li>点击 “Settings” (设置)。</li>
+<li>在左侧导航栏选择 “Pages”。</li>
+<li>在 “Build and deployment” -&gt; “Source” 部分，选择 “Deploy from a branch”。</li>
+<li>在 “Branch” 部分，选择 <code>gh-pages</code> 分支和 <code>/(root)</code> 目录。</li>
+<li>点击 “Save”。</li>
+</ul>
+</li>
+<li><p><strong>检查自定义域名 (Custom domain)</strong>：</p>
+<ul>
+<li>在 “Pages” 设置页面，向下滚动到 “Custom domain” 部分。</li>
+<li>你的域名 <code>your.custom.domain.com</code> 应该仍然在此处列出。</li>
+<li>如果它丢失了，重新输入并保存。GitHub 可能会重新验证 DNS 设置。</li>
+<li>确保 “Enforce HTTPS” 是勾选的。</li>
+</ul>
+</li>
+<li><p><strong>触发 Action 并观察</strong>：</p>
+<ul>
+<li>你刚才推送 <code>deploy.yml</code> 到 <code>main</code> 分支的操作应该已经自动触发了 GitHub Action。</li>
+<li>进入仓库的 “Actions” 标签页，你应该能看到一个正在运行或已完成的 workflow。</li>
+<li>点击进去查看详细日志，确保每一步都成功执行，特别是最后部署到 <code>gh-pages</code> 分支的步骤。</li>
+</ul>
+</li>
+<li><p><strong>验证部署</strong>：</p>
+<ul>
+<li>等待 Action 完成后（可能需要几分钟），访问你的自定义域名。</li>
+<li>如果一切顺利，你应该能看到你的博客。首次从 <code>gh-pages</code> 部署可能需要一点时间让 GitHub Pages 更新。</li>
+</ul>
+</li>
+</ol>
+<p><strong>迁移完成！</strong></p>
+<p><strong>后续维护：</strong><br>以后，你只需要在本地修改你的 Hexo 博客内容（写新文章、修改主题等），然后将更改 <code>commit</code> 并 <code>push</code> 到 <code>main</code> 分支。GitHub Actions 会自动完成构建和部署到 <code>gh-pages</code> 分支的后续所有工作。</p>
+<hr>
+<p><strong>总结一下关键点：</strong></p>
+<ul>
+<li><strong>博客源代码</strong> (Markdown 文件, 主题配置, Hexo <code>_config.yml</code> 等) 现在位于 <code>pistachioss.github.io</code> 仓库的 <code>main</code> 分支。</li>
+<li><strong>生成的静态 HTML&#x2F;CSS&#x2F;JS 文件</strong> 会由 GitHub Actions 自动构建并推送到 <code>pistachioss.github.io</code> 仓库的 <code>gh-pages</code> 分支。</li>
+<li><strong>GitHub Pages</strong> 设置为从 <code>gh-pages</code> 分支提供服务。</li>
+<li><strong>自定义域名</strong> 通过 <code>source/CNAME</code> 文件（或 Action 配置）和 GitHub Pages 设置来保持。</li>
+</ul>
+<p>这个方案应该能满足你的需求。如果在操作过程中遇到任何问题，欢迎追问。</p>
+	  
+	</div>
+
+	<!-- recommended posts -->
+	
+
+	<div>
+  	<center>
+	<div class="pagination">
+<ul class="pagination">
+	 
+				
+		<li class="prev"><a href="/2020/05/12/AbstractQueuedSynchronizer/" class="alignleft prev"><i class="fa fa-arrow-circle-o-left"></i>Prev</a></li>
+  		
+
+        <li><a href="/archives"><i class="fa fa-archive"></i>Archive</a></li>
+
+		
+          <li class="next"><a href="/2020/01/09/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" class="alignright next">Next<i class="fa fa-arrow-circle-o-right"></i></a></li>
+        
+	
+</ul>
+</div>
+
+    </center>
+	</div>
+
+    <!-- share -->
+    
+        
+    <div class="bdsharebuttonbox">
+        <a href="#" class="bds_more" data-cmd="more"></a>
+        <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+        <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+        <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+        <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+        <a href="#" class="bds_linkedin" data-cmd="linkedin" title="分享到linkedin"></a>
+        <a href="#" class="bds_evernotecn" data-cmd="evernotecn" title="分享到印象笔记"></a>
+        <a href="#" class="bds_youdao" data-cmd="youdao" title="分享到有道云笔记"></a>
+        <a href="#" class="bds_copy" data-cmd="copy" title="分享到复制网址"></a>
+    </div>
+    <script>
+        window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"24"},"share":{}};
+        with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+    </script>
+
+
+        
+
+    
+	
+	<!-- comment -->
+	
+<section id="comment">
+  <h2 class="title">Comments</h2>
+  
+     <div id="gitalk-container"></div>
+	 <script type="text/javascript">
+	 // 拼接 body 内容
+	    const decodedPageUrl = decodeURI(location.href)
+		const issueBody = `${decodedPageUrl} \n\n Hexo 迁移自动化部署`;
+        const gitalk = new Gitalk({
+           clientID: 'Ov23liTbPXkD3NfIs0KX',
+           clientSecret: '4e727600e55d74a25577449de551363030ee5a0e',
+           repo: 'pistachioss.github.io',      // The repository of store comments,
+           owner: 'pistachioss',
+           admin: ['pistachioss'],
+           id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50 
+		   title: 'Hexo Github Action部署', // 使用文章标题作为 Issue 的标题
+		   body: issueBody, // 拼接好的 body
+		   distractionFreeMode: false  // Facebook-like distraction free mode
+         });
+
+         gitalk.render('gitalk-container');
+	 </script>
+  
+</section>
+
+
+	</div> <!-- col-md-9/col-md-12 -->
+		
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2020-02-10 
+	</div>
+	
+
+	<!-- categories -->
+    
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
+    <ul id="categorys" class="tag_box list-unstyled collapse in">
+          
+  <li>
+    <li><a href="/categories/Hexo/">Hexo<span>1</span></a></li>
+  </li>
+
+    </ul>
+	</div>
+	
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/wiki/">wiki<span>19</span></a></li>
+
+    </ul>
+	</div>
+	
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	   <a data-toggle="collapse" data-target="#toc"><i class="fa fa-bars"></i></a>
+	   <div id="toc" class="toc collapse in">
+			
+		</div>
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+	</div>
+		
+
+</div><!-- row -->
+
+
+
+
+    </div>
+  </div>
+  <div class="container-narrow">
+    <footer> <p>
+  &copy; 2025 shineXGO
+  
+      with help from <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a>. Theme by <a target="_blank" rel="noopener" href="http://github.com/wzpan/hexo-theme-freemind/">Freemind</a>.    
+</p> </footer>
+  </div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>▲</span> 
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+
+<!-- syntax highlighting -->
+
+
+</body>
+</html>

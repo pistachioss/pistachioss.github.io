@@ -1,0 +1,349 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Hexo | pistachioss</title>
+  <meta name="author" content="shineXGO">
+  
+  <meta name="description" content="pistachioss delicious">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="pistachioss"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="pistachioss" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/themes/cerulean.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight-default.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/comment.css" media="screen" type="text/css">
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.9/es5-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-sham.min.js"></script>
+  <![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+  
+  
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+	<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  
+  <!-- analytics -->
+  
+
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <nav id="main-nav" class="navbar navbar-inverse navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+	<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+       <a class="navbar-brand" href="/">pistachioss</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="about me">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+    <div class="content">
+      
+
+<!-- title -->
+<div class="page-header page-header-inverse ">
+  <h1 class="archive-title-category title title-inverse ">Hexo</h1>
+</div>
+
+<div class="row page">
+  <!-- cols -->
+  
+  <div class="col-md-9">
+	
+
+	  <div id="top_search"></div>
+
+      
+         <!-- display as entry -->
+	     <div class="mypage">
+	       
+		     
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2020-02-10 </div>
+			<div class="article-title"><a href="/2020/02/10/Hexo%20%E5%8D%9A%E5%AE%A2%E8%BF%81%E7%A7%BB%E4%B8%8E%20GitHub%20Actions%20%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/" title="Hexo 迁移自动化部署">Hexo Github Action部署</a></div>
+		</h3>
+	
+
+
+		     
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>根据目前的状况和迁移需求，整理了一份迁移方案。</p>
+<p><strong>核心思路：</strong></p>
+<ol>
+<li><strong>备份</strong>：确保现有内容安全。</li>
+<li><strong>本地准备</strong>：将你的 Hexo 博客源代码目录初始化为 Git 仓库。</li>
+<li><strong>远程仓库准备</strong>：清理或重命名 <code>pistachioss.github.io</code> 仓库的 <code>main</code> 分支，因为它目前存放的是静态文件，未来要存放源代码。</li>
+<li><strong>推送源代码</strong>：将本地 Hexo 源代码推送到 <code>pistachioss.github.io</code> 仓库的 <code>main</code> 分支。</li>
+<li><strong>配置 GitHub Actions</strong>：创建 workflow 文件，实现自动拉取 <code>main</code> 分支代码、构建、然后推送到 <code>gh-pages</code> 分支。</li>
+<li><strong>GitHub Pages 设置</strong>：更改 GitHub Pages 的部署源为 <code>gh-pages</code> 分支。</li>
+<li><strong>CNAME 处理</strong>：确保自定义域名配置正确。</li>
+</ol>
+<hr>
+<p><strong>详细迁移步骤：</strong></p>
+<p><strong>阶段一：准备工作和备份</strong></p>
+<ol>
+<li><p><strong>备份现有已部署的网站（可选但推荐）</strong>：<br>虽然你的目标是 <code>gh-pages</code> 分支，但以防万一，可以先将 <code>pistachioss.github.io</code> 仓库 <code>main</code> 分支（当前存放静态文件的分支）的内容克隆到本地另一文件夹作为备份。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/pistachioss/pistachioss.github.io.git backup_deployed_site</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>备份你的 Hexo 博客根目录</strong>：<br>直接复制整个博客根目录文件夹到另一个安全位置。这是最重要的备份，包含了你的所有源文件。</p>
+</li>
+</ol>
+<p><strong>阶段二：本地 Hexo 源代码 Git 初始化与配置</strong></p>
+<ol>
+<li><p><strong>进入你的 Hexo 博客根目录</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /path/to/your/hexo-blog-root</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>删除 <code>.deploy_git</code> 文件夹（可选但推荐清理）</strong>：<br>既然不再使用 <code>hexo deploy</code> 的默认方式，可以删除这个文件夹。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">rm</span> -rf .deploy_git</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>初始化 Git 仓库</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git init</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>创建 <code>.gitignore</code> 文件</strong>：<br>在博客根目录下创建 <code>.gitignore</code> 文件，告诉 Git 哪些文件不需要版本控制。内容至少应包括：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">.DS_Store</span><br><span class="line">Thumbs.db</span><br><span class="line">db.json</span><br><span class="line">*.log</span><br><span class="line">node_modules/</span><br><span class="line">public/</span><br><span class="line">.deploy*/</span><br><span class="line"># 如果你的主题是通过 git clone 下载的，并且你不希望管理主题的 .git 历史，</span><br><span class="line"># 可以加上 themes/&lt;your-theme-name&gt;/.git/</span><br><span class="line"># 或者直接在添加主题时，删除主题文件夹内的 .git 文件夹</span><br></pre></td></tr></table></figure>
+<p><em>注意：如果你的主题是通过 <code>git submodule</code> 添加的，则不应忽略主题文件夹。但从你的描述看，似乎不是这种情况。</em></p>
+</li>
+<li><p><strong>添加 CNAME 文件到 <code>source</code> 目录</strong>：<br>为了让 Hexo 在生成静态文件时包含你的自定义域名配置，在博客根目录下的 <code>source</code> 文件夹中创建一个名为 <code>CNAME</code> (无后缀) 的文件。<br>文件内容就是你的自定义域名，例如：<br><code>your.custom.domain.com</code> (替换成你自己的域名)</p>
+</li>
+<li><p><strong>修改 Hexo 配置文件 <code>_config.yml</code> (可选，但建议检查)</strong>：<br>确保 <code>url</code> 和 <code>root</code> 配置正确，特别是 <code>url</code> 应该指向你的自定义域名。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">url:</span> <span class="string">https://your.custom.domain.com</span>  <span class="comment"># 替换成你的域名</span></span><br><span class="line"><span class="attr">root:</span> <span class="string">/</span></span><br></pre></td></tr></table></figure>
+<p><code>deploy</code> 部分的配置对于 GitHub Actions 来说不是必需的了，你可以注释掉或删除它。</p>
+</li>
+<li><p><strong>添加所有文件到 Git 并提交</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git add .</span><br><span class="line">git commit -m <span class="string">&quot;Initial commit of Hexo source code&quot;</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<p><strong>阶段三：远程 GitHub 仓库 (<code>pistachioss.github.io</code>) 配置</strong></p>
+	
+	</div>
+  <a type="button" href="/2020/02/10/Hexo%20%E5%8D%9A%E5%AE%A2%E8%BF%81%E7%A7%BB%E4%B8%8E%20GitHub%20Actions%20%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/#more" class="btn btn-default more">Read More</a>
+</div>
+
+	       
+	     </div>
+	     <div>
+	       <center>
+	         <div class="pagination">
+<ul class="pagination">
+	 
+</ul>
+</div>
+
+	       </center>
+	     </div>	
+      
+
+</div> <!-- col-md-9/col-md-12 -->
+
+
+<div class="col-md-3">
+	<div id="sidebar">
+	
+			
+  <div id="site_search">
+   <div class="form-group">
+    <input type="text" id="local-search-input" name="q" results="0" placeholder="Search" class="st-search-input st-default-search-input form-control"/>
+   </div>  
+  <div id="local-search-result"></div>
+  </div>
+
+
+		
+			<div class="widget">
+    
+</div>
+
+		
+			
+	<div class="widget">
+		<h4>Categories</h4>
+		<ul class="tag_box inline list-unstyled">
+		
+			<li><a href="/categories/Hexo/">Hexo<span>1</span></a></li>
+		
+			<li><a href="/categories/Java/">Java<span>2</span></a></li>
+		
+			<li><a href="/categories/ShardingSphere/">ShardingSphere<span>1</span></a></li>
+		
+			<li><a href="/categories/Spring/">Spring<span>1</span></a></li>
+		
+			<li><a href="/categories/blog/">blog<span>1</span></a></li>
+		
+			<li><a href="/categories/v2ray/cloudflare/">cloudflare<span>1</span></a></li>
+		
+			<li><a href="/categories/llm/">llm<span>1</span></a></li>
+		
+			<li><a href="/categories/netty/">netty<span>1</span></a></li>
+		
+			<li><a href="/categories/v2ray/">v2ray<span>1</span></a></li>
+		
+			<li><a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程<span>9</span></a></li>
+		
+			<li><a href="/categories/%E7%9B%91%E6%8E%A7/">监控<span>1</span></a></li>
+		
+		</ul>
+	</div>
+
+		
+			
+	<div class="widget">
+		<h4>Tag Cloud</h4>
+		<ul class="tag_box inline list-unstyled">		
+		
+			<li><a href="/tags/wiki/">wiki<span>19</span></a></li>
+		
+		 
+		</ul>
+	</div>
+
+
+		
+			
+<div class="widget">
+  <h4>Recent Posts</h4>
+  <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2025/03/11/llm-agent-java/"  title="基于springboot开发agent" ><i class="fa fa-file-o"></i>llm-agent工具开发</a>
+      </li>
+    
+      <li>
+        <a href="/2024/10/09/prometheus-grafana/"  title="Prometheus、Grafana " ><i class="fa fa-file-o"></i>Prometheus 数据类型解析与 Grafana 制图</a>
+      </li>
+    
+      <li>
+        <a href="/2024/09/01/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/"  title="Sharding分库分表实践、主从读取" ><i class="fa fa-file-o"></i>Sharding分库分表实践</a>
+      </li>
+    
+      <li>
+        <a href="/2024/02/04/zgc/"  title="ZGC" ><i class="fa fa-file-o"></i>ZGC 介绍</a>
+      </li>
+    
+      <li>
+        <a href="/2022/06/08/spring-ioc/"  title="Spring启动" ><i class="fa fa-file-o"></i>Spring IOC 容器源码分析</a>
+      </li>
+    
+  </ul>
+</div>
+
+		
+	</div> <!-- sidebar -->
+</div> <!-- col-md-3 -->
+
+
+
+
+    </div>
+  </div>
+  <div class="container-narrow">
+    <footer> <p>
+  &copy; 2025 shineXGO
+  
+      with help from <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a>. Theme by <a target="_blank" rel="noopener" href="http://github.com/wzpan/hexo-theme-freemind/">Freemind</a>.    
+</p> </footer>
+  </div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>▲</span> 
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+
+<!-- syntax highlighting -->
+
+
+</body>
+</html>

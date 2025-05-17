@@ -154,6 +154,12 @@
 		
             
 		
+            
+		
+            
+		
+            
+		
         
         <!-- render other articles -->
         
@@ -253,6 +259,60 @@
 	
 	<!-- display as entry -->	
 		<h3 class="title">
+			<div class="date"> 2024-09-01 </div>
+			<div class="article-title"><a href="/2024/09/01/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/" title="Sharding分库分表实践、主从读取">Sharding分库分表实践</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>好的，我们来详细讲解如何在 Spring Boot 项目中实战分库分表与读写分离。我们将选用业界广泛使用的 <strong>ShardingSphere</strong>（其 JDBC 驱动形式，即原 Sharding-JDBC）作为核心框架，因为它与 Spring Boot 集成良好，功能强大且社区活跃。</p>
+<h2 id="目标场景"><a href="#目标场景" class="headerlink" title="目标场景:"></a><strong>目标场景:</strong></h2><ol>
+<li><strong>分库 (Vertical&#x2F;Horizontal Sharding - Database Level):</strong> 将原来的单个 <code>order</code> 库拆分成两个物理库：<code>ds_0</code> 和 <code>ds_1</code>。<code>t_order</code> 和 <code>t_order_detail</code> 两张表的数据将根据某个规则（例如 <code>order_id</code> 或 <code>user_id</code>）分散到这两个库中。注意：这里不是垂直分库（一个库放 order，一个库放 detail），而是水平分库，每个库都有 <code>t_order</code> 和 <code>t_order_detail</code> 的一部分数据。</li>
+<li><strong>分表 (Horizontal Sharding - Table Level):</strong> 在每个物理库 (<code>ds_0</code>, <code>ds_1</code>) 内部，<code>t_order</code> 表再分成两张物理表 <code>t_order_0</code>, <code>t_order_1</code>；<code>t_order_detail</code> 表也分成 <code>t_order_detail_0</code>, <code>t_order_detail_1</code>。分表规则通常也与 <code>order_id</code> 相关。</li>
+<li><strong>读写分离 (Read&#x2F;Write Splitting):</strong> 为每个分片后的物理库（<code>ds_0</code>, <code>ds_1</code>）配置主从数据库。写入操作（INSERT, UPDATE, DELETE）路由到主库，读取操作（SELECT）路由到从库，以提高读取性能和可用性。</li>
+<li><strong>绑定表 (Binding Tables):</strong> <code>t_order</code> 和 <code>t_order_detail</code> 是典型的关联表，它们应该始终位于同一个数据库分片和对应的表分片中（例如，<code>order_id</code> 为 100 的订单及其详情，如果 <code>t_order</code> 路由到 <code>ds_0.t_order_0</code>，那么 <code>t_order_detail</code> 也应该路由到 <code>ds_0.t_order_detail_0</code>）。ShardingSphere 支持配置绑定表来保证这一点。</li>
+<li><strong>分布式主键:</strong> 使用 ShardingSphere 提供的 Snowflake 算法自动生成全局唯一的 <code>order_id</code>。</li>
+</ol>
+<h2 id="技术选型"><a href="#技术选型" class="headerlink" title="技术选型:**"></a>技术选型:**</h2><ul>
+<li><strong>核心框架:</strong> Apache ShardingSphere (via <code>shardingsphere-jdbc-core-spring-boot-starter</code>)</li>
+<li><strong>数据库:</strong> MySQL (演示需要至少 4 个实例：2 主 2 从)</li>
+<li><strong>持久层:</strong> MyBatis (使用 <code>mybatis-spring-boot-starter</code>，JPA 也可以类似配置)</li>
+<li><strong>构建工具:</strong> Maven</li>
+<li><strong>开发环境:</strong> Spring Boot (e.g., 2.7.x or 3.x), Java 8+</li>
+</ul>
+<hr>
+<h2 id="步骤详解"><a href="#步骤详解" class="headerlink" title="步骤详解:**"></a>步骤详解:**</h2><h3 id="第一步：环境准备与数据库设置"><a href="#第一步：环境准备与数据库设置" class="headerlink" title="第一步：环境准备与数据库设置**"></a>第一步：环境准备与数据库设置**</h3><ol>
+<li><p><strong>安装 MySQL:</strong> 确保你有可用的 MySQL 服务。为了模拟读写分离和分库，你需要创建 4 个数据库实例（或在同一实例中创建 4 个 database）。我们假设：</p>
+<ul>
+<li><code>ds_0_master</code>: 主库 0 (写入 + 可能的读取)</li>
+<li><code>ds_0_slave</code>: 从库 0 (只读)</li>
+<li><code>ds_1_master</code>: 主库 1 (写入 + 可能的读取)</li>
+<li><code>ds_1_slave</code>: 从库 1 (只读)</li>
+</ul>
+<p><em>注意:</em> 实际生产环境中，你需要配置 MySQL 的主从复制，确保 <code>ds_0_slave</code> 复制 <code>ds_0_master</code>，<code>ds_1_slave</code> 复制 <code>ds_1_master</code>。本示例代码不包含 MySQL 复制的配置，仅演示 ShardingSphere 如何连接和路由。</p>
+</li>
+<li><p><strong>创建数据库和表:</strong> 在对应的 MySQL 实例上执行以下 SQL。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 在 ds_0_master 和 ds_0_slave 上执行 (假设已创建好数据库 ds_0)</span></span><br><span class="line"><span class="comment">-- USE ds_0; -- 如果需要指定数据库</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE TABLE</span> `t_order_0` (</span><br><span class="line">  `order_id` <span class="type">bigint</span> <span class="keyword">NOT NULL</span>,</span><br><span class="line">  `user_id` <span class="type">int</span> <span class="keyword">NOT NULL</span>,</span><br><span class="line">  `order_no` <span class="type">varchar</span>(<span class="number">100</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  `amount` <span class="type">decimal</span>(<span class="number">10</span>,<span class="number">2</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  `create_time` datetime <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span>,</span><br><span class="line">  <span class="keyword">PRIMARY KEY</span> (`order_id`)</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8mb4;</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE TABLE</span> `t_order_1` (</span><br><span class="line">  `order_id` <span class="type">bigint</span> <span class="keyword">NOT NULL</span>,</span><br><span class="line">  `user_id` <span class="type">int</span> <span class="keyword">NOT NULL</span>,</span><br><span class="line">  `order_no` <span class="type">varchar</span>(<span class="number">100</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  `amount` <span class="type">decimal</span>(<span class="number">10</span>,<span class="number">2</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  `create_time` datetime <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span>,</span><br><span class="line">  <span class="keyword">PRIMARY KEY</span> (`order_id`)</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8mb4;</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE TABLE</span> `t_order_detail_0` (</span><br><span class="line">  `detail_id` <span class="type">bigint</span> <span class="keyword">NOT NULL</span> AUTO_INCREMENT, <span class="comment">-- 详情ID通常用自增，或也可用分布式ID</span></span><br><span class="line">  `order_id` <span class="type">bigint</span> <span class="keyword">NOT NULL</span>,</span><br><span class="line">  `item_name` <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  `quantity` <span class="type">int</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  <span class="keyword">PRIMARY KEY</span> (`detail_id`),</span><br><span class="line">  KEY `idx_order_id` (`order_id`) <span class="comment">-- 必须有 order_id 索引，用于关联查询和路由</span></span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8mb4;</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE TABLE</span> `t_order_detail_1` (</span><br><span class="line">  `detail_id` <span class="type">bigint</span> <span class="keyword">NOT NULL</span> AUTO_INCREMENT,</span><br><span class="line">  `order_id` <span class="type">bigint</span> <span class="keyword">NOT NULL</span>,</span><br><span class="line">  `item_name` <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  `quantity` <span class="type">int</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  <span class="keyword">PRIMARY KEY</span> (`detail_id`),</span><br><span class="line">  KEY `idx_order_id` (`order_id`)</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8mb4;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 在 ds_1_master 和 ds_1_slave 上执行 (假设已创建好数据库 ds_1)</span></span><br><span class="line"><span class="comment">-- USE ds_1; -- 如果需要指定数据库</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 重复上面的 CREATE TABLE 语句，创建 ds_1 库中的 t_order_0, t_order_1, t_order_detail_0, t_order_detail_1</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> `t_order_0` ( ... );</span><br><span class="line"><span class="keyword">CREATE TABLE</span> `t_order_1` ( ... );</span><br><span class="line"><span class="keyword">CREATE TABLE</span> `t_order_detail_0` ( ... );</span><br><span class="line"><span class="keyword">CREATE TABLE</span> `t_order_detail_1` ( ... );</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="第二步：创建-Spring-Boot-项目并添加依赖"><a href="#第二步：创建-Spring-Boot-项目并添加依赖" class="headerlink" title="第二步：创建 Spring Boot 项目并添加依赖**"></a>第二步：创建 Spring Boot 项目并添加依赖**</h2>
+	
+	</div>
+  <a type="button" href="/2024/09/01/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
 			<div class="date"> 2024-02-04 </div>
 			<div class="article-title"><a href="/2024/02/04/zgc/" title="ZGC">ZGC 介绍</a></div>
 		</h3>
@@ -312,6 +372,51 @@
 	
 	</div>
   <a type="button" href="/2022/06/08/spring-ioc/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2022-03-04 </div>
+			<div class="article-title"><a href="/2022/03/04/v2ray_x509_error/" title="Cloudflare v2ray一直 509 certificate signed by unknown authority">509 certificate signed by unknown authority</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>“x509: certificate signed by unknown authority” 错误表明 Nginx 或 V2Ray 客户端在验证 Cloudflare 源服务器证书（Origin Server Certificate）时，无法信任该证书的颁发机构（CA）。这通常是因为证书配置不正确、Cloudflare 的 SSL&#x2F;TLS 设置有误，或者缺少必要的根证书&#x2F;中间证书。本回答将针对你的 Cloudflare + V2Ray 配置（基于 WebSocket + TLS），提供详细的排查和解决步骤，帮助你修复这个错误。</p>
+<h3 id="错误原因分析"><a href="#错误原因分析" class="headerlink" title="错误原因分析"></a><strong>错误原因分析</strong></h3><p>在 Cloudflare + V2Ray 的场景中，“certificate signed by unknown authority” 错误可能由以下原因引起：</p>
+<ol>
+<li><strong>源服务器证书未正确配置</strong>：Cloudflare 源服务器证书未正确安装到 Nginx，或文件内容有误。</li>
+<li><strong>SSL&#x2F;TLS 模式问题</strong>：Cloudflare 的 SSL&#x2F;TLS 模式设置为 <strong>Full (strict)</strong>，但 VPS 未使用 Cloudflare 签发的证书，或者证书链不完整。</li>
+<li><strong>缺少 Cloudflare 根证书</strong>：如果启用了 <strong>Authenticated Origin Pulls</strong>，Nginx 需要 Cloudflare 的根证书来验证边缘服务器的客户端证书。</li>
+<li><strong>客户端配置错误</strong>：V2Ray 客户端的 TLS 设置（如 SNI）与服务器证书不匹配。</li>
+<li><strong>证书和私钥不匹配</strong>：Nginx 使用的证书和私钥不对应，导致 TLS 握手失败。</li>
+</ol>
+<hr>
+<h3 id="修复步骤"><a href="#修复步骤" class="headerlink" title="修复步骤"></a><strong>修复步骤</strong></h3><p>以下是针对 Cloudflare + V2Ray 配置的逐步排查和解决方法，假设你的 VPS 使用 Nginx 和 V2Ray，域名是 <code>v2ray.example.com</code>。</p>
+<h4 id="步骤-1：检查-Nginx-错误日志"><a href="#步骤-1：检查-Nginx-错误日志" class="headerlink" title="步骤 1：检查 Nginx 错误日志"></a><strong>步骤 1：检查 Nginx 错误日志</strong></h4><ol>
+<li>查看 Nginx 错误日志，获取详细错误信息：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /var/log/nginx/error.log</span><br></pre></td></tr></table></figure></li>
+<li>查找类似以下的错误：<ul>
+<li><code>x509: certificate signed by unknown authority</code></li>
+<li><code>SSL: error:0B080074:x509 certificate routines</code></li>
+</ul>
+</li>
+<li>记录具体错误上下文（例如错误发生在 TLS 握手还是客户端验证阶段）。</li>
+</ol>
+<h4 id="步骤-2：验证-Cloudflare-源服务器证书"><a href="#步骤-2：验证-Cloudflare-源服务器证书" class="headerlink" title="步骤 2：验证 Cloudflare 源服务器证书"></a><strong>步骤 2：验证 Cloudflare 源服务器证书</strong></h4>
+	
+	</div>
+  <a type="button" href="/2022/03/04/v2ray_x509_error/#more" class="btn btn-default more">Read More</a>
 </div>
 
            
@@ -457,74 +562,6 @@
 
            
 		
-           
-			  
-	
-	<!-- display as entry -->	
-		<h3 class="title">
-			<div class="date"> 2020-06-25 </div>
-			<div class="article-title"><a href="/2020/06/25/java-thread-pool/" title="深度解读 java 线程池设计思想及源码实现">线程池如何理解</a></div>
-		</h3>
-	
-
-
-			  
-<div class="entry">
-
-  <div class="row">
-	
-	
-		<p>我相信大家都看过很多的关于线程池的文章，基本上也是面试的时候必问的，如果你在看过很多文章以后，还是一知半解的，那希望这篇文章能让你真正的掌握好 Java 线程池。</p>
-<p>本文一大重点是源码解析，同时会有少量篇幅介绍线程池设计思想以及作者 Doug Lea 实现过程中的一些巧妙用法。本文还是会一行行关键代码进行分析，目的是为了让那些自己看源码不是很理解的同学可以得到参考。</p>
-<p>线程池是非常重要的工具，如果你要成为一个好的工程师，还是得比较好地掌握这个知识，很多线上问题都是因为没有用好线程池导致的。即使你为了谋生，也要知道，这基本上是面试必问的题目，而且面试官很容易从被面试者的回答中捕捉到被面试者的技术水平。</p>
-<p>本文略长，建议在 pc 上阅读，边看文章边翻源码（Java7 和 Java8 都一样），建议想好好看的读者抽出至少 30 分钟的整块时间来阅读。当然，如果读者仅为面试准备，可以直接滑到最后的<strong>总结</strong>部分。</p>
-<h2 id="总览"><a href="#总览" class="headerlink" title="总览"></a>总览</h2><p>开篇来一些废话。下图是 java 线程池几个相关类的继承结构：</p>
-<p><img src="https://assets.javadoop.com/imgs/20510079/java-thread-pool/1.jpg" alt="1"></p>
-<p>先简单说说这个继承结构，Executor 位于最顶层，也是最简单的，就一个 execute(Runnable runnable) 接口方法定义。</p>
-<p>ExecutorService 也是接口，在 Executor 接口的基础上添加了很多的接口方法，所以<strong>一般来说我们会使用这个接口</strong>。</p>
-<p>然后再下来一层是 AbstractExecutorService，从名字我们就知道，这是抽象类，这里实现了非常有用的一些方法供子类直接使用，之后我们再细说。</p>
-	
-	</div>
-  <a type="button" href="/2020/06/25/java-thread-pool/#more" class="btn btn-default more">Read More</a>
-</div>
-
-           
-		
-           
-			  
-	
-	<!-- display as entry -->	
-		<h3 class="title">
-			<div class="date"> 2020-06-10 </div>
-			<div class="article-title"><a href="/2020/06/10/java-concurrent-queue/" title="什么是队列">线程池队列</a></div>
-		</h3>
-	
-
-
-			  
-<div class="entry">
-
-  <div class="row">
-	
-	
-		<p>最近得空，想写篇文章好好说说 java 线程池问题，我相信很多人都一知半解的，包括我自己在仔仔细细看源码之前，也有许多的不解，甚至有些地方我一直都没有理解到位。</p>
-<p>说到线程池实现，那么就不得不涉及到各种 BlockingQueue 的实现，那么我想就 BlockingQueue 的问题和大家分享分享我了解的一些知识。</p>
-<p>本文没有像之前分析 AQS 那样一行一行源码分析了，不过还是把其中最重要和最难理解的代码说了一遍，所以不免篇幅略长。本文涉及到比较多的 Doug Lea 对 BlockingQueue 的设计思想，希望有心的读者真的可以有一些收获，我觉得自己还是写了一些干货的。</p>
-<p>本文直接参考 Doug Lea 写的 Java doc 和注释，这也是我们在学习 java 并发包时最好的材料了。希望大家能有所思、有所悟，学习 Doug Lea 的代码风格，并将其优雅、严谨的作风应用到我们写的每一行代码中。</p>
-<p><strong>目录：</strong></p>
-<h2 id="BlockingQueue"><a href="#BlockingQueue" class="headerlink" title="BlockingQueue"></a>BlockingQueue</h2><blockquote>
-<p>开篇先介绍下 BlockingQueue 这个接口的规则，后面再看其实现。</p>
-</blockquote>
-<p>首先，最基本的来说， BlockingQueue 是一个<strong>先进先出</strong>的队列（Queue），为什么说是阻塞（Blocking）的呢？是因为 BlockingQueue 支持当获取队列元素但是队列为空时，会阻塞等待队列中有元素再返回；也支持添加元素时，如果队列已满，那么等到队列可以放入新元素时再放入。</p>
-<p>BlockingQueue 是一个接口，继承自 Queue，所以其实现类也可以作为 Queue 的实现来使用，而 Queue 又继承自 Collection 接口。</p>
-<p>BlockingQueue 对插入操作、移除操作、获取元素操作提供了四种不同的方法用于不同的场景中使用：1、抛出异常；2、返回特殊值（null 或 true&#x2F;false，取决于具体的操作）；3、阻塞等待此操作，直到这个操作成功；4、阻塞等待此操作，直到成功或者超时指定时间。总结如下：</p>
-	
-	</div>
-  <a type="button" href="/2020/06/10/java-concurrent-queue/#more" class="btn btn-default more">Read More</a>
-</div>
-
-           
-		
 
 		</div>
 
@@ -578,15 +615,23 @@
 		<h4>Categories</h4>
 		<ul class="tag_box inline list-unstyled">
 		
+			<li><a href="/categories/Hexo/">Hexo<span>1</span></a></li>
+		
 			<li><a href="/categories/Java/">Java<span>2</span></a></li>
+		
+			<li><a href="/categories/ShardingSphere/">ShardingSphere<span>1</span></a></li>
 		
 			<li><a href="/categories/Spring/">Spring<span>1</span></a></li>
 		
 			<li><a href="/categories/blog/">blog<span>1</span></a></li>
 		
+			<li><a href="/categories/v2ray/cloudflare/">cloudflare<span>1</span></a></li>
+		
 			<li><a href="/categories/llm/">llm<span>1</span></a></li>
 		
 			<li><a href="/categories/netty/">netty<span>1</span></a></li>
+		
+			<li><a href="/categories/v2ray/">v2ray<span>1</span></a></li>
 		
 			<li><a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程<span>9</span></a></li>
 		
@@ -601,7 +646,7 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/wiki/">wiki<span>16</span></a></li>
+			<li><a href="/tags/wiki/">wiki<span>19</span></a></li>
 		
 		 
 		</ul>
@@ -623,15 +668,15 @@
       </li>
     
       <li>
+        <a href="/2024/09/01/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/"  title="Sharding分库分表实践、主从读取" ><i class="fa fa-file-o"></i>Sharding分库分表实践</a>
+      </li>
+    
+      <li>
         <a href="/2024/02/04/zgc/"  title="ZGC" ><i class="fa fa-file-o"></i>ZGC 介绍</a>
       </li>
     
       <li>
         <a href="/2022/06/08/spring-ioc/"  title="Spring启动" ><i class="fa fa-file-o"></i>Spring IOC 容器源码分析</a>
-      </li>
-    
-      <li>
-        <a href="/2021/06/14/Threads-And-Locks-md/"  title="Threads-And-Locks" ><i class="fa fa-file-o"></i>深入分析 java 8 编程语言规范：Threads ...</a>
       </li>
     
   </ul>

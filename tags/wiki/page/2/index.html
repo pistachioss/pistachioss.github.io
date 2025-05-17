@@ -121,6 +121,70 @@
 	
 	<!-- display as entry -->	
 		<h3 class="title">
+			<div class="date"> 2020-06-25 </div>
+			<div class="article-title"><a href="/2020/06/25/java-thread-pool/" title="深度解读 java 线程池设计思想及源码实现">线程池如何理解</a></div>
+		</h3>
+	
+
+
+		     
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>我相信大家都看过很多的关于线程池的文章，基本上也是面试的时候必问的，如果你在看过很多文章以后，还是一知半解的，那希望这篇文章能让你真正的掌握好 Java 线程池。</p>
+<p>本文一大重点是源码解析，同时会有少量篇幅介绍线程池设计思想以及作者 Doug Lea 实现过程中的一些巧妙用法。本文还是会一行行关键代码进行分析，目的是为了让那些自己看源码不是很理解的同学可以得到参考。</p>
+<p>线程池是非常重要的工具，如果你要成为一个好的工程师，还是得比较好地掌握这个知识，很多线上问题都是因为没有用好线程池导致的。即使你为了谋生，也要知道，这基本上是面试必问的题目，而且面试官很容易从被面试者的回答中捕捉到被面试者的技术水平。</p>
+<p>本文略长，建议在 pc 上阅读，边看文章边翻源码（Java7 和 Java8 都一样），建议想好好看的读者抽出至少 30 分钟的整块时间来阅读。当然，如果读者仅为面试准备，可以直接滑到最后的<strong>总结</strong>部分。</p>
+<h2 id="总览"><a href="#总览" class="headerlink" title="总览"></a>总览</h2><p>开篇来一些废话。下图是 java 线程池几个相关类的继承结构：</p>
+<p><img src="https://assets.javadoop.com/imgs/20510079/java-thread-pool/1.jpg" alt="1"></p>
+<p>先简单说说这个继承结构，Executor 位于最顶层，也是最简单的，就一个 execute(Runnable runnable) 接口方法定义。</p>
+<p>ExecutorService 也是接口，在 Executor 接口的基础上添加了很多的接口方法，所以<strong>一般来说我们会使用这个接口</strong>。</p>
+<p>然后再下来一层是 AbstractExecutorService，从名字我们就知道，这是抽象类，这里实现了非常有用的一些方法供子类直接使用，之后我们再细说。</p>
+	
+	</div>
+  <a type="button" href="/2020/06/25/java-thread-pool/#more" class="btn btn-default more">Read More</a>
+</div>
+
+	       
+		     
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2020-06-10 </div>
+			<div class="article-title"><a href="/2020/06/10/java-concurrent-queue/" title="什么是队列">线程池队列</a></div>
+		</h3>
+	
+
+
+		     
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>最近得空，想写篇文章好好说说 java 线程池问题，我相信很多人都一知半解的，包括我自己在仔仔细细看源码之前，也有许多的不解，甚至有些地方我一直都没有理解到位。</p>
+<p>说到线程池实现，那么就不得不涉及到各种 BlockingQueue 的实现，那么我想就 BlockingQueue 的问题和大家分享分享我了解的一些知识。</p>
+<p>本文没有像之前分析 AQS 那样一行一行源码分析了，不过还是把其中最重要和最难理解的代码说了一遍，所以不免篇幅略长。本文涉及到比较多的 Doug Lea 对 BlockingQueue 的设计思想，希望有心的读者真的可以有一些收获，我觉得自己还是写了一些干货的。</p>
+<p>本文直接参考 Doug Lea 写的 Java doc 和注释，这也是我们在学习 java 并发包时最好的材料了。希望大家能有所思、有所悟，学习 Doug Lea 的代码风格，并将其优雅、严谨的作风应用到我们写的每一行代码中。</p>
+<p><strong>目录：</strong></p>
+<h2 id="BlockingQueue"><a href="#BlockingQueue" class="headerlink" title="BlockingQueue"></a>BlockingQueue</h2><blockquote>
+<p>开篇先介绍下 BlockingQueue 这个接口的规则，后面再看其实现。</p>
+</blockquote>
+<p>首先，最基本的来说， BlockingQueue 是一个<strong>先进先出</strong>的队列（Queue），为什么说是阻塞（Blocking）的呢？是因为 BlockingQueue 支持当获取队列元素但是队列为空时，会阻塞等待队列中有元素再返回；也支持添加元素时，如果队列已满，那么等到队列可以放入新元素时再放入。</p>
+<p>BlockingQueue 是一个接口，继承自 Queue，所以其实现类也可以作为 Queue 的实现来使用，而 Queue 又继承自 Collection 接口。</p>
+<p>BlockingQueue 对插入操作、移除操作、获取元素操作提供了四种不同的方法用于不同的场景中使用：1、抛出异常；2、返回特殊值（null 或 true&#x2F;false，取决于具体的操作）；3、阻塞等待此操作，直到这个操作成功；4、阻塞等待此操作，直到成功或者超时指定时间。总结如下：</p>
+	
+	</div>
+  <a type="button" href="/2020/06/10/java-concurrent-queue/#more" class="btn btn-default more">Read More</a>
+</div>
+
+	       
+		     
+	
+	<!-- display as entry -->	
+		<h3 class="title">
 			<div class="date"> 2020-06-01 </div>
 			<div class="article-title"><a href="/2020/06/01/hashmap/" title="hashmap">hashmap分析</a></div>
 		</h3>
@@ -259,6 +323,74 @@
 	
 	<!-- display as entry -->	
 		<h3 class="title">
+			<div class="date"> 2020-02-10 </div>
+			<div class="article-title"><a href="/2020/02/10/Hexo%20%E5%8D%9A%E5%AE%A2%E8%BF%81%E7%A7%BB%E4%B8%8E%20GitHub%20Actions%20%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/" title="Hexo 迁移自动化部署">Hexo Github Action部署</a></div>
+		</h3>
+	
+
+
+		     
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>根据目前的状况和迁移需求，整理了一份迁移方案。</p>
+<p><strong>核心思路：</strong></p>
+<ol>
+<li><strong>备份</strong>：确保现有内容安全。</li>
+<li><strong>本地准备</strong>：将你的 Hexo 博客源代码目录初始化为 Git 仓库。</li>
+<li><strong>远程仓库准备</strong>：清理或重命名 <code>pistachioss.github.io</code> 仓库的 <code>main</code> 分支，因为它目前存放的是静态文件，未来要存放源代码。</li>
+<li><strong>推送源代码</strong>：将本地 Hexo 源代码推送到 <code>pistachioss.github.io</code> 仓库的 <code>main</code> 分支。</li>
+<li><strong>配置 GitHub Actions</strong>：创建 workflow 文件，实现自动拉取 <code>main</code> 分支代码、构建、然后推送到 <code>gh-pages</code> 分支。</li>
+<li><strong>GitHub Pages 设置</strong>：更改 GitHub Pages 的部署源为 <code>gh-pages</code> 分支。</li>
+<li><strong>CNAME 处理</strong>：确保自定义域名配置正确。</li>
+</ol>
+<hr>
+<p><strong>详细迁移步骤：</strong></p>
+<p><strong>阶段一：准备工作和备份</strong></p>
+<ol>
+<li><p><strong>备份现有已部署的网站（可选但推荐）</strong>：<br>虽然你的目标是 <code>gh-pages</code> 分支，但以防万一，可以先将 <code>pistachioss.github.io</code> 仓库 <code>main</code> 分支（当前存放静态文件的分支）的内容克隆到本地另一文件夹作为备份。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/pistachioss/pistachioss.github.io.git backup_deployed_site</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>备份你的 Hexo 博客根目录</strong>：<br>直接复制整个博客根目录文件夹到另一个安全位置。这是最重要的备份，包含了你的所有源文件。</p>
+</li>
+</ol>
+<p><strong>阶段二：本地 Hexo 源代码 Git 初始化与配置</strong></p>
+<ol>
+<li><p><strong>进入你的 Hexo 博客根目录</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /path/to/your/hexo-blog-root</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>删除 <code>.deploy_git</code> 文件夹（可选但推荐清理）</strong>：<br>既然不再使用 <code>hexo deploy</code> 的默认方式，可以删除这个文件夹。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">rm</span> -rf .deploy_git</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>初始化 Git 仓库</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git init</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>创建 <code>.gitignore</code> 文件</strong>：<br>在博客根目录下创建 <code>.gitignore</code> 文件，告诉 Git 哪些文件不需要版本控制。内容至少应包括：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">.DS_Store</span><br><span class="line">Thumbs.db</span><br><span class="line">db.json</span><br><span class="line">*.log</span><br><span class="line">node_modules/</span><br><span class="line">public/</span><br><span class="line">.deploy*/</span><br><span class="line"># 如果你的主题是通过 git clone 下载的，并且你不希望管理主题的 .git 历史，</span><br><span class="line"># 可以加上 themes/&lt;your-theme-name&gt;/.git/</span><br><span class="line"># 或者直接在添加主题时，删除主题文件夹内的 .git 文件夹</span><br></pre></td></tr></table></figure>
+<p><em>注意：如果你的主题是通过 <code>git submodule</code> 添加的，则不应忽略主题文件夹。但从你的描述看，似乎不是这种情况。</em></p>
+</li>
+<li><p><strong>添加 CNAME 文件到 <code>source</code> 目录</strong>：<br>为了让 Hexo 在生成静态文件时包含你的自定义域名配置，在博客根目录下的 <code>source</code> 文件夹中创建一个名为 <code>CNAME</code> (无后缀) 的文件。<br>文件内容就是你的自定义域名，例如：<br><code>your.custom.domain.com</code> (替换成你自己的域名)</p>
+</li>
+<li><p><strong>修改 Hexo 配置文件 <code>_config.yml</code> (可选，但建议检查)</strong>：<br>确保 <code>url</code> 和 <code>root</code> 配置正确，特别是 <code>url</code> 应该指向你的自定义域名。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">url:</span> <span class="string">https://your.custom.domain.com</span>  <span class="comment"># 替换成你的域名</span></span><br><span class="line"><span class="attr">root:</span> <span class="string">/</span></span><br></pre></td></tr></table></figure>
+<p><code>deploy</code> 部分的配置对于 GitHub Actions 来说不是必需的了，你可以注释掉或删除它。</p>
+</li>
+<li><p><strong>添加所有文件到 Git 并提交</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git add .</span><br><span class="line">git commit -m <span class="string">&quot;Initial commit of Hexo source code&quot;</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<p><strong>阶段三：远程 GitHub 仓库 (<code>pistachioss.github.io</code>) 配置</strong></p>
+	
+	</div>
+  <a type="button" href="/2020/02/10/Hexo%20%E5%8D%9A%E5%AE%A2%E8%BF%81%E7%A7%BB%E4%B8%8E%20GitHub%20Actions%20%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/#more" class="btn btn-default more">Read More</a>
+</div>
+
+	       
+		     
+	
+	<!-- display as entry -->	
+		<h3 class="title">
 			<div class="date"> 2020-01-09 </div>
 			<div class="article-title"><a href="/2020/01/09/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" title="Java多线程深度剖析">Java多线程深度剖析</a></div>
 		</h3>
@@ -374,15 +506,23 @@
 		<h4>Categories</h4>
 		<ul class="tag_box inline list-unstyled">
 		
+			<li><a href="/categories/Hexo/">Hexo<span>1</span></a></li>
+		
 			<li><a href="/categories/Java/">Java<span>2</span></a></li>
+		
+			<li><a href="/categories/ShardingSphere/">ShardingSphere<span>1</span></a></li>
 		
 			<li><a href="/categories/Spring/">Spring<span>1</span></a></li>
 		
 			<li><a href="/categories/blog/">blog<span>1</span></a></li>
 		
+			<li><a href="/categories/v2ray/cloudflare/">cloudflare<span>1</span></a></li>
+		
 			<li><a href="/categories/llm/">llm<span>1</span></a></li>
 		
 			<li><a href="/categories/netty/">netty<span>1</span></a></li>
+		
+			<li><a href="/categories/v2ray/">v2ray<span>1</span></a></li>
 		
 			<li><a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程<span>9</span></a></li>
 		
@@ -397,7 +537,7 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/wiki/">wiki<span>16</span></a></li>
+			<li><a href="/tags/wiki/">wiki<span>19</span></a></li>
 		
 		 
 		</ul>
@@ -419,15 +559,15 @@
       </li>
     
       <li>
+        <a href="/2024/09/01/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/"  title="Sharding分库分表实践、主从读取" ><i class="fa fa-file-o"></i>Sharding分库分表实践</a>
+      </li>
+    
+      <li>
         <a href="/2024/02/04/zgc/"  title="ZGC" ><i class="fa fa-file-o"></i>ZGC 介绍</a>
       </li>
     
       <li>
         <a href="/2022/06/08/spring-ioc/"  title="Spring启动" ><i class="fa fa-file-o"></i>Spring IOC 容器源码分析</a>
-      </li>
-    
-      <li>
-        <a href="/2021/06/14/Threads-And-Locks-md/"  title="Threads-And-Locks" ><i class="fa fa-file-o"></i>深入分析 java 8 编程语言规范：Threads ...</a>
       </li>
     
   </ul>
