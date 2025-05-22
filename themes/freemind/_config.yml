@@ -22,6 +22,11 @@ menu:
     url: about
     intro: "about me"
     icon: "fa fa-user"
+    # ... 其他菜单项 ...
+  - title: "Pages"
+    url: /my-page-collection/
+    intro: "独立页面。"
+    icon: "fa fa-star"
 
 links:
   - title: Get_Jobs
@@ -45,7 +50,6 @@ widgets:
 - recent_posts
 #- links
 #- rss  # uncomment this to show an RSS button in the sidebar
-
 
 rss: atom.xml
 fancybox: true
