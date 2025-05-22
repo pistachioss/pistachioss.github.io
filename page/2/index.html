@@ -128,6 +128,39 @@
 	
 	<!-- display as entry -->	
 		<h3 class="title">
+			<div class="date"> 2020-07-18 </div>
+			<div class="article-title"><a href="/2020/07/18/java-memory-model/" title="经典面试内存模型">Java的内存模型-并发</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>很久没更新文章了，对隔三差五过来刷更新的读者说声抱歉。</p>
+<p>关于 Java 并发也算是写了好几篇文章了，本文将介绍一些比较基础的内容，注意，阅读本文需要一定的并发基础。</p>
+<p>本文的主要目的是让大家对于并发程序中的重排序、内存可见性以及原子性有一定的了解，同时要能准确理解 synchronized、volatile、final 几个关键字的作用。</p>
+<p>另外，本文还对<strong>双重检查形式的单例模式为什么需要使用 volatile</strong> 做了深入的解释。</p>
+<h2 id="并发三问题"><a href="#并发三问题" class="headerlink" title="并发三问题"></a>并发三问题</h2><p>这节将介绍重排序、内存可见性以及原子性相关的知识，这些也是并发程序为什么难写的原因。</p>
+<h3 id="1-重排序"><a href="#1-重排序" class="headerlink" title="1. 重排序"></a>1. 重排序</h3><p>请读者先在自己的电脑上运行一下以下程序：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">x</span> <span class="operator">=</span> <span class="number">0</span>, y = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">0</span>, b =<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(;;) &#123;</span><br><span class="line">            i++;</span><br><span class="line">            x = <span class="number">0</span>; y = <span class="number">0</span>;</span><br><span class="line">            a = <span class="number">0</span>; b = <span class="number">0</span>;</span><br><span class="line">            <span class="type">CountDownLatch</span> <span class="variable">latch</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CountDownLatch</span>(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">            <span class="type">Thread</span> <span class="variable">one</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    latch.await();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                &#125;</span><br><span class="line">                a = <span class="number">1</span>;</span><br><span class="line">                x = b;</span><br><span class="line">            &#125;);</span><br><span class="line"></span><br><span class="line">            <span class="type">Thread</span> <span class="variable">other</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    latch.await();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                &#125;</span><br><span class="line">                b = <span class="number">1</span>;</span><br><span class="line">                y = a;</span><br><span class="line">            &#125;);</span><br><span class="line">            one.start();other.start();</span><br><span class="line">            latch.countDown();</span><br><span class="line">            one.join();other.join();</span><br><span class="line"></span><br><span class="line">            <span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> <span class="string">&quot;第&quot;</span> + i + <span class="string">&quot;次 (&quot;</span> + x + <span class="string">&quot;,&quot;</span> + y + <span class="string">&quot;）&quot;</span>;</span><br><span class="line">            <span class="keyword">if</span>(x == <span class="number">0</span> &amp;&amp; y == <span class="number">0</span>) &#123;</span><br><span class="line">                System.err.println(result);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                System.out.println(result);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>几秒后，我们就可以得到 x &#x3D;&#x3D; 0 &amp;&amp; y &#x3D;&#x3D; 0 这个结果，仔细看看代码就会知道，如果不发生重排序的话，这个结果是不可能出现的。</p>
+	
+	</div>
+  <a type="button" href="/2020/07/18/java-memory-model/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
 			<div class="date"> 2020-06-25 </div>
 			<div class="article-title"><a href="/2020/06/25/java-thread-pool/" title="深度解读 java 线程池设计思想及源码实现">线程池如何理解</a></div>
 		</h3>
@@ -538,9 +571,11 @@
 		
 			<li><a href="/categories/Java/">Java<span>2</span></a></li>
 		
+			<li><a href="/categories/Spring/Java/">Java<span>1</span></a></li>
+		
 			<li><a href="/categories/ShardingSphere/">ShardingSphere<span>1</span></a></li>
 		
-			<li><a href="/categories/Spring/">Spring<span>1</span></a></li>
+			<li><a href="/categories/Spring/">Spring<span>2</span></a></li>
 		
 			<li><a href="/categories/blog/">blog<span>1</span></a></li>
 		
@@ -566,6 +601,8 @@
 		<ul class="tag_box inline list-unstyled">		
 		
 			<li><a href="/tags/wiki/">wiki<span>19</span></a></li>
+		
+			<li><a href="/tags/Aop/">Aop<span>1</span></a></li>
 		
 		 
 		</ul>
@@ -595,7 +632,7 @@
       </li>
     
       <li>
-        <a href="/2022/06/08/spring-ioc/"  title="Spring启动" ><i class="fa fa-file-o"></i>Spring IOC 容器源码分析</a>
+        <a href="/2023/02/24/spring%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/"  title="Spring动态代理全解析：生成时机、源码脉络与代理类形态" ><i class="fa fa-file-o"></i>Spring动态代理全解析</a>
       </li>
     
   </ul>
