@@ -1,0 +1,510 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring动态代理交互式解析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .nav-link.active {
+            color: white;
+            background-color: #0284c7; /* sky-600 */
+        }
+        .tab-button.active {
+            border-bottom-width: 2px;
+            border-color: #0284c7; /* sky-600 */
+            color: #0369a1; /* sky-700 */
+        }
+        .code-block {
+            background-color: #f1f5f9; /* slate-100 */
+            color: #334155; /* slate-700 */
+            padding: 1rem;
+            border-radius: 0.375rem; /* rounded-md */
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 0.875rem; /* text-sm */
+        }
+        .diagram-step {
+            border: 1px solid #cbd5e1; /* border-slate-300 */
+            padding: 0.75rem; /* p-3 */
+            border-radius: 0.375rem; /* rounded-md */
+            background-color: #f8fafc; /* slate-50 */
+            text-align: center;
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06); /* shadow-sm */
+        }
+        .diagram-arrow {
+            font-size: 1.5rem; /* text-2xl */
+            color: #38bdf8; /* sky-400 */
+            margin: 0 0.5rem; /* mx-2 */
+            align-self: center;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-sky-700">Spring动态代理深度解析</h1>
+                </div>
+                <nav class="hidden md:flex space-x-1">
+                    <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-sky-500 hover:text-white transition-colors">概览</a>
+                    <a href="#timing" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-sky-500 hover:text-white transition-colors">生成时机</a>
+                    <a href="#source-flow" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-sky-500 hover:text-white transition-colors">源码脉络</a>
+                    <a href="#proxy-structure" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-sky-500 hover:text-white transition-colors">代理形态</a>
+                    <a href="#summary" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-sky-500 hover:text-white transition-colors">总结</a>
+                </nav>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-slate-700 hover:text-sky-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-500">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <a href="#overview" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-sky-500 hover:text-white transition-colors">概览</a>
+            <a href="#timing" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-sky-500 hover:text-white transition-colors">生成时机</a>
+            <a href="#source-flow" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-sky-500 hover:text-white transition-colors">源码脉络</a>
+            <a href="#proxy-structure" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-sky-500 hover:text-white transition-colors">代理形态</a>
+            <a href="#summary" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-sky-500 hover:text-white transition-colors">总结</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <section id="overview" class="content-section space-y-6">
+            <h2 class="text-3xl font-semibold text-sky-700 border-b-2 border-sky-200 pb-2">动态代理概览</h2>
+            <p class="text-lg leading-relaxed">
+                欢迎来到Spring动态代理的交互式解析。本部分将向您介绍Spring动态代理的基本概念、为何需要它，以及其主要的实现方式。动态代理是Spring AOP（面向切面编程）的基石，理解它有助于深入掌握Spring框架的核心功能。
+            </p>
+            
+            <article class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-2xl font-medium text-sky-600 mb-3">什么是Spring动态代理?</h3>
+                <p class="text-slate-700 leading-relaxed">
+                    Spring动态代理是一种在运行时动态创建代理对象的技术。这个代理对象可以在不修改原始对象代码的前提下，为原始对象的方法调用添加额外的行为（如日志记录、事务管理、安全检查等）。简单来说，它就像给你的对象找了一个“替身”，你与“替身”交互，而“替身”在执行原始对象功能的基础上，还能帮你处理一些额外的事情。
+                </p>
+            </article>
+
+            <article class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-2xl font-medium text-sky-600 mb-3">为什么需要动态代理?</h3>
+                <ul class="list-disc list-inside text-slate-700 leading-relaxed space-y-2">
+                    <li><strong>实现面向切面编程 (AOP)</strong>：将横切关注点（如日志、事务）从业务逻辑中分离出来，集中管理。</li>
+                    <li><strong>增强代码复用性</strong>：通用的代理逻辑可以应用于多个不同的对象，避免重复代码。</li>
+                    <li><strong>提高代码解耦度</strong>：业务逻辑与非业务逻辑（辅助功能）分离，使代码更清晰、易维护。</li>
+                    <li><strong>提供灵活性和可扩展性</strong>：在运行时动态添加或移除代理行为，无需修改原始类。</li>
+                </ul>
+            </article>
+
+            <article class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-2xl font-medium text-sky-600 mb-3">两种主要实现方式</h3>
+                <p class="text-slate-700 leading-relaxed">Spring主要通过以下两种方式实现动态代理，并会根据目标对象的具体情况自动选择：</p>
+                <div class="mt-4 grid md:grid-cols-2 gap-4">
+                    <div class="border border-sky-200 p-4 rounded-md">
+                        <h4 class="font-semibold text-lg text-sky-700">JDK动态代理</h4>
+                        <p class="text-sm text-slate-600 mt-1">基于接口。要求目标对象必须实现一个或多个接口。代理类也实现相同接口。</p>
+                    </div>
+                    <div class="border border-sky-200 p-4 rounded-md">
+                        <h4 class="font-semibold text-lg text-sky-700">CGLIB代理</h4>
+                        <p class="text-sm text-slate-600 mt-1">基于继承。目标对象无需实现接口。代理类继承目标类并重写其方法。</p>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section id="timing" class="content-section space-y-6">
+            <h2 class="text-3xl font-semibold text-sky-700 border-b-2 border-sky-200 pb-2">代理生成时机</h2>
+            <p class="text-lg leading-relaxed">
+                理解Spring动态代理的生成时机对于掌握其工作原理至关重要。代理对象并非在Bean定义时就创建，而是在Bean生命周期的特定阶段，通过`BeanPostProcessor`机制动态生成。本部分将阐述这一过程。
+            </p>
+
+            <article class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-2xl font-medium text-sky-600 mb-3">Bean生命周期中的关键节点</h3>
+                <p class="text-slate-700 leading-relaxed">
+                    Spring Bean的生命周期包括实例化、属性填充和初始化等阶段。代理类的生成通常发生在Bean完成标准初始化之后。
+                </p>
+            </article>
+            
+            <article class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-2xl font-medium text-sky-600 mb-3">核心角色: `BeanPostProcessor`</h3>
+                <p class="text-slate-700 leading-relaxed">
+                    `BeanPostProcessor`接口允许我们在Bean初始化前后插入自定义逻辑。Spring AOP正是通过其实现类（如`AbstractAutoProxyCreator`）在合适的时机创建代理。
+                </p>
+            </article>
+
+            <article class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-2xl font-medium text-sky-600 mb-3">关键方法: `postProcessAfterInitialization`</h3>
+                <p class="text-slate-700 leading-relaxed">
+                    这是AOP代理创建的主要发生地。当一个Bean完成了实例化、属性填充及自身的初始化方法（如`afterPropertiesSet`或自定义`init-method`）后，`BeanPostProcessor`的`postProcessAfterInitialization`方法会被调用。
+                    此时，AOP相关的`BeanPostProcessor`（如`AbstractAutoProxyCreator`）会检查当前Bean是否需要被代理。如果需要，它将为原始Bean实例创建一个代理对象，并返回这个代理对象。之后，Spring容器中管理和注入的就是这个代理实例了。
+                </p>
+            </article>
+
+            <article class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-2xl font-medium text-sky-600 mb-3">Bean初始化与代理创建流程图</h3>
+                <div class="mt-4 space-y-4 md:space-y-0 md:flex md:items-start md:justify-around overflow-x-auto pb-4">
+                    <div class="diagram-step">1. 实例化<br><span class="text-xs">(Instantiation)</span></div>
+                    <div class="diagram-arrow hidden md:block">→</div>
+                    <div class="diagram-step">2. 属性填充<br><span class="text-xs">(Populate Properties)</span></div>
+                    <div class="diagram-arrow hidden md:block">→</div>
+                    <div class="diagram-step">
+                        3. 初始化<br>
+                        <span class="text-xs block mt-1">(Aware接口回调)</span>
+                        <span class="text-xs block mt-1">(postProcessBeforeInitialization)</span>
+                        <span class="text-xs block mt-1">(InitializingBean.afterPropertiesSet)</span>
+                        <span class="text-xs block mt-1">(自定义init-method)</span>
+                    </div>
+                    <div class="diagram-arrow hidden md:block">→</div>
+                    <div class="diagram-step bg-sky-100 border-sky-500">
+                        <strong>4. postProcessAfterInitialization</strong><br>
+                        <span class="text-xs text-sky-700 font-semibold">(AOP代理创建点!)</span>
+                    </div>
+                </div>
+                 <p class="text-sm text-slate-600 mt-4 text-center">注意：此流程图为简化示意，实际步骤更为复杂。</p>
+            </article>
+        </section>
+
+        <section id="source-flow" class="content-section space-y-6">
+            <h2 class="text-3xl font-semibold text-sky-700 border-b-2 border-sky-200 pb-2">源码脉络</h2>
+            <p class="text-lg leading-relaxed">
+                本部分将带您简要了解Spring内部创建代理对象的源码调用链。虽然实际源码非常复杂，但通过一个简化的流程，我们可以理解代理是如何在`BeanPostProcessor`中被触发并最终由`ProxyFactory`创建的。
+            </p>
+            <article class="bg-white p-6 rounded-lg shadow">
+                 <h3 class="text-2xl font-medium text-sky-600 mb-3">简化的代理创建调用链</h3>
+                <div class="text-slate-700 leading-relaxed space-y-2">
+                    <p><strong class="text-sky-700">1. `getBean()`</strong>: 获取Bean的入口。</p>
+                    <p class="ml-4"><span class="diagram-arrow transform rotate-90 md:transform-none md:inline-block">↓</span> `AbstractBeanFactory.getBean()`</p>
+                    
+                    <p><strong class="text-sky-700">2. `doGetBean()`</strong>: 核心处理逻辑，处理缓存和创建。</p>
+                    <p class="ml-4"><span class="diagram-arrow transform rotate-90 md:transform-none md:inline-block">↓</span> (缓存未命中则创建)</p>
+
+                    <p><strong class="text-sky-700">3. `createBean()`</strong>: 调用实际创建Bean的方法。</p>
+                    <p class="ml-4"><span class="diagram-arrow transform rotate-90 md:transform-none md:inline-block">↓</span> `AbstractAutowireCapableBeanFactory.createBean()`</p>
+
+                    <p><strong class="text-sky-700">4. `doCreateBean()`</strong>: 负责Bean的实例化和属性填充。</p>
+                    <p class="ml-4"><span class="diagram-arrow transform rotate-90 md:transform-none md:inline-block">↓</span> (实例化, 属性填充)</p>
+
+                    <p><strong class="text-sky-700">5. `initializeBean()`</strong>: 初始化Bean，关键步骤。</p>
+                    <p class="ml-4"><span class="diagram-arrow transform rotate-90 md:transform-none md:inline-block">↓</span> `AbstractAutowireCapableBeanFactory.initializeBean()`</p>
+                    <p class="ml-8"><span class="diagram-arrow transform rotate-90 md:transform-none md:inline-block">↳</span> `applyBeanPostProcessorsBeforeInitialization()`</p>
+                    <p class="ml-8"><span class="diagram-arrow transform rotate-90 md:transform-none md:inline-block">↳</span> `invokeInitMethods()`</p>
+                    <p class="ml-8"><span class="diagram-arrow transform rotate-90 md:transform-none md:inline-block">↳</span> <strong class="text-red-600">`applyBeanPostProcessorsAfterInitialization()` (主角登场!)</strong></p>
+
+                    <p><strong class="text-sky-700">6. `AbstractAutoProxyCreator.postProcessAfterInitialization()`</strong>: AOP代理创建逻辑。</p>
+                    <p class="ml-4"><span class="diagram-arrow transform rotate-90 md:transform-none md:inline-block">↓</span> (遍历所有BeanPostProcessor)</p>
+
+                    <p><strong class="text-sky-700">7. `wrapIfNecessary()`</strong>: 决定是否及如何代理。</p>
+                    <p class="ml-4"><span class="diagram-arrow transform rotate-90 md:transform-none md:inline-block">↓</span> (收集Advisors)</p>
+
+                    <p><strong class="text-sky-700">8. `createProxy()`</strong>: 使用`ProxyFactory`创建代理。</p>
+                    <p class="ml-4"><span class="diagram-arrow transform rotate-90 md:transform-none md:inline-block">↓</span> (`ProxyFactory`根据配置选择JDK或CGLIB)</p>
+                    <p class="ml-4"><span class="diagram-arrow transform rotate-90 md:transform-none md:inline-block">↓</span> `proxyFactory.getProxy()`</p>
+
+                    <p><strong class="text-sky-700">9. 返回代理对象</strong>: 将代理对象（或原始对象）放入容器缓存。</p>
+                </div>
+                <p class="text-sm text-slate-600 mt-4 text-center">这是一个高度简化的流程，旨在帮助理解核心步骤。</p>
+            </article>
+        </section>
+
+        <section id="proxy-structure" class="content-section space-y-6">
+            <h2 class="text-3xl font-semibold text-sky-700 border-b-2 border-sky-200 pb-2">代理类的形态</h2>
+            <p class="text-lg leading-relaxed">
+                Spring在运行时动态生成的代理类，我们无法直接看到其 `.java` 文件。但通过其特征和行为，我们可以理解它们的结构。本部分将对比分析JDK动态代理和CGLIB代理生成的代理类有何不同。
+            </p>
+
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="mb-4 border-b border-slate-200">
+                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button id="tab-jdk" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-slate-500 hover:text-sky-700 hover:border-sky-300">
+                            JDK动态代理
+                        </button>
+                        <button id="tab-cglib" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-slate-500 hover:text-sky-700 hover:border-sky-300">
+                            CGLIB代理
+                        </button>
+                    </nav>
+                </div>
+
+                <div id="content-jdk" class="tab-content space-y-4">
+                    <h3 class="text-2xl font-medium text-sky-600">JDK动态代理生成的代理类</h3>
+                    <p><strong>条件：</strong>目标Bean实现了一个或多个接口，并且Spring未被强制使用CGLIB（即 `proxyTargetClass` 属性为 `false`，默认情况）。</p>
+                    <div>
+                        <h4 class="font-semibold text-lg text-slate-700 mt-2 mb-1">特征：</h4>
+                        <ul class="list-disc list-inside text-slate-600 space-y-1">
+                            <li><strong>命名规则：</strong>类名通常类似 <code>com.sun.proxy.$ProxyX</code> (X是数字)。</li>
+                            <li><strong>实现接口：</strong>实现目标Bean的所有接口及Spring内部标记接口 (如 <code>SpringProxy</code>, <code>Advised</code>)。</li>
+                            <li><strong>继承关系：</strong>继承自 <code>java.lang.reflect.Proxy</code>。</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg text-slate-700 mt-2 mb-1">内部结构与工作原理：</h4>
+                        <p class="text-slate-600">不包含原始业务逻辑代码，内部持有 <code>java.lang.reflect.InvocationHandler</code> 实例 (通常是Spring的 <code>JdkDynamicAopProxy</code>)。当代理对象的接口方法被调用时，请求被转发到 <code>InvocationHandler</code> 的 <code>invoke()</code> 方法。此方法负责执行AOP通知链，并最终通过反射调用原始目标Bean的方法。</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg text-slate-700 mt-2 mb-1">示例伪代码 (概念性)：</h4>
+                        <pre class="code-block"><code>// 伪代码，实际是运行时生成的字节码
+public final class $Proxy12 extends java.lang.reflect.Proxy 
+    implements UserService, SpringProxy, Advised {
+    
+    private static Method m3; // addUser(String)
+    // ... 其他接口的方法引用
+
+    // 构造函数，传入 InvocationHandler
+    public $Proxy12(InvocationHandler h) {
+        super(h);
+    }
+
+    // 实现UserService接口的方法
+    public final void addUser(String var1) {
+        try {
+            // this.h 就是 JdkDynamicAopProxy 实例
+            // 调用会被转发到 JdkDynamicAopProxy.invoke(...)
+            this.h.invoke(this, m3, new Object[]{var1});
+        } catch (Throwable t) { /* ... */ }
+    }
+    // ... 其他方法
+}</code></pre>
+                        <p class="text-sm text-slate-500 mt-1">当你调用 <code>$Proxy12.addUser("test")</code> 时，会触发 <code>JdkDynamicAopProxy</code> 的 <code>invoke</code> 方法，执行通知链和原始方法。</p>
+                    </div>
+                </div>
+
+                <div id="content-cglib" class="tab-content space-y-4" style="display: none;">
+                    <h3 class="text-2xl font-medium text-sky-600">CGLIB代理生成的代理类</h3>
+                    <p><strong>条件：</strong>目标Bean没有实现任何接口，或者Spring被明确配置为对类进行代理（即 `proxyTargetClass` 属性设置为 `true`）。</p>
+                    <div>
+                        <h4 class="font-semibold text-lg text-slate-700 mt-2 mb-1">特征：</h4>
+                        <ul class="list-disc list-inside text-slate-600 space-y-1">
+                            <li><strong>命名规则：</strong>类名通常是目标类名 + <code>$$EnhancerBySpringCGLIB$$</code> + 哈希码 (如 <code>UserServiceImpl$$EnhancerBySpringCGLIB$$a1b2c3d4</code>)。</li>
+                            <li><strong>继承关系：</strong>继承目标Bean的类。因此目标类不能是 `final`，被代理方法也不能是 `final` 或 `private`。</li>
+                            <li><strong>实现接口：</strong>也会实现Spring内部标记接口 (如 <code>SpringProxy</code>, <code>Advised</code>)。</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg text-slate-700 mt-2 mb-1">内部结构与工作原理：</h4>
+                        <p class="text-slate-600">代理类会重写目标类中所有公共的、受保护的非 `final` 方法。在重写的方法内部，调用会委托给CGLIB的回调机制。Spring设置 `MethodInterceptor` (通常是 <code>DynamicAdvisedInterceptor</code>) 作为回调。当代理对象的被重写方法被调用时，触发拦截器的 `intercept()` 方法，该方法负责执行AOP通知链，并最终通过 `MethodProxy.invokeSuper()` 调用原始目标Bean（即父类）的方法。</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg text-slate-700 mt-2 mb-1">示例伪代码 (概念性)：</h4>
+                        <pre class="code-block"><code>// 伪代码，实际是运行时生成的字节码
+public class UserServiceImpl$$EnhancerBySpringCGLIB$$a1b2c3d4 
+    extends UserServiceImpl implements SpringProxy, Advised {
+    
+    private static Callback[] CGLIB$STATIC_CALLBACKS; // 其中一个是 DynamicAdvisedInterceptor
+    // ... 其他CGLIB内部字段
+
+    // 重写的 addUser 方法
+    public final void addUser(String var1) {
+        MethodInterceptor interceptor = CGLIB$CALLBACK_0; // 获取拦截器
+        if (interceptor == null) {
+            super.addUser(var1); // 无拦截器则调用父类
+            return;
+        }
+        // 调用拦截器的 intercept 方法
+        interceptor.intercept(this, /* addUser方法引用 */, new Object[]{var1}, /* MethodProxy */);
+    }
+    // ... 其他被重写的方法
+}</code></pre>
+                        <p class="text-sm text-slate-500 mt-1">当你调用代理对象的 <code>addUser("test")</code> 时，会执行重写的方法，进而调用拦截器的 <code>intercept</code> 方法。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="summary" class="content-section space-y-6">
+            <h2 class="text-3xl font-semibold text-sky-700 border-b-2 border-sky-200 pb-2">核心总结</h2>
+            <p class="text-lg leading-relaxed">
+                通过前面的学习，我们对Spring动态代理的生成时机、源码流程以及代理类的形态有了深入的了解。这里我们对核心知识点进行回顾总结。
+            </p>
+            <div class="bg-white p-6 rounded-lg shadow space-y-4">
+                <article>
+                    <h3 class="text-xl font-medium text-sky-600 mb-2">代理生成时机总结</h3>
+                    <ul class="list-disc list-inside text-slate-700 space-y-1">
+                        <li>主要发生在Bean初始化完成后的 <strong><code>BeanPostProcessor.postProcessAfterInitialization</code></strong> 阶段。</li>
+                        <li>由 <strong><code>AbstractAutoProxyCreator</code></strong> (及其子类) 负责扫描和创建代理。</li>
+                        <li>如果Bean需要AOP增强（如匹配切点、有特定注解），则原始Bean会被代理对象替换。</li>
+                    </ul>
+                </article>
+                <hr class="border-slate-200">
+                <article>
+                    <h3 class="text-xl font-medium text-sky-600 mb-2">源码关键点总结</h3>
+                    <ul class="list-disc list-inside text-slate-700 space-y-1">
+                        <li>入口: <code>getBean()</code>。</li>
+                        <li>核心初始化: <code>initializeBean()</code>。</li>
+                        <li>代理决策: <code>AbstractAutoProxyCreator.wrapIfNecessary()</code>。</li>
+                        <li>代理创建: <code>ProxyFactory.getProxy()</code>，内部选择JDK或CGLIB。</li>
+                    </ul>
+                </article>
+                <hr class="border-slate-200">
+                <article>
+                    <h3 class="text-xl font-medium text-sky-600 mb-2">两种代理形态对比</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200">
+                            <thead class="bg-slate-100">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">特性</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">JDK动态代理</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">CGLIB代理</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-slate-200 text-sm text-slate-700">
+                                <tr>
+                                    <td class="px-4 py-2 font-medium">基础</td>
+                                    <td class="px-4 py-2">基于接口</td>
+                                    <td class="px-4 py-2">基于继承</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-2 font-medium">目标类要求</td>
+                                    <td class="px-4 py-2">必须实现接口</td>
+                                    <td class="px-4 py-2">无需实现接口</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-2 font-medium">代理类</td>
+                                    <td class="px-4 py-2">实现目标接口，继承<code>java.lang.reflect.Proxy</code></td>
+                                    <td class="px-4 py-2">继承目标类</td>
+                                </tr>
+                                 <tr>
+                                    <td class="px-4 py-2 font-medium">final类/方法</td>
+                                    <td class="px-4 py-2">不适用（因为基于接口）</td>
+                                    <td class="px-4 py-2">不能代理final类，不能代理final方法</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-2 font-medium">核心机制</td>
+                                    <td class="px-4 py-2"><code>InvocationHandler.invoke()</code></td>
+                                    <td class="px-4 py-2"><code>MethodInterceptor.intercept()</code></td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-2 font-medium">Spring默认选择</td>
+                                    <td class="px-4 py-2">目标实现接口时优先使用</td>
+                                    <td class="px-4 py-2">目标未实现接口或强制(<code>proxyTargetClass=true</code>)时使用</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+                 <p class="text-sm text-slate-600 mt-4">理解这些机制有助于您更深入地排查Spring AOP相关的问题，以及更好地利用Spring的声明式服务。</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300 py-8 text-center">
+        <p class="text-sm">&copy; 2024 Spring动态代理交互式解析。内容基于提供的学习资料。</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.content-section');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            function setActiveSection(hash) {
+                let targetHash = hash || '#overview'; // Default to overview
+                if (!document.querySelector(targetHash)) { // Fallback if hash is invalid
+                    targetHash = '#overview';
+                }
+
+                sections.forEach(section => {
+                    if ('#' + section.id === targetHash) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === targetHash) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+                
+                // Scroll to top of section for better UX
+                const activeSectionElement = document.querySelector(targetHash);
+                if(activeSectionElement) {
+                    // Scroll into view smoothly, or just jump if not supported widely
+                    if ('scrollBehavior' in document.documentElement.style) {
+                        window.scrollTo({ top: activeSectionElement.offsetTop - 80, behavior: 'smooth' }); // Adjust offset for fixed header
+                    } else {
+                         window.scrollTo(0, activeSectionElement.offsetTop - 80);
+                    }
+                }
+                 // Close mobile menu after navigation
+                if (mobileMenu.classList.contains('block')) {
+                    mobileMenu.classList.remove('block');
+                    mobileMenu.classList.add('hidden');
+                }
+            }
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetHash = this.getAttribute('href');
+                    setActiveSection(targetHash);
+                    // Update URL hash without page jump for history/bookmarking
+                    if (history.pushState) {
+                        history.pushState(null, null, targetHash);
+                    } else {
+                        location.hash = targetHash;
+                    }
+                });
+            });
+
+            // Mobile menu toggle
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                    mobileMenu.classList.toggle('block');
+                });
+            }
+            
+            // Tabs for Proxy Structure section
+            const tabJdk = document.getElementById('tab-jdk');
+            const tabCglib = document.getElementById('tab-cglib');
+            const contentJdk = document.getElementById('content-jdk');
+            const contentCglib = document.getElementById('content-cglib');
+
+            if (tabJdk && tabCglib && contentJdk && contentCglib) {
+                function setActiveTab(activeTabButton, activeContentElement) {
+                    // Reset tabs
+                    tabJdk.classList.remove('active');
+                    tabCglib.classList.remove('active');
+                    contentJdk.style.display = 'none';
+                    contentCglib.style.display = 'none';
+
+                    // Set active tab
+                    activeTabButton.classList.add('active');
+                    activeContentElement.style.display = 'block';
+                }
+
+                tabJdk.addEventListener('click', () => setActiveTab(tabJdk, contentJdk));
+                tabCglib.addEventListener('click', () => setActiveTab(tabCglib, contentCglib));
+                
+                // Default to JDK tab active
+                setActiveTab(tabJdk, contentJdk);
+            }
+
+            // Handle initial page load (check hash in URL)
+            setActiveSection(window.location.hash);
+
+            // Handle back/forward browser navigation
+            window.addEventListener('popstate', function() {
+                setActiveSection(window.location.hash);
+            });
+        });
+    </script>
+
+</body>
+</html>

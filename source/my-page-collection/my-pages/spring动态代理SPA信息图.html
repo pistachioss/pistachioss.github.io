@@ -1,0 +1,544 @@
+---
+layout: false
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring动态代理信息图</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <!-- Visualization & Content Choices:
+        - Report Info: Intro to Proxies, Why Proxies -> Goal: Inform -> Viz: Large text, key benefit callouts -> Interaction: Static -> Justification: Clear, impactful introduction to the topic -> Method: HTML/CSS with Tailwind.
+        - Report Info: Bean Lifecycle & Proxy Timing -> Goal: Organize/Change (show process) -> Viz: HTML/CSS styled flowchart/timeline -> Interaction: Static visual flow -> Justification: Visually clarifies a key process from the report -> Method: HTML/CSS with Tailwind.
+        - Report Info: JDK vs CGLIB details, pseudo-code -> Goal: Compare -> Viz: Interactive Tabs showing side-by-side comparison points and styled pseudo-code blocks -> Interaction: Click to switch between JDK/CGLIB details -> Justification: Allows focused comparison of complex alternatives -> Method: HTML/CSS/JS.
+        - Report Info: Illustrative AOP Usage (conceptual) -> Goal: Inform (contextual example) -> Viz: Chart.js Donut Chart (e.g., 'Spring AOP 应用场景分布') -> Interaction: Chart.js tooltips -> Justification: Fulfills Chart.js requirement, provides a visual break, and illustrates a practical concept related to AOP -> Library: Chart.js (Canvas).
+        - Report Info: Simplified Source Code Flow for proxy creation -> Goal: Organize (show process) -> Viz: HTML/CSS styled step-diagram -> Interaction: Static visual flow -> Justification: Simplifies a complex call chain from the report for easier understanding -> Method: HTML/CSS with Tailwind.
+        - Report Info: Summary of key points -> Goal: Inform -> Viz: Styled bullet points or summary cards -> Interaction: Static -> Justification: Provides a concise review of essential information -> Method: HTML/CSS.
+        CONFIRMING NO SVG/Mermaid. All diagrams are HTML/CSS. Chart.js is used for one illustrative chart. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #F0F9FF; /* sky-50, very light blue page background */
+            color: #1E293B; /* slate-800, main text */
+        }
+        .section-title {
+            color: #0C4A6E; /* sky-800, darker headers */
+        }
+        .nav-link.active {
+            background-color: #0077B6; /* Deep Blue */
+            color: white;
+            font-weight: 600;
+        }
+        .nav-link:hover {
+            background-color: #00B4D8; /* Medium Blue */
+            color: white;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem; /* p-6 */
+            margin-bottom: 1.5rem; /* mb-6 */
+        }
+        .tab-button.active {
+            border-color: #0077B6; /* Deep Blue */
+            color: #0077B6;
+            font-weight: 600;
+        }
+        .tab-button {
+            border-bottom-width: 3px;
+            border-color: transparent;
+        }
+        .code-block {
+            background-color: #E0F2FE; /* sky-100 */
+            color: #075985; /* sky-800 */
+            padding: 1rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 0.875rem; /* text-sm */
+            border: 1px solid #BAE6FD; /* sky-200 */
+        }
+        .diagram-step {
+            background-color: #CAF0F8; /* Very Light Blue */
+            border: 2px solid #90E0EF; /* Light Blue */
+            color: #0C4A6E; /* sky-800 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: 500;
+        }
+        .diagram-arrow {
+            color: #0077B6; /* Deep Blue */
+            font-size: 2rem; /* text-3xl */
+            line-height: 1;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px; /* max-w-md equivalent */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height */
+            max-height: 350px;
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="scroll-smooth">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex-shrink-0">
+                    <h1 class="text-2xl md:text-3xl font-bold section-title">Spring动态代理剖析</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-1 lg:space-x-2">
+                        <a href="#section-intro" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 transition-colors duration-150">引言</a>
+                        <a href="#section-timing" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 transition-colors duration-150">生成时机</a>
+                        <a href="#section-types" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 transition-colors duration-150">两大派系</a>
+                        <a href="#section-flow" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 transition-colors duration-150">幕后英雄</a>
+                        <a href="#section-usage" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 transition-colors duration-150">应用场景</a>
+                        <a href="#section-summary" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700 transition-colors duration-150">总结回顾</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-500 hover:text-white hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">打开主菜单</span>
+                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#section-intro" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-700">引言</a>
+                <a href="#section-timing" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-700">生成时机</a>
+                <a href="#section-types" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-700">两大派系</a>
+                <a href="#section-flow" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-700">幕后英雄</a>
+                <a href="#section-usage" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-700">应用场景</a>
+                <a href="#section-summary" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-700">总结回顾</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+        <section id="section-intro" class="min-h-screen flex flex-col justify-center items-center text-center pt-10 pb-20">
+            <h2 class="text-4xl md:text-5xl font-bold section-title mb-6 animate-fade-in-down">Spring动态代理：深入核心</h2>
+            <p class="text-xl md:text-2xl text-slate-700 max-w-3xl mb-10 animate-fade-in-up">
+                揭秘Spring框架的魔力之源：动态代理如何无缝增强您的应用功能，实现AOP编程范式，让代码更优雅、更强大。
+            </p>
+            <div class="grid md:grid-cols-3 gap-6 max-w-4xl w-full">
+                <div class="card animate-fade-in-up delay-100ms">
+                    <h3 class="text-2xl font-semibold text-sky-600 mb-3">🚀 功能增强</h3>
+                    <p class="text-slate-600">无需修改源码，即可为Bean添加事务、日志、安全等横切关注点。</p>
+                </div>
+                <div class="card animate-fade-in-up delay-200ms">
+                    <h3 class="text-2xl font-semibold text-sky-600 mb-3">🧩 解耦设计</h3>
+                    <p class="text-slate-600">业务逻辑与非业务逻辑分离，提升代码模块化和可维护性。</p>
+                </div>
+                <div class="card animate-fade-in-up delay-300ms">
+                    <h3 class="text-2xl font-semibold text-sky-600 mb-3">⚙️ AOP基石</h3>
+                    <p class="text-slate-600">Spring AOP的核心实现机制，赋予框架强大的扩展能力。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-timing" class="py-20">
+            <h2 class="text-3xl md:text-4xl font-bold section-title text-center mb-12">代理生成：时机是关键</h2>
+            <p class="text-lg text-slate-700 max-w-3xl mx-auto text-center mb-12">
+                Spring动态代理并非凭空产生，它在Bean的生命周期中有着精确的“登场”时机。理解这一点，有助于我们把握AOP的运作脉络。
+            </p>
+            <div class="card max-w-4xl mx-auto">
+                <h3 class="text-2xl font-semibold text-sky-700 mb-6 text-center">Bean生命周期与代理创建点</h3>
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+                    <div class="diagram-step">1. 实例化</div>
+                    <div class="diagram-arrow hidden md:block">➔</div> <div class="diagram-arrow md:hidden self-center">⬇</div>
+                    <div class="diagram-step">2. 属性填充</div>
+                    <div class="diagram-arrow hidden md:block">➔</div> <div class="diagram-arrow md:hidden self-center">⬇</div>
+                    <div class="diagram-step">3. 初始化 <br/>(Aware, BeforeInit, InitMethods)</div>
+                    <div class="diagram-arrow hidden md:block">➔</div> <div class="diagram-arrow md:hidden self-center">⬇</div>
+                    <div class="diagram-step ring-4 ring-offset-2 ring-amber-400 bg-amber-100 border-amber-500 text-amber-700">
+                        <strong>4. `postProcessAfterInitialization`</strong><br/>
+                        <span class="text-sm font-bold">✨ AOP代理创建点 ✨</span>
+                    </div>
+                </div>
+                <p class="mt-8 text-center text-slate-600">
+                    在Bean完成标准初始化后，`BeanPostProcessor`（特别是`AbstractAutoProxyCreator`）会介入，检查是否需要创建代理。如果需要，原始Bean将被替换为代理Bean。
+                </p>
+            </div>
+        </section>
+
+        <section id="section-types" class="py-20">
+            <h2 class="text-3xl md:text-4xl font-bold section-title text-center mb-12">两大派系：JDK 与 CGLIB</h2>
+            <p class="text-lg text-slate-700 max-w-3xl mx-auto text-center mb-12">
+                Spring灵活地采用两种主流动态代理技术：JDK动态代理和CGLIB代理。它们各有特点和适用场景，共同构成了Spring AOP的强大后盾。
+            </p>
+            <div class="card max-w-5xl mx-auto">
+                <div class="mb-6 border-b border-slate-200">
+                    <nav class="-mb-px flex space-x-4 sm:space-x-8 justify-center" aria-label="Tabs">
+                        <button data-tab="jdk" class="tab-button whitespace-nowrap pb-4 px-1 text-base sm:text-lg font-medium text-slate-500 hover:text-sky-700">
+                            🌿 JDK动态代理
+                        </button>
+                        <button data-tab="cglib" class="tab-button whitespace-nowrap pb-4 px-1 text-base sm:text-lg font-medium text-slate-500 hover:text-sky-700">
+                            🛠️ CGLIB代理
+                        </button>
+                    </nav>
+                </div>
+
+                <div id="tab-content-jdk" class="tab-content-panel space-y-6">
+                    <h3 class="text-2xl font-semibold text-sky-700">JDK动态代理：基于接口的优雅</h3>
+                    <p class="text-slate-600"><strong>核心前提：</strong>目标Bean必须实现一个或多个接口。</p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-xl font-medium text-sky-600 mb-2">运作方式</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1">
+                                <li>代理类在运行时动态创建，实现目标Bean的所有接口。</li>
+                                <li>继承自 `java.lang.reflect.Proxy`。</li>
+                                <li>通过 `InvocationHandler` (Spring中为 `JdkDynamicAopProxy`) 拦截方法调用，织入增强逻辑。</li>
+                            </ul>
+                        </div>
+                        <div>
+                             <h4 class="text-xl font-medium text-sky-600 mb-2">代理类特征</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1">
+                                <li>命名：通常为 `com.sun.proxy.$ProxyX`。</li>
+                                <li>不包含原始业务代码，调用转发给 `InvocationHandler`。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-medium text-sky-600 mt-4 mb-2">概念性伪代码：</h4>
+                    <pre class="code-block"><code>public final class $Proxy12 extends java.lang.reflect.Proxy 
+    implements UserService, SpringProxy {
+    
+    private InvocationHandler h; // JdkDynamicAopProxy实例
+
+    public $Proxy12(InvocationHandler h) { super(h); }
+
+    public final void addUser(String username) {
+        // 调用转发给 InvocationHandler 的 invoke 方法
+        this.h.invoke(this, /* addUser方法引用 */, new Object[]{username});
+    }
+    // ... 其他接口方法
+}</code></pre>
+                </div>
+
+                <div id="tab-content-cglib" class="tab-content-panel hidden space-y-6">
+                    <h3 class="text-2xl font-semibold text-sky-700">CGLIB代理：基于继承的强大</h3>
+                    <p class="text-slate-600"><strong>核心前提：</strong>目标Bean无需实现接口（但不能是final类，方法也不能是final）。</p>
+                     <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-xl font-medium text-sky-600 mb-2">运作方式</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1">
+                                <li>代理类在运行时动态创建，继承自目标Bean的类。</li>
+                                <li>重写目标类的非final方法。</li>
+                                <li>通过 `MethodInterceptor` (Spring中为 `DynamicAdvisedInterceptor`) 拦截方法调用。</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-medium text-sky-600 mb-2">代理类特征</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1">
+                                <li>命名：通常为 `TargetClass$$EnhancerBySpringCGLIB$$xxxx`。</li>
+                                <li>方法内部调用委托给 `MethodInterceptor`。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-medium text-sky-600 mt-4 mb-2">概念性伪代码：</h4>
+                    <pre class="code-block"><code>public class UserServiceImpl$$EnhancerBySpringCGLIB$$a1b2 
+    extends UserServiceImpl implements SpringProxy {
+    
+    private MethodInterceptor CGLIB$CALLBACK_0; // DynamicAdvisedInterceptor
+
+    // 重写 addUser 方法
+    public final void addUser(String username) {
+        if (CGLIB$CALLBACK_0 == null) {
+            super.addUser(username); // 无拦截器则直接调用父类
+        } else {
+            // 调用拦截器的 intercept 方法
+            CGLIB$CALLBACK_0.intercept(this, /* addUser方法 */, new Object[]{username}, /* MethodProxy */);
+        }
+    }
+    // ... 其他被重写的方法
+}</code></pre>
+                </div>
+                <p class="mt-8 text-center text-slate-600">Spring会根据目标Bean是否实现接口以及`proxyTargetClass`配置智能选择使用JDK代理还是CGLIB代理。</p>
+            </div>
+        </section>
+
+        <section id="section-flow" class="py-20 bg-sky-50">
+            <h2 class="text-3xl md:text-4xl font-bold section-title text-center mb-12">幕后英雄：代理创建流程</h2>
+            <p class="text-lg text-slate-700 max-w-3xl mx-auto text-center mb-12">
+                虽然Spring为我们屏蔽了代理创建的复杂性，但了解其大致流程有助于我们更深入地理解框架的运作。以下是简化的代理创建调用链。
+            </p>
+            <div class="card max-w-3xl mx-auto">
+                <div class="space-y-3 text-slate-700">
+                    <div class="diagram-step p-3">1. `getBean()`: 请求Bean实例</div>
+                    <div class="flex justify-center"><span class="diagram-arrow">⬇</span></div>
+                    <div class="diagram-step p-3">2. `doGetBean()`: 核心获取逻辑 (检查缓存)</div>
+                    <div class="flex justify-center"><span class="diagram-arrow">⬇</span></div>
+                    <div class="diagram-step p-3">3. `createBean()`: 若未缓存，开始创建</div>
+                    <div class="flex justify-center"><span class="diagram-arrow">⬇</span></div>
+                    <div class="diagram-step p-3">4. `doCreateBean()`: 实例化 & 属性填充</div>
+                    <div class="flex justify-center"><span class="diagram-arrow">⬇</span></div>
+                    <div class="diagram-step p-3">5. `initializeBean()`: 初始化Bean</div>
+                    <div class="ml-6 border-l-2 border-sky-300 pl-4 py-2 my-1">
+                        <div class="text-sm diagram-step p-2 my-1 bg-sky-100 border-sky-300">↳ `applyBeanPostProcessorsBeforeInitialization()`</div>
+                        <div class="text-sm diagram-step p-2 my-1 bg-sky-100 border-sky-300">↳ `invokeInitMethods()`</div>
+                        <div class="text-sm diagram-step p-2 my-1 bg-amber-100 border-amber-500 text-amber-700 font-semibold">↳ `applyBeanPostProcessorsAfterInitialization()` <span class="text-xs">(关键!)</span></div>
+                    </div>
+                    <div class="flex justify-center"><span class="diagram-arrow">⬇</span></div>
+                     <div class="diagram-step p-3 bg-sky-200 border-sky-400">6. `AbstractAutoProxyCreator.postProcessAfterInitialization()`: 检查是否需代理</div>
+                    <div class="flex justify-center"><span class="diagram-arrow">⬇</span></div>
+                    <div class="diagram-step p-3">7. `wrapIfNecessary()`: 收集Advisors，决定是否代理</div>
+                    <div class="flex justify-center"><span class="diagram-arrow">⬇</span></div>
+                    <div class="diagram-step p-3">8. `createProxy()` (使用`ProxyFactory`): 生成代理对象 (JDK或CGLIB)</div>
+                    <div class="flex justify-center"><span class="diagram-arrow">⬇</span></div>
+                    <div class="diagram-step p-3 bg-green-100 border-green-400 text-green-700">9. 返回代理对象 (或原始对象)</div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="section-usage" class="py-20">
+            <h2 class="text-3xl md:text-4xl font-bold section-title text-center mb-12">应用场景：AOP的魔力</h2>
+            <p class="text-lg text-slate-700 max-w-3xl mx-auto text-center mb-12">
+                动态代理是Spring AOP的基石，使得开发者可以将横切关注点（如事务、日志、安全）从核心业务逻辑中分离出来。下图展示了AOP常见的一些应用场景（数据为概念性示例）。
+            </p>
+            <div class="card max-w-xl mx-auto">
+                <h3 class="text-2xl font-semibold text-sky-700 mb-6 text-center">Spring AOP 应用场景分布 (示例)</h3>
+                <div class="chart-container">
+                    <canvas id="aopUsageChart"></canvas>
+                </div>
+                <p class="mt-6 text-sm text-slate-500 text-center">
+                    此图表为概念性展示，旨在说明AOP通过动态代理在不同方面增强应用的能力。
+                </p>
+            </div>
+        </section>
+
+        <section id="section-summary" class="py-20 bg-slate-800 text-slate-100">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-sky-300">总结回顾：动态代理精髓</h2>
+                <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div class="bg-slate-700 p-6 rounded-lg shadow-xl">
+                        <h3 class="text-2xl font-semibold text-sky-400 mb-3">核心机制</h3>
+                        <ul class="list-disc list-inside space-y-2 text-slate-200">
+                            <li>代理生成主要在Bean初始化后的 `postProcessAfterInitialization` 阶段。</li>
+                            <li>`AbstractAutoProxyCreator` 负责识别并创建代理。</li>
+                            <li>`ProxyFactory` 智能选择JDK或CGLIB代理技术。</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-700 p-6 rounded-lg shadow-xl">
+                        <h3 class="text-2xl font-semibold text-sky-400 mb-3">两大代理对比</h3>
+                        <ul class="list-disc list-inside space-y-2 text-slate-200">
+                            <li><strong>JDK代理：</strong>基于接口，轻量级，Java标准。</li>
+                            <li><strong>CGLIB代理：</strong>基于继承，无需接口，功能更强（可代理类）。</li>
+                            <li>Spring优先JDK代理（若有接口），否则用CGLIB。</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="mt-12 text-center text-lg text-slate-300">
+                    理解Spring动态代理，是深入掌握Spring AOP乃至整个Spring生态的关键一步。
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-8 bg-slate-900 text-slate-400">
+        <p>&copy; 2024 Spring动态代理信息图。基于学习资料构建。</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Sticky Nav Highlighting
+            const sections = document.querySelectorAll('main section[id]');
+            const navLinks = document.querySelectorAll('header nav a.nav-link');
+            const mobileNavLinks = document.querySelectorAll('#mobile-menu a.nav-link');
+
+            function changeNav(targetId) {
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === `#${targetId}`);
+                });
+                mobileNavLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === `#${targetId}`);
+                });
+            }
+
+            const observerOptions = { root: null, rootMargin: "-25% 0px -75% 0px", threshold: 0 };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        changeNav(entry.target.id);
+                    }
+                });
+            }, observerOptions);
+            sections.forEach(section => observer.observe(section));
+            
+            // Smooth scroll for nav links
+            document.querySelectorAll('a[href^="#section-"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        const offsetTop = targetElement.offsetTop - (document.querySelector('header').offsetHeight || 80); // Adjust for fixed header
+                         window.scrollTo({
+                            top: offsetTop,
+                            behavior: 'smooth'
+                        });
+                        // Update hash in URL without page jump
+                        if (history.pushState) {
+                            history.pushState(null, null, targetId);
+                        } else {
+                            location.hash = targetId;
+                        }
+                        // Close mobile menu if open
+                        const mobileMenu = document.getElementById('mobile-menu');
+                        if (mobileMenu.classList.contains('block')) {
+                           mobileMenu.classList.remove('block');
+                           mobileMenu.classList.add('hidden');
+                           document.querySelector('#mobile-menu-button svg.hidden').classList.add('hidden');
+                           document.querySelector('#mobile-menu-button svg.block').classList.remove('hidden');
+                        }
+                    }
+                });
+            });
+
+
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuIcons = mobileMenuButton.querySelectorAll('svg');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                mobileMenuIcons.forEach(icon => icon.classList.toggle('hidden'));
+            });
+
+            // Tabs for JDK vs CGLIB
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContentPanels = document.querySelectorAll('.tab-content-panel');
+
+            // Set initial active tab (JDK)
+            if (tabButtons.length > 0 && tabContentPanels.length > 0) {
+                tabButtons[0].classList.add('active');
+                tabContentPanels.forEach(panel => panel.classList.add('hidden'));
+                document.getElementById('tab-content-jdk').classList.remove('hidden');
+            }
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetTab = button.dataset.tab;
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    tabContentPanels.forEach(panel => {
+                        panel.classList.toggle('hidden', panel.id !== `tab-content-${targetTab}`);
+                    });
+                });
+            });
+
+            // Chart.js: AOP Usage Donut Chart
+            const aopUsageCtx = document.getElementById('aopUsageChart');
+            if (aopUsageCtx) {
+                const aopUsageChart = new Chart(aopUsageCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [
+                            '事务管理 (Transactions)', 
+                            '日志记录 (Logging)', 
+                            '安全控制 (Security)', 
+                            '性能监控 (Performance)', 
+                            '其他 (Others)'
+                        ],
+                        datasets: [{
+                            label: 'AOP 应用场景占比',
+                            data: [40, 25, 20, 10, 5], // Mock data
+                            backgroundColor: [
+                                '#0077B6', // Deep Blue
+                                '#00B4D8', // Medium Blue
+                                '#48CAE4', // Lighter Medium Blue
+                                '#90E0EF', // Light Blue
+                                '#ADE8F4'  // Very Light Blue
+                            ],
+                            borderColor: '#F0F9FF', // Page background for separation
+                            borderWidth: 2,
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#1E293B', // slate-800
+                                    font: { size: 12 }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += context.parsed + '%';
+                                        }
+                                        return label;
+                                    },
+                                    title: function(tooltipItems) {
+                                        const item = tooltipItems[0];
+                                        let label = item.chart.data.labels[item.dataIndex];
+                                        if (Array.isArray(label)) {
+                                          return label.join(' ');
+                                        } else {
+                                          return label;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+             // Simple fade-in animations for intro section
+            const animatedElements = document.querySelectorAll('.animate-fade-in-down, .animate-fade-in-up');
+            const animationObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                        animationObserver.unobserve(entry.target); // Optional: stop observing after animation
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            animatedElements.forEach(el => {
+                el.style.opacity = 0;
+                if (el.classList.contains('animate-fade-in-down')) {
+                    el.style.transform = 'translateY(-20px)';
+                } else if (el.classList.contains('animate-fade-in-up')) {
+                    el.style.transform = 'translateY(20px)';
+                }
+                el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+                const delayClass = Array.from(el.classList).find(c => c.startsWith('delay-'));
+                if(delayClass) {
+                    const delay = parseInt(delayClass.split('-')[1].replace('ms',''));
+                    el.style.transitionDelay = `${delay}ms`;
+                }
+                animationObserver.observe(el);
+            });
+
+        });
+    </script>
+</body>
+</html>

@@ -5,7 +5,6 @@ categories: Java
 tags: wiki
 toc: true
 description: "Threads-And-Locks"
-
 ---
 
 在 java 并发编程中，线程和锁永远是最重要的概念。语言规范虽然是规范描述，但是其中也有非常多的知识和最佳实践是值得学习的，相信这篇文章还是可以给很多读者提供学习参考的。
