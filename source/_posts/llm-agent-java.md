@@ -25,6 +25,8 @@ description: "基于springboot开发agent"
 
    - "为 `AgentTask` 实体创建一个 Spring Data JPA Repository 接口 `AgentTaskRepository`，继承自 `JpaRepository`。并添加一个根据 `status` 查询任务列表的方法。"
 
+<!--more-->
+
 ###  Service 层：
 
    - "创建一个 Spring Boot Service 类 
