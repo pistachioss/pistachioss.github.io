@@ -134,6 +134,205 @@
 	
 	<!-- display as entry -->	
 		<h3 class="title">
+			<div class="date"> 2021-06-14 </div>
+			<div class="article-title"><a href="/2021/06/14/tx-fat%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" title="分布式事务框架">tx-fat</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<h2 id="tx-fat-分布式事务框架面试介绍指南"><a href="#tx-fat-分布式事务框架面试介绍指南" class="headerlink" title="tx-fat 分布式事务框架面试介绍指南"></a>tx-fat 分布式事务框架面试介绍指南</h2><p>面试官您好，我参与&#x2F;负责的 <code>tx-fat</code> 项目是一个轻量级的分布式事务解决方案，主要目标是为微服务架构下的应用提供<strong>最终一致性</strong>的事务保障。</p>
+<h3 id="一、项目背景与痛点-Why-We-Built-It"><a href="#一、项目背景与痛点-Why-We-Built-It" class="headerlink" title="一、项目背景与痛点 (Why We Built It)"></a>一、项目背景与痛点 (Why We Built It)</h3><ul>
+<li><strong>为什么需要这个项目？</strong><ul>
+<li>在微服务架构下，一个完整的业务操作往往需要跨越多个独立部署的服务。传统的单体应用中的本地数据库事务（ACID）无法保证这种跨服务操作的原子性——要么所有服务的操作都成功，要么都失败。</li>
+<li><strong>举个例子</strong>：比如电商场景的下单操作，可能涉及到订单服务创建订单、库存服务扣减库存、积分服务增加积分。如果其中任何一个服务操作失败，我们希望整个下单流程都能回滚，避免数据不一致（比如订单创建了但库存没扣）。</li>
+<li>传统的强一致性分布式事务方案，比如基于 XA 协议的两阶段提交（2PC），虽然能保证强一致性，但通常<strong>性能开销较大、实现复杂、对数据库和业务的侵入性也比较强</strong>，在高并发的互联网场景下可能不太适用。</li>
+<li>因此，我们希望找到一种<strong>更轻量、对业务侵入更小、性能表现更好</strong>的解决方案，即使它牺牲了一点点的实时一致性，转而追求最终一致性。这就是我们开发 <code>tx-fat</code> 的初衷。</li>
+</ul>
+</li>
+</ul>
+<h3 id="二、项目目标-What-We-Aimed-For"><a href="#二、项目目标-What-We-Aimed-For" class="headerlink" title="二、项目目标 (What We Aimed For)"></a>二、项目目标 (What We Aimed For)</h3><ul>
+<li><strong>我们想通过这个项目达到什么效果？</strong><ol>
+<li><strong>易用性与低侵入性</strong>：开发者可以通过简单的注解（比如 <code>@FatTransaction</code>）就能将普通方法接入分布式事务管理，而不需要修改大量的业务代码。</li>
+<li><strong>最终一致性保障</strong>：在分布式环境下，保证参与事务的各个服务最终能够达到一致的状态，要么全部成功提交，要么全部成功回滚各自的操作。</li>
+<li><strong>主流RPC框架支持</strong>：能够与业界主流的微服务通信框架（如 Dubbo、Spring Cloud OpenFeign）无缝集成，自动完成事务上下文的跨服务传播。</li>
+<li><strong>清晰的协调机制</strong>：提供明确的事务提交和回滚协调流程，并通过外部协调服务（我们选择了Redis）来管理事务状态。</li>
+<li><strong>相对较好的性能</strong>：相比传统的2PC方案，我们希望通过异步协调和优化的流程来获得更好的性能和吞吐量。</li>
+</ol>
+</li>
+</ul>
+<h3 id="三、技术选型与核心架构-How-It-Works-Overview"><a href="#三、技术选型与核心架构-How-It-Works-Overview" class="headerlink" title="三、技术选型与核心架构 (How It Works - Overview)"></a>三、技术选型与核心架构 (How It Works - Overview)</h3><ul>
+<li><strong>项目的整体设计思路和用了哪些关键技术？</strong><ul>
+<li><strong>核心思想</strong>：<code>tx-fat</code> 的核心思想借鉴了类似两阶段提交（2PC）的模式，但我们将其改造为一种<strong>基于最终一致性的异步协调模型</strong>。可以理解为，我们有一个“协调员”（事务发起者），它会先让所有“参与者”（其他微服务）尝试执行自己的那部分任务，并告诉协调员“我准备好了，可以提交”，或者“我出错了，大家一起回滚吧”。</li>
+<li><strong>协调中心 - Redis</strong>：<ul>
+<li>我们选择 <strong>Redis</strong> 作为中心化的事务协调器和状态存储服务。</li>
+<li><em>为什么是Redis？</em> 因为 Redis 具备高性能的内存读写能力，支持丰富的数据结构（如 Set、List、String），并且可以方便地实现分布式锁、状态标记等原子操作，非常适合做这种轻量级的协调工作。</li>
+</ul>
+</li>
+<li><strong>事务管理与切入 - Spring AOP</strong>：<ul>
+<li>我们利用 <strong>Spring AOP（面向切面编程）</strong> 的能力，通过自定义注解（如 <code>@FatTransaction</code> 标记事务方法，<code>@FatServiceRegister</code> 注册服务的提交&#x2F;回滚能力）来实现对事务的声明式管理。</li>
+<li>这意味着业务代码只需要关注业务逻辑，事务的开启、提交、回滚等横切关注点由框架通过AOP自动织入。</li>
+</ul>
+</li>
+<li><strong>事务上下文传播 - RPC拦截器&#x2F;过滤器</strong>：<ul>
+<li>当一个服务调用链中包含多个微服务时，事务的相关信息（比如全局事务ID、当前分支ID等，我们称之为“事务上下文”）需要在这些服务间传递。</li>
+<li><code>tx-fat</code> 提供了对 Dubbo（通过 Filter）和 Spring Cloud OpenFeign（通过 RequestInterceptor 和 HandlerInterceptor）的集成，自动在RPC调用时传递这些上下文信息。</li>
+</ul>
+</li>
+<li><strong>一致性模型 - 最终一致性</strong>：<ul>
+<li>我们追求的是<strong>最终一致性</strong>。这意味着在事务执行过程中，系统可能会存在短暂的数据不一致状态（比如A服务成功了，B服务还在处理中）。但框架会努力确保，经过协调后，所有服务的数据最终会达到一致（要么都提交，要么都回滚到初始状态）。这通常涉及到<strong>补偿逻辑</strong>（即回滚操作）。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="四、核心功能与实现细节-How-It-Works-Key-Details"><a href="#四、核心功能与实现细节-How-It-Works-Key-Details" class="headerlink" title="四、核心功能与实现细节 (How It Works - Key Details)"></a>四、核心功能与实现细节 (How It Works - Key Details)</h3><ul>
+<li><strong>“能具体讲讲几个关键功能的实现吗？”</strong> （这部分是面试官最可能深入追问的，你需要对代码细节有把握）<ol>
+<li><strong>服务注册机制 (<code>@FatServiceRegister</code>, <code>ServiceRegisterAspect</code>)</strong>：<ul>
+<li>“每个参与事务的服务都需要告诉框架，如果事务要提交，它应该执行哪个方法；如果事务要回滚，它又应该执行哪个补偿方法。这是怎么做到的？”</li>
+<li>开发者在服务实现类上使用 <code>@FatServiceRegister</code> 注解，指定服务名、提交方法名和回滚方法名。</li>
+<li>应用启动时，<code>ServiceRegisterAspect</code> 会扫描这些注解，并通过 <code>ServiceRegisterResolver</code> 将这些元数据（服务名 -&gt; {提交方法, 回滚方法} 的映射）存储到 Redis 的一个特定 Key 中（比如 <code>SERVICE_SET:&#123;serviceName&#125;</code>）。这样，事务协调时就能动态查找到并调用它们。</li>
+</ul>
+</li>
+<li><strong>事务的生命周期：发起、参与、协调</strong>：<ul>
+<li><strong>事务发起 (<code>@FatTransaction</code>, <code>TransactionAspect</code>)</strong>：<ul>
+<li>当一个被 <code>@FatTransaction</code> 注解的方法首次被调用（或者注解显式指定 <code>isStart=true</code>），并且当前线程没有事务上下文时，它就成为<strong>事务发起者</strong>。</li>
+<li><code>TransactionAspect</code> 会拦截这个方法调用，生成一个全局唯一的事务组ID（<code>groupKey</code>）和当前分支ID（<code>currentKey</code>），并将这些信息封装在 <code>TransactionContent</code> 对象中，存入 <code>TransactionThreadLocal</code>，这样在同一个线程内就能共享这个事务信息。</li>
+<li>同时，发起者会将自己（服务名）注册到 Redis 的一个代表当前事务组的集合中（比如 <code>GROUP_SERVICE_SET:&#123;groupKey&#125;</code>），表明它参与了这个全局事务。</li>
+</ul>
+</li>
+<li><strong>事务参与 (RPC拦截与上下文传递)</strong>：<ul>
+<li>当发起者或其他已参与者通过RPC调用下游服务时，框架提供的RPC拦截器（如 <code>FatDubboFilter</code>）会从 <code>TransactionThreadLocal</code> 中获取 <code>TransactionContent</code>，将其序列化（通常是JSON），并附加到RPC请求中（比如Dubbo的Attachment或HTTP Header）。</li>
+<li>下游服务的RPC拦截器接收到请求后，会解析出这个事务上下文，并将其设置到自己线程的 <code>TransactionThreadLocal</code> 中。这样，下游服务就知道自己是某个全局事务的<strong>参与者</strong>了。它也会将自己的服务名注册到上述的 <code>GROUP_SERVICE_SET:&#123;groupKey&#125;</code>。</li>
+</ul>
+</li>
+<li><strong>事务提交协调 (<code>CommitResolver.commitTransaction()</code>)</strong>：<ul>
+<li>“如果发起者的业务逻辑成功了，怎么确保所有参与者都一起提交呢？”</li>
+<li>发起者会调用 <code>CommitResolver</code>。这个协调器会做几件事：<ol>
+<li><strong>检查全局回滚标记</strong>：首先看 Redis 中是否有针对此 <code>groupKey</code> 的“一票否决”回滚标记（比如 <code>BLOCK_MARK:&#123;groupKey&#125;</code>）。如果有，说明已经有其他分支出错了，直接转入回滚。</li>
+<li><strong>等待所有参与者就绪</strong>：发起者会等待（通过轮询 Redis 的特定 Key，比如 <code>SERVICE_READY_COMMIT_LIST:&#123;groupKey&#125;</code> 和 <code>GROUP_CAN_COMMIT_LIST:&#123;groupKey&#125;</code>，并设有超时机制）所有在 <code>GROUP_SERVICE_SET:&#123;groupKey&#125;</code> 中注册的参与者都声明自己“本地业务已完成，可以提交”。</li>
+<li><strong>执行最终提交</strong>：如果所有参与者都确认可以提交，并且没有错误和超时，协调者就会通知所有参与者执行它们之前注册的 <code>commit</code> 方法（通过 <code>ServiceRunningHandler</code> 反射调用）。</li>
+<li><strong>清理状态</strong>：提交完成后，清理 Redis 中与此事务相关的所有临时状态数据。</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><strong>事务回滚协调 (<code>CommitResolver.rollbackTransaction()</code>)</strong>：<ul>
+<li>“如果任何一个环节出错了，如何保证所有操作都撤销呢？”</li>
+<li>回滚可能由多种情况触发：发起者业务异常、参与者业务异常（通过在 Redis 中设置错误标记 <code>SERVICE_ERROR_MARK:&#123;groupKey&#125;:&#123;branchKey&#125;</code> 被协调者发现）、提交或等待超时等。</li>
+<li>一旦决定回滚，协调者会：<ol>
+<li><strong>设置全局回滚标记</strong>：立即在 Redis 中设置 <code>BLOCK_MARK:&#123;groupKey&#125;</code>，阻止任何其他分支尝试提交。</li>
+<li><strong>执行补偿操作</strong>：通知所有已参与的服务执行它们注册的 <code>rollback</code> 方法（补偿方法）。</li>
+<li><strong>清理状态</strong>：回滚完成后，同样清理 Redis 中的事务状态数据。</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Redis Key 的设计与运用</strong>：<ul>
+<li>“你们在 Redis 中用了哪些关键的 Key 来管理事务状态？”</li>
+<li>可以重点介绍几个，比如：<ul>
+<li><code>SERVICE_SET:&#123;serviceName&#125;</code>: 存储服务注册的提议&#x2F;回滚方法。</li>
+<li><code>GROUP_SERVICE_SET:&#123;groupKey&#125;</code>: 记录参与当前事务的所有服务。</li>
+<li><code>BLOCK_MARK:&#123;groupKey&#125;</code>: 全局回滚标记。</li>
+<li><code>SERVICE_ERROR_MARK:&#123;groupKey&#125;:&#123;branchKey&#125;</code>: 特定分支错误标记。</li>
+<li><code>SERVICE_READY_COMMIT_LIST:&#123;groupKey&#125;</code> &#x2F; <code>GROUP_CAN_COMMIT_LIST:&#123;groupKey&#125;</code>: 用于协调提交阶段各方状态的列表。</li>
+<li>并说明这些 Key 通常都会设置<strong>过期时间（TTL）</strong>，以防止异常情况下数据永久残留。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+	
+	</div>
+  <a type="button" href="/2021/06/14/tx-fat%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2021-03-26 </div>
+			<div class="article-title"><a href="/2021/03/26/netty-1/" title="Netty 解析">Netty 源码解析（一）</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>本文又是一篇源码分析文章，其实除了 Doug Lea 的并发包源码，我是真不太爱写源码分析。因为要花非常多的时间，而且很多地方需要反复组织语言。</p>
+<p>本文将介绍 Netty，Java 平台上使用最广泛的 NIO 包，它是对 JDK 中的 NIO 实现的一层封装，让我们能更方便地开发 NIO 程序。其实，Netty 不仅仅是 NIO 吧，但是，基本上大家都冲着 NIO 来的。</p>
+<p>个人感觉国内对于 Netty 的吹嘘是有点过了，主要是很多人靠它吃饭，要么是搞培训的，要么是出书的，恨不得把 Netty 吹上天去，这种现象也是挺不好的，反而使得初学者觉得 Netty 是什么高深的技术一样。</p>
+<p>Netty 的源码不是很简单，因为它比较多，而且各个类之间的关系错综复杂，很多人说它的源码很好，这点我觉得一般，真要说好代码，还得 Doug Lea 的并发源码比较漂亮，一行行都是精华，不过它们是不同类型的，也没什么好对比的。Netty 源码好就好在它的接口使用比较灵活，往往接口好用的框架，源码都不会太简单。</p>
+<p>本文将立足于源码分析，所以读者需要先掌握 NIO 的基础知识，至少我之前写的 <a href="/post/java-nio">《Java NIO：Buffer、Channel 和 Selector》</a> 中介绍的基础知识要清楚，如果读者已经对 Netty 有些了解，或者使用过，那就更好了。</p>
+<ul>
+<li>本文只介绍 TCP 相关的内容，Netty 对于其他协议的支持，不在本文的讨论范围内。</li>
+<li>和并发包的源码分析不一样，我不可能一行一行源码说，所以有些异常分支是会直接略过，除非我觉得需要介绍。</li>
+<li>Netty 源码一直在更新，各版本之间有些差异，我是按照 2018-09-06 的最新版本 <strong>4.1.25.Final</strong> 来进行介绍的。</li>
+</ul>
+<p>建议初学者在看完本文以后，可以去翻翻《Netty In Action》，网上也可以找到中文文字版的。</p>
+<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><p>学习源码，一开始肯定是准备环境。</p>
+<p>我喜欢用 maven，也喜欢 Spring Boot，所以我一般先到 <a target="_blank" rel="noopener" href="https://start.spring.io/">https://start.spring.io/</a> 准备一个最简单的脚手架。</p>
+	
+	</div>
+  <a type="button" href="/2021/03/26/netty-1/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2020-09-20 </div>
+			<div class="article-title"><a href="/2020/09/20/reentrant-read-write-lock/" title="Java 读写锁 ReentrantReadWriteLock 源码分析">读写锁ReentrantReadWriteLock</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>本文内容：读写锁 ReentrantReadWriteLock 的源码分析，基于 Java7&#x2F;Java8。</p>
+<p>阅读建议：虽然我这里会介绍一些 AQS 的知识，不过如果你完全不了解 AQS，看本文就有点吃力了。</p>
+<p><strong>目录</strong></p>
+<h2 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h2><p>下面这个例子非常实用，我是 javadoc 的搬运工：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这是一个关于缓存操作的故事</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">CachedData</span> &#123;</span><br><span class="line">    Object data;</span><br><span class="line">    <span class="keyword">volatile</span> <span class="type">boolean</span> cacheValid;</span><br><span class="line">    <span class="comment">// 读写锁实例</span></span><br><span class="line">    <span class="keyword">final</span> <span class="type">ReentrantReadWriteLock</span> <span class="variable">rwl</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantReadWriteLock</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">processCachedData</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 获取读锁</span></span><br><span class="line">        rwl.readLock().lock();</span><br><span class="line">        <span class="keyword">if</span> (!cacheValid) &#123; <span class="comment">// 如果缓存过期了，或者为 null</span></span><br><span class="line">            <span class="comment">// 释放掉读锁，然后获取写锁 (后面会看到，没释放掉读锁就获取写锁，会发生死锁情况)</span></span><br><span class="line">            rwl.readLock().unlock();</span><br><span class="line">            rwl.writeLock().lock();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (!cacheValid) &#123; <span class="comment">// 重新判断，因为在等待写锁的过程中，可能前面有其他写线程执行过了</span></span><br><span class="line">                    data = ...</span><br><span class="line">                    cacheValid = <span class="literal">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 获取读锁 (持有写锁的情况下，是允许获取读锁的，称为 “锁降级”，反之不行。)</span></span><br><span class="line">                rwl.readLock().lock();</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                <span class="comment">// 释放写锁，此时还剩一个读锁</span></span><br><span class="line">                rwl.writeLock().unlock(); <span class="comment">// Unlock write, still hold read</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            use(data);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="comment">// 释放读锁</span></span><br><span class="line">            rwl.readLock().unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ReentrantReadWriteLock 分为读锁和写锁两个实例，读锁是共享锁，可被多个线程同时使用，写锁是独占锁。持有写锁的线程可以继续获取读锁，反之不行。</p>
+<h2 id="ReentrantReadWriteLock-总览"><a href="#ReentrantReadWriteLock-总览" class="headerlink" title="ReentrantReadWriteLock 总览"></a>ReentrantReadWriteLock 总览</h2><p>这一节比较重要，我们要先看清楚 ReentrantReadWriteLock 的大框架，然后再到源码细节。</p>
+<p>首先，我们来看下 ReentrantReadWriteLock 的结构，它有好些嵌套类：</p>
+	
+	</div>
+  <a type="button" href="/2020/09/20/reentrant-read-write-lock/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
 			<div class="date"> 2020-07-18 </div>
 			<div class="article-title"><a href="/2020/07/18/java-memory-model/" title="经典面试内存模型">Java的内存模型-并发</a></div>
 		</h3>
@@ -376,150 +575,6 @@
 
            
 		
-           
-			  
-	
-	<!-- display as entry -->	
-		<h3 class="title">
-			<div class="date"> 2020-02-10 </div>
-			<div class="article-title"><a href="/2020/02/10/Hexo%20%E5%8D%9A%E5%AE%A2%E8%BF%81%E7%A7%BB%E4%B8%8E%20GitHub%20Actions%20%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/" title="Hexo 迁移自动化部署">Hexo Github Action部署</a></div>
-		</h3>
-	
-
-
-			  
-<div class="entry">
-
-  <div class="row">
-	
-	
-		<p>根据目前的状况和迁移需求，整理了一份迁移方案。</p>
-<p><strong>核心思路：</strong></p>
-<ol>
-<li><strong>备份</strong>：确保现有内容安全。</li>
-<li><strong>本地准备</strong>：将你的 Hexo 博客源代码目录初始化为 Git 仓库。</li>
-<li><strong>远程仓库准备</strong>：清理或重命名 <code>pistachioss.github.io</code> 仓库的 <code>main</code> 分支，因为它目前存放的是静态文件，未来要存放源代码。</li>
-<li><strong>推送源代码</strong>：将本地 Hexo 源代码推送到 <code>pistachioss.github.io</code> 仓库的 <code>main</code> 分支。</li>
-<li><strong>配置 GitHub Actions</strong>：创建 workflow 文件，实现自动拉取 <code>main</code> 分支代码、构建、然后推送到 <code>gh-pages</code> 分支。</li>
-<li><strong>GitHub Pages 设置</strong>：更改 GitHub Pages 的部署源为 <code>gh-pages</code> 分支。</li>
-<li><strong>CNAME 处理</strong>：确保自定义域名配置正确。</li>
-</ol>
-<hr>
-<p><strong>详细迁移步骤：</strong></p>
-<p><strong>阶段一：准备工作和备份</strong></p>
-<ol>
-<li><p><strong>备份现有已部署的网站（可选但推荐）</strong>：<br>虽然你的目标是 <code>gh-pages</code> 分支，但以防万一，可以先将 <code>pistachioss.github.io</code> 仓库 <code>main</code> 分支（当前存放静态文件的分支）的内容克隆到本地另一文件夹作为备份。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/pistachioss/pistachioss.github.io.git backup_deployed_site</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>备份你的 Hexo 博客根目录</strong>：<br>直接复制整个博客根目录文件夹到另一个安全位置。这是最重要的备份，包含了你的所有源文件。</p>
-</li>
-</ol>
-<p><strong>阶段二：本地 Hexo 源代码 Git 初始化与配置</strong></p>
-<ol>
-<li><p><strong>进入你的 Hexo 博客根目录</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /path/to/your/hexo-blog-root</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>删除 <code>.deploy_git</code> 文件夹（可选但推荐清理）</strong>：<br>既然不再使用 <code>hexo deploy</code> 的默认方式，可以删除这个文件夹。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">rm</span> -rf .deploy_git</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>初始化 Git 仓库</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git init</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>创建 <code>.gitignore</code> 文件</strong>：<br>在博客根目录下创建 <code>.gitignore</code> 文件，告诉 Git 哪些文件不需要版本控制。内容至少应包括：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">.DS_Store</span><br><span class="line">Thumbs.db</span><br><span class="line">db.json</span><br><span class="line">*.log</span><br><span class="line">node_modules/</span><br><span class="line">public/</span><br><span class="line">.deploy*/</span><br><span class="line"># 如果你的主题是通过 git clone 下载的，并且你不希望管理主题的 .git 历史，</span><br><span class="line"># 可以加上 themes/&lt;your-theme-name&gt;/.git/</span><br><span class="line"># 或者直接在添加主题时，删除主题文件夹内的 .git 文件夹</span><br></pre></td></tr></table></figure>
-<p><em>注意：如果你的主题是通过 <code>git submodule</code> 添加的，则不应忽略主题文件夹。但从你的描述看，似乎不是这种情况。</em></p>
-</li>
-<li><p><strong>添加 CNAME 文件到 <code>source</code> 目录</strong>：<br>为了让 Hexo 在生成静态文件时包含你的自定义域名配置，在博客根目录下的 <code>source</code> 文件夹中创建一个名为 <code>CNAME</code> (无后缀) 的文件。<br>文件内容就是你的自定义域名，例如：<br><code>your.custom.domain.com</code> (替换成你自己的域名)</p>
-</li>
-<li><p><strong>修改 Hexo 配置文件 <code>_config.yml</code> (可选，但建议检查)</strong>：<br>确保 <code>url</code> 和 <code>root</code> 配置正确，特别是 <code>url</code> 应该指向你的自定义域名。</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">url:</span> <span class="string">https://your.custom.domain.com</span>  <span class="comment"># 替换成你的域名</span></span><br><span class="line"><span class="attr">root:</span> <span class="string">/</span></span><br></pre></td></tr></table></figure>
-<p><code>deploy</code> 部分的配置对于 GitHub Actions 来说不是必需的了，你可以注释掉或删除它。</p>
-</li>
-<li><p><strong>添加所有文件到 Git 并提交</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git add .</span><br><span class="line">git commit -m <span class="string">&quot;Initial commit of Hexo source code&quot;</span></span><br></pre></td></tr></table></figure></li>
-</ol>
-<p><strong>阶段三：远程 GitHub 仓库 (<code>pistachioss.github.io</code>) 配置</strong></p>
-	
-	</div>
-  <a type="button" href="/2020/02/10/Hexo%20%E5%8D%9A%E5%AE%A2%E8%BF%81%E7%A7%BB%E4%B8%8E%20GitHub%20Actions%20%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/#more" class="btn btn-default more">Read More</a>
-</div>
-
-           
-		
-           
-			  
-	
-	<!-- display as entry -->	
-		<h3 class="title">
-			<div class="date"> 2020-01-09 </div>
-			<div class="article-title"><a href="/2020/01/09/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" title="Java多线程深度剖析">Java多线程深度剖析</a></div>
-		</h3>
-	
-
-
-			  
-<div class="entry">
-
-  <div class="row">
-	
-	
-		<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="section"># Java多线程深度剖析：从原理到实践</span></span><br><span class="line"></span><br><span class="line"><span class="section">## 摘要</span></span><br><span class="line"></span><br><span class="line">本文旨在深入探讨Java多线程的各个方面，从多线程产生的背景、操作系统层面的线程原理，到C++中的线程实现，最终聚焦于Java中多线程的机制、挑战、解决方案以及如何利用多线程充分发挥硬件资源。</span><br><span class="line"></span><br><span class="line"><span class="section">## 1. 为什么需要多线程？</span></span><br><span class="line"></span><br><span class="line"><span class="section">### 1.1 早期单任务操作系统</span></span><br><span class="line"></span><br><span class="line">计算机发展初期，操作系统是单任务的，即一次只能运行一个程序。用户提交一个作业，必须等待其完成后才能提交下一个。这种方式无法充分利用CPU资源，因为程序在等待I/O操作（如读写磁盘、网络通信）时，CPU处于空闲状态。</span><br><span class="line"></span><br><span class="line"><span class="section">### 1.2 多任务操作系统的出现</span></span><br><span class="line"></span><br><span class="line">为了提高CPU利用率和用户体验，多任务操作系统应运而生。它允许同时运行多个程序（进程）。操作系统通过快速地在不同进程间切换执行权（时间片轮转），使得用户感觉多个程序在“同时”运行。这大大提高了资源利用率和系统的吞吐量。</span><br><span class="line"></span><br><span class="line"><span class="section">### 1.3 CPU发展与摩尔定律的瓶颈</span></span><br><span class="line"></span><br><span class="line">长期以来，CPU的性能提升主要依赖于提高主频（摩尔定律）。但随着主频的提高，功耗和散热问题日益突出，单纯提高主频变得越来越困难。因此，CPU制造商转向了多核架构，即在一个CPU芯片上集成多个计算核心。</span><br><span class="line"></span><br><span class="line"><span class="section">### 1.4 多线程的优势</span></span><br><span class="line"></span><br><span class="line">在多核CPU时代，单个进程如果只使用一个核心，其他核心就会被浪费。多线程技术允许在一个进程内部创建多个执行流（线程），这些线程可以并发或并行执行，从而带来诸多好处：</span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span>  <span class="strong">**提高响应速度**</span>：对于GUI应用程序，可以将耗时的操作（如文件下载、复杂计算）放到后台线程执行，保持用户界面的响应。</span><br><span class="line"><span class="bullet">2.</span>  <span class="strong">**充分利用多核CPU**</span>：将计算密集型任务分解给多个线程，可以并行在多个CPU核心上执行，显著提高处理速度。</span><br><span class="line"><span class="bullet">3.</span>  <span class="strong">**资源共享**</span>：同一进程内的线程共享相同的内存空间（堆内存、方法区），可以方便地进行数据共享和通信，但也带来了线程安全问题。</span><br><span class="line"><span class="bullet">4.</span>  <span class="strong">**简化复杂任务的建模**</span>：某些任务天然适合分解为多个并发执行的子任务，使用多线程可以使程序结构更清晰。</span><br><span class="line"></span><br><span class="line"><span class="section">## 2. 多线程的原理：从操作系统到编程语言</span></span><br><span class="line"></span><br><span class="line"><span class="section">### 2.1 操作系统的视角：进程与线程</span></span><br><span class="line"></span><br><span class="line"><span class="bullet">*</span>   <span class="strong">**进程（Process）**</span>：操作系统进行资源分配和调度的基本单位。一个进程拥有独立的内存空间、文件句柄、设备等资源。进程的创建、销毁和切换开销较大。</span><br><span class="line"><span class="bullet">*</span>   <span class="strong">**线程（Thread）**</span>：进程内的一个执行单元，是CPU调度的基本单位。一个进程可以包含多个线程，它们共享进程的资源。线程的创建、销毁和切换开销远小于进程。</span><br><span class="line"><span class="bullet">*</span>   <span class="strong">**进程与线程的关系**</span>：</span><br><span class="line"><span class="bullet">    *</span>   一个进程至少有一个线程（主线程）。</span><br><span class="line"><span class="bullet">    *</span>   线程是轻量级的进程（LWP - Light Weight Process）。</span><br><span class="line"><span class="bullet">    *</span>   线程共享进程的堆内存、方法区（元空间）、打开的文件和设备等。</span><br><span class="line"><span class="bullet">    *</span>   每个线程有自己独立的程序计数器、虚拟机栈、本地方法栈。</span><br><span class="line"><span class="bullet">*</span>   <span class="strong">**线程切换（Context Switching）**</span>：当CPU从一个线程切换到另一个线程时，需要保存当前线程的上下文（寄存器状态、程序计数器等），并加载下一个线程的上下文。这个过程称为线程切换，它是有开销的。</span><br><span class="line"></span><br><span class="line"><span class="section">### 2.2 C++中的多线程 (简述)</span></span><br><span class="line"></span><br><span class="line">在Java之前，C/C++等语言就已经支持多线程编程。</span><br><span class="line"></span><br><span class="line"><span class="bullet">*</span>   <span class="strong">**POSIX Threads (pthreads)**</span>：是一个线程相关的标准API，广泛应用于Unix-like系统（Linux, macOS等）。程序员可以直接调用操作系统提供的线程库函数（如<span class="code">`pthread_create`</span>, <span class="code">`pthread_join`</span>）来创建和管理线程。</span><br><span class="line"><span class="bullet">*</span>   <span class="strong">**C++11 `std::thread`**</span>：C++11标准引入了<span class="code">`&lt;thread&gt;`</span>头文件，提供了跨平台的线程支持（<span class="code">`std::thread`</span>类），底层通常是对pthreads（Linux/macOS）或Windows Threads（Windows）的封装。</span><br><span class="line"></span><br><span class="line">C++多线程编程需要开发者更关注内存管理和底层的同步原语（如互斥锁<span class="code">`std::mutex`</span>、条件变量<span class="code">`std::condition_variable`</span>）。</span><br><span class="line"></span><br><span class="line"><span class="section">### 2.3 Java中的多线程</span></span><br><span class="line"></span><br><span class="line">Java从诞生之初就内置了对多线程的支持，这是其重要特性之一。</span><br><span class="line"></span><br><span class="line"><span class="bullet">*</span>   <span class="strong">**JVM与OS线程的映射**</span>：Java线程最终是由操作系统内核线程实现的。JVM负责将Java层面的<span class="code">`java.lang.Thread`</span>对象映射到操作系统的本地线程。通常是一对一的映射关系（轻量级进程模型）。</span><br><span class="line"><span class="bullet">*</span>   <span class="strong">**Java内存模型 (JMM - Java Memory Model)**</span>：JMM是Java虚拟机规范的一部分，它定义了Java程序中各种变量（线程共享变量）的访问规则，以及在并发环境下，如何保证变量的原子性、可见性和有序性。JMM屏蔽了各种硬件和操作系统的内存访问差异，实现了Java程序在各种平台下对内存的访问都能保证效果一致的目标。JMM的关键概念包括主内存（Main Memory）和工作内存（Working Memory，每个线程私有）。</span><br><span class="line"></span><br><span class="line"><span class="section">## 3. Java多线程的实现方式</span></span><br><span class="line"></span><br><span class="line">Java提供了多种创建和使用线程的方式：</span><br><span class="line"></span><br><span class="line"><span class="section">### 3.1 继承 `Thread` 类</span></span><br><span class="line"></span><br><span class="line"><span class="code">```java</span></span><br><span class="line"><span class="code">class MyThread extends Thread &#123;</span></span><br><span class="line"><span class="code">    @Override</span></span><br><span class="line"><span class="code">    public void run() &#123;</span></span><br><span class="line"><span class="code">        System.out.println(&quot;Thread &quot; + Thread.currentThread().getName() + &quot; is running by extending Thread.&quot;);</span></span><br><span class="line"><span class="code">    &#125;</span></span><br><span class="line"><span class="code">&#125;</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">// 使用</span></span><br><span class="line"><span class="code">MyThread t1 = new MyThread();</span></span><br><span class="line"><span class="code">t1.start(); // 启动线程</span></span><br></pre></td></tr></table></figure>
-
-<p>缺点：Java是单继承的，如果类已经继承了其他类，就不能再继承<code>Thread</code>。</p>
-<h3 id="3-2-实现-Runnable-接口"><a href="#3-2-实现-Runnable-接口" class="headerlink" title="3.2 实现 Runnable 接口"></a>3.2 实现 <code>Runnable</code> 接口</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyRunnable</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Thread &quot;</span> + Thread.currentThread().getName() + <span class="string">&quot; is running by implementing Runnable.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用</span></span><br><span class="line"><span class="type">MyRunnable</span> <span class="variable">myRunnable</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyRunnable</span>();</span><br><span class="line"><span class="type">Thread</span> <span class="variable">t2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(myRunnable);</span><br><span class="line">t2.start();</span><br><span class="line"></span><br><span class="line"><span class="comment">// Lambda表达式简化</span></span><br><span class="line"><span class="type">Thread</span> <span class="variable">t3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; System.out.println(<span class="string">&quot;Thread &quot;</span> + Thread.currentThread().getName() + <span class="string">&quot; with Lambda.&quot;</span>));</span><br><span class="line">t3.start();</span><br></pre></td></tr></table></figure>
-
-<p>优点：更灵活，可以将任务逻辑与线程创建分离，避免了单继承的限制，推荐使用。</p>
-<h3 id="3-3-实现-Callable-接口-与-Future"><a href="#3-3-实现-Callable-接口-与-Future" class="headerlink" title="3.3 实现 Callable 接口 (与 Future)"></a>3.3 实现 <code>Callable</code> 接口 (与 <code>Future</code>)</h3><p><code>Callable</code>接口类似于<code>Runnable</code>，但它可以返回一个结果，并且可以抛出受检查的异常。通常与<code>Future</code>和<code>ExecutorService</code>一起使用。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyCallable</span> <span class="keyword">implements</span> <span class="title class_">Callable</span>&lt;String&gt; &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>); <span class="comment">// 模拟耗时操作</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Result from MyCallable&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用</span></span><br><span class="line"><span class="type">ExecutorService</span> <span class="variable">executor</span> <span class="operator">=</span> Executors.newSingleThreadExecutor();</span><br><span class="line">Future&lt;String&gt; future = executor.submit(<span class="keyword">new</span> <span class="title class_">MyCallable</span>());</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> future.get(); <span class="comment">// 阻塞等待结果</span></span><br><span class="line">    System.out.println(result);</span><br><span class="line">&#125; <span class="keyword">catch</span> (InterruptedException | ExecutionException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">    executor.shutdown();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-4-线程池-ExecutorService"><a href="#3-4-线程池-ExecutorService" class="headerlink" title="3.4 线程池 (ExecutorService)"></a>3.4 线程池 (<code>ExecutorService</code>)</h3><p>频繁创建和销毁线程开销很大。线程池维护一组可重用的线程，当有任务提交时，从池中取一个空闲线程执行任务，任务完成后线程归还池中。</p>
-	
-	</div>
-  <a type="button" href="/2020/01/09/%E5%A4%9A%E7%BA%BF%E7%A8%8B/#more" class="btn btn-default more">Read More</a>
-</div>
-
-           
-		
-           
-			  
-	
-	<!-- display as entry -->	
-		<h3 class="title">
-			<div class="date"> 2020-01-06 </div>
-			<div class="article-title"><a href="/2020/01/06/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/" title="搭建说明">博客搭建</a></div>
-		</h3>
-	
-
-
-			  
-<div class="entry">
-
-  <div class="row">
-	
-           
-              <div class="thumbnail"><a href="/2020/01/06/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/"><img src="images/tb.1.b303e3c0.jpg" alt="博客搭建"  class="nofancybox"></a>
-           
-		</div>
-	
-	
-		<p>Hexo 博客搭配免费、快速、安全的托管平台是完全可行的。最主流和推荐的方案是使用 <strong>GitHub Pages</strong>，或者更现代化的 <strong>Vercel</strong> 或 <strong>Netlify</strong>。它们都提供免费额度，速度快（全球 CDN），并且自动提供 HTTPS 安全连接。</p>
-<p>我将以 <strong>GitHub Pages</strong> 为例，手把手教你，因为它和 Hexo 的集成非常成熟。之后会简要介绍 Vercel&#x2F;Netlify，它们在某些方面更便捷。</p>
-<h2 id="核心思路："><a href="#核心思路：" class="headerlink" title="核心思路："></a>核心思路：</h2><ol>
-<li>在你的电脑上安装 Hexo 环境，生成静态博客文件。</li>
-<li>将这些静态文件推送到 GitHub Pages 托管。</li>
-</ol>
-<h2 id="准备工作："><a href="#准备工作：" class="headerlink" title="准备工作："></a>准备工作：</h2><h3 id="Node-js-和-npm："><a href="#Node-js-和-npm：" class="headerlink" title="Node.js 和 npm："></a>Node.js 和 npm：</h3><p>Hexo 基于 Node.js。访问 <a target="_blank" rel="noopener" href="https://nodejs.org/">Node.js 官网</a> 下载并安装 LTS (长期支持) 版本，npm 会随之安装。<br>    验证安装：打开终端（Windows 用户用 Git Bash 或 PowerShell，macOS&#x2F;Linux 用户用 Terminal），输入：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">node -v</span><br><span class="line">npm -v</span><br></pre></td></tr></table></figure>
-
-<p>​        能看到版本号即可。</p>
-<h3 id="Git："><a href="#Git：" class="headerlink" title="Git："></a>Git：</h3>
-	
-	</div>
-  <a type="button" href="/2020/01/06/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/#more" class="btn btn-default more">Read More</a>
-</div>
-
-           
-		
 
 		</div>
 
@@ -536,7 +591,7 @@
         <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
 
 		
-          <li class="next disabled"><a>Next<i class="fa fa-arrow-circle-o-right"></i></a></li>
+		   <li class="next"> <a href="/page/3/" class="alignright next">Next<i class="fa fa-arrow-circle-o-right"></i></a> </li>
         
 	
 </ul>
@@ -575,7 +630,7 @@
 		
 			<li><a href="/categories/Hexo/">Hexo<span>1</span></a></li>
 		
-			<li><a href="/categories/Java/">Java<span>2</span></a></li>
+			<li><a href="/categories/Java/">Java<span>3</span></a></li>
 		
 			<li><a href="/categories/Spring/Java/">Java<span>1</span></a></li>
 		
@@ -587,13 +642,19 @@
 		
 			<li><a href="/categories/v2ray/cloudflare/">cloudflare<span>1</span></a></li>
 		
-			<li><a href="/categories/llm/">llm<span>1</span></a></li>
+			<li><a href="/categories/%E4%BA%8B%E5%8A%A1/fat/">fat<span>1</span></a></li>
+		
+			<li><a href="/categories/llm/">llm<span>2</span></a></li>
 		
 			<li><a href="/categories/netty/">netty<span>1</span></a></li>
 		
+			<li><a href="/categories/llm/pdf/">pdf<span>1</span></a></li>
+		
 			<li><a href="/categories/v2ray/">v2ray<span>1</span></a></li>
 		
-			<li><a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程<span>9</span></a></li>
+			<li><a href="/categories/%E4%BA%8B%E5%8A%A1/">事务<span>1</span></a></li>
+		
+			<li><a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程<span>10</span></a></li>
 		
 			<li><a href="/categories/%E7%9B%91%E6%8E%A7/">监控<span>1</span></a></li>
 		
@@ -606,13 +667,15 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/wiki/">wiki<span>19</span></a></li>
-		
 			<li><a href="/tags/spring/">spring<span>1</span></a></li>
+		
+			<li><a href="/tags/wiki/">wiki<span>22</span></a></li>
+		
+			<li><a href="/tags/aop/">aop<span>1</span></a></li>
 		
 			<li><a href="/tags/llm/">llm<span>1</span></a></li>
 		
-			<li><a href="/tags/aop/">aop<span>1</span></a></li>
+			<li><a href="/tags/pdf/">pdf<span>1</span></a></li>
 		
 		 
 		</ul>
@@ -624,6 +687,10 @@
 <div class="widget">
   <h4>Recent Posts</h4>
   <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2025/05/13/pdf2zn/"  title="pdf翻译" ><i class="fa fa-file-o"></i>nebius</a>
+      </li>
     
       <li>
         <a href="/2025/03/11/llm-agent-java/"  title="基于springboot开发agent" ><i class="fa fa-file-o"></i>llm-agent工具开发</a>
@@ -638,11 +705,7 @@
       </li>
     
       <li>
-        <a href="/2024/02/04/zgc/"  title="ZGC" ><i class="fa fa-file-o"></i>ZGC 介绍</a>
-      </li>
-    
-      <li>
-        <a href="/2023/02/24/spring%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/"  title="Spring动态代理全解析：生成时机、源码脉络与代理类形态" ><i class="fa fa-file-o"></i>Spring动态代理全解析</a>
+        <a href="/2024/06/08/%E5%AD%97%E8%8A%82%E7%A0%81%E4%B9%A6%E7%B1%8D%E7%BA%BF%E8%B7%AF/"  title="书籍推荐" ><i class="fa fa-file-o"></i>字节码学习线路</a>
       </li>
     
   </ul>

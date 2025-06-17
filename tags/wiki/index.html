@@ -266,6 +266,44 @@
 	
 	<!-- display as entry -->	
 		<h3 class="title">
+			<div class="date"> 2024-06-08 </div>
+			<div class="article-title"><a href="/2024/06/08/%E5%AD%97%E8%8A%82%E7%A0%81%E4%B9%A6%E7%B1%8D%E7%BA%BF%E8%B7%AF/" title="书籍推荐">字节码学习线路</a></div>
+		</h3>
+	
+
+
+		     
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<h3 id="这是什么语言？"><a href="#这是什么语言？" class="headerlink" title="这是什么语言？"></a>这是什么语言？</h3><p>你看到的 <code>push ebp</code>, <code>mov ebp, esp</code> 等内容，属于 <strong>x86 汇编语言 (Assembly Language)</strong>。</p>
+<ul>
+<li><strong>汇编语言</strong>：它不是一种单一的语言，而是一族与特定计算机体系结构（CPU架构）紧密相关的低级编程语言。我们这里讨论的 x86 汇编，是为 Intel 和 AMD 等公司生产的 x86 架构 CPU 设计的“母语”。</li>
+<li><strong>为什么是“低级”语言？</strong>：因为它与机器指令（CPU能直接执行的二进制代码）几乎是一一对应的。<code>mov</code>, <code>push</code>, <code>pop</code> 这些助记符，最终都会被翻译成特定的二进制数字（机器码）让CPU执行。</li>
+<li><strong>与高级语言的关系</strong>：像 Java, C++, Python 这样的高级语言，最终都必须通过<strong>编译器 (Compiler)</strong> 或 <strong>解释器 (Interpreter) + 即时编译器 (JIT)</strong>，被翻译成汇编语言，然后再转成机器码，才能在CPU上运行。</li>
+</ul>
+<p>你之前问到的 JVM 锁升级、JIT 编译等，其最终在操作系统和硬件层面执行的，就是这些汇编指令。</p>
+<hr>
+<h3 id="需要学习什么书籍才能懂这些？"><a href="#需要学习什么书籍才能懂这些？" class="headerlink" title="需要学习什么书籍才能懂这些？"></a>需要学习什么书籍才能懂这些？</h3><p>懂了这些，就能真正理解“代码是如何运行的”。这需要一个系统性的学习路径，而不是只看一本书。推荐一个从基础到深入的学习路径和经典书籍。</p>
+<h4 id="学习路径"><a href="#学习路径" class="headerlink" title="学习路径"></a>学习路径</h4><ol>
+<li><strong>第一步：打好地基 —— 计算机组成原理 (Computer Organization)</strong><br>在学习汇编之前，你必须先知道计算机的基本构造：什么是CPU，什么是内存，什么是寄存器（EBP&#x2F;ESP就是寄存器），数据是如何在它们之间流动的。</li>
+<li><strong>第二步：理解环境 —— 操作系统 (Operating Systems)</strong><br>程序不是在真空中运行的。操作系统负责管理进程、线程、内存（虚拟内存）、文件系统等。函数调用、栈的建立，都离不开操作系统的支持。</li>
+<li><strong>第三步：学习语言本身 —— 汇编语言 (Assembly Language)</strong><br>掌握汇编指令、寻址模式、伪指令，并开始编写简单的汇编程序。</li>
+<li><strong>第四步：连接高低 —— 编译原理 (Compilers)</strong><br>理解高级语言的结构（如 <code>if</code> 语句, <code>for</code> 循环, 函数调用）是如何被翻译成汇编语言的。这是将你已有的 Java&#x2F;C++ 知识与汇编知识连接起来的关键。</li>
+</ol>
+<h4 id="经典书籍推荐"><a href="#经典书籍推荐" class="headerlink" title="经典书籍推荐"></a>经典书籍推荐</h4>
+	
+	</div>
+  <a type="button" href="/2024/06/08/%E5%AD%97%E8%8A%82%E7%A0%81%E4%B9%A6%E7%B1%8D%E7%BA%BF%E8%B7%AF/#more" class="btn btn-default more">Read More</a>
+</div>
+
+	       
+		     
+	
+	<!-- display as entry -->	
+		<h3 class="title">
 			<div class="date"> 2024-02-04 </div>
 			<div class="article-title"><a href="/2024/02/04/zgc/" title="ZGC">ZGC 介绍</a></div>
 		</h3>
@@ -409,6 +447,133 @@
 	
 	<!-- display as entry -->	
 		<h3 class="title">
+			<div class="date"> 2021-06-14 </div>
+			<div class="article-title"><a href="/2021/06/14/tx-fat%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" title="分布式事务框架">tx-fat</a></div>
+		</h3>
+	
+
+
+		     
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<h2 id="tx-fat-分布式事务框架面试介绍指南"><a href="#tx-fat-分布式事务框架面试介绍指南" class="headerlink" title="tx-fat 分布式事务框架面试介绍指南"></a>tx-fat 分布式事务框架面试介绍指南</h2><p>面试官您好，我参与&#x2F;负责的 <code>tx-fat</code> 项目是一个轻量级的分布式事务解决方案，主要目标是为微服务架构下的应用提供<strong>最终一致性</strong>的事务保障。</p>
+<h3 id="一、项目背景与痛点-Why-We-Built-It"><a href="#一、项目背景与痛点-Why-We-Built-It" class="headerlink" title="一、项目背景与痛点 (Why We Built It)"></a>一、项目背景与痛点 (Why We Built It)</h3><ul>
+<li><strong>为什么需要这个项目？</strong><ul>
+<li>在微服务架构下，一个完整的业务操作往往需要跨越多个独立部署的服务。传统的单体应用中的本地数据库事务（ACID）无法保证这种跨服务操作的原子性——要么所有服务的操作都成功，要么都失败。</li>
+<li><strong>举个例子</strong>：比如电商场景的下单操作，可能涉及到订单服务创建订单、库存服务扣减库存、积分服务增加积分。如果其中任何一个服务操作失败，我们希望整个下单流程都能回滚，避免数据不一致（比如订单创建了但库存没扣）。</li>
+<li>传统的强一致性分布式事务方案，比如基于 XA 协议的两阶段提交（2PC），虽然能保证强一致性，但通常<strong>性能开销较大、实现复杂、对数据库和业务的侵入性也比较强</strong>，在高并发的互联网场景下可能不太适用。</li>
+<li>因此，我们希望找到一种<strong>更轻量、对业务侵入更小、性能表现更好</strong>的解决方案，即使它牺牲了一点点的实时一致性，转而追求最终一致性。这就是我们开发 <code>tx-fat</code> 的初衷。</li>
+</ul>
+</li>
+</ul>
+<h3 id="二、项目目标-What-We-Aimed-For"><a href="#二、项目目标-What-We-Aimed-For" class="headerlink" title="二、项目目标 (What We Aimed For)"></a>二、项目目标 (What We Aimed For)</h3><ul>
+<li><strong>我们想通过这个项目达到什么效果？</strong><ol>
+<li><strong>易用性与低侵入性</strong>：开发者可以通过简单的注解（比如 <code>@FatTransaction</code>）就能将普通方法接入分布式事务管理，而不需要修改大量的业务代码。</li>
+<li><strong>最终一致性保障</strong>：在分布式环境下，保证参与事务的各个服务最终能够达到一致的状态，要么全部成功提交，要么全部成功回滚各自的操作。</li>
+<li><strong>主流RPC框架支持</strong>：能够与业界主流的微服务通信框架（如 Dubbo、Spring Cloud OpenFeign）无缝集成，自动完成事务上下文的跨服务传播。</li>
+<li><strong>清晰的协调机制</strong>：提供明确的事务提交和回滚协调流程，并通过外部协调服务（我们选择了Redis）来管理事务状态。</li>
+<li><strong>相对较好的性能</strong>：相比传统的2PC方案，我们希望通过异步协调和优化的流程来获得更好的性能和吞吐量。</li>
+</ol>
+</li>
+</ul>
+<h3 id="三、技术选型与核心架构-How-It-Works-Overview"><a href="#三、技术选型与核心架构-How-It-Works-Overview" class="headerlink" title="三、技术选型与核心架构 (How It Works - Overview)"></a>三、技术选型与核心架构 (How It Works - Overview)</h3><ul>
+<li><strong>项目的整体设计思路和用了哪些关键技术？</strong><ul>
+<li><strong>核心思想</strong>：<code>tx-fat</code> 的核心思想借鉴了类似两阶段提交（2PC）的模式，但我们将其改造为一种<strong>基于最终一致性的异步协调模型</strong>。可以理解为，我们有一个“协调员”（事务发起者），它会先让所有“参与者”（其他微服务）尝试执行自己的那部分任务，并告诉协调员“我准备好了，可以提交”，或者“我出错了，大家一起回滚吧”。</li>
+<li><strong>协调中心 - Redis</strong>：<ul>
+<li>我们选择 <strong>Redis</strong> 作为中心化的事务协调器和状态存储服务。</li>
+<li><em>为什么是Redis？</em> 因为 Redis 具备高性能的内存读写能力，支持丰富的数据结构（如 Set、List、String），并且可以方便地实现分布式锁、状态标记等原子操作，非常适合做这种轻量级的协调工作。</li>
+</ul>
+</li>
+<li><strong>事务管理与切入 - Spring AOP</strong>：<ul>
+<li>我们利用 <strong>Spring AOP（面向切面编程）</strong> 的能力，通过自定义注解（如 <code>@FatTransaction</code> 标记事务方法，<code>@FatServiceRegister</code> 注册服务的提交&#x2F;回滚能力）来实现对事务的声明式管理。</li>
+<li>这意味着业务代码只需要关注业务逻辑，事务的开启、提交、回滚等横切关注点由框架通过AOP自动织入。</li>
+</ul>
+</li>
+<li><strong>事务上下文传播 - RPC拦截器&#x2F;过滤器</strong>：<ul>
+<li>当一个服务调用链中包含多个微服务时，事务的相关信息（比如全局事务ID、当前分支ID等，我们称之为“事务上下文”）需要在这些服务间传递。</li>
+<li><code>tx-fat</code> 提供了对 Dubbo（通过 Filter）和 Spring Cloud OpenFeign（通过 RequestInterceptor 和 HandlerInterceptor）的集成，自动在RPC调用时传递这些上下文信息。</li>
+</ul>
+</li>
+<li><strong>一致性模型 - 最终一致性</strong>：<ul>
+<li>我们追求的是<strong>最终一致性</strong>。这意味着在事务执行过程中，系统可能会存在短暂的数据不一致状态（比如A服务成功了，B服务还在处理中）。但框架会努力确保，经过协调后，所有服务的数据最终会达到一致（要么都提交，要么都回滚到初始状态）。这通常涉及到<strong>补偿逻辑</strong>（即回滚操作）。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="四、核心功能与实现细节-How-It-Works-Key-Details"><a href="#四、核心功能与实现细节-How-It-Works-Key-Details" class="headerlink" title="四、核心功能与实现细节 (How It Works - Key Details)"></a>四、核心功能与实现细节 (How It Works - Key Details)</h3><ul>
+<li><strong>“能具体讲讲几个关键功能的实现吗？”</strong> （这部分是面试官最可能深入追问的，你需要对代码细节有把握）<ol>
+<li><strong>服务注册机制 (<code>@FatServiceRegister</code>, <code>ServiceRegisterAspect</code>)</strong>：<ul>
+<li>“每个参与事务的服务都需要告诉框架，如果事务要提交，它应该执行哪个方法；如果事务要回滚，它又应该执行哪个补偿方法。这是怎么做到的？”</li>
+<li>开发者在服务实现类上使用 <code>@FatServiceRegister</code> 注解，指定服务名、提交方法名和回滚方法名。</li>
+<li>应用启动时，<code>ServiceRegisterAspect</code> 会扫描这些注解，并通过 <code>ServiceRegisterResolver</code> 将这些元数据（服务名 -&gt; {提交方法, 回滚方法} 的映射）存储到 Redis 的一个特定 Key 中（比如 <code>SERVICE_SET:&#123;serviceName&#125;</code>）。这样，事务协调时就能动态查找到并调用它们。</li>
+</ul>
+</li>
+<li><strong>事务的生命周期：发起、参与、协调</strong>：<ul>
+<li><strong>事务发起 (<code>@FatTransaction</code>, <code>TransactionAspect</code>)</strong>：<ul>
+<li>当一个被 <code>@FatTransaction</code> 注解的方法首次被调用（或者注解显式指定 <code>isStart=true</code>），并且当前线程没有事务上下文时，它就成为<strong>事务发起者</strong>。</li>
+<li><code>TransactionAspect</code> 会拦截这个方法调用，生成一个全局唯一的事务组ID（<code>groupKey</code>）和当前分支ID（<code>currentKey</code>），并将这些信息封装在 <code>TransactionContent</code> 对象中，存入 <code>TransactionThreadLocal</code>，这样在同一个线程内就能共享这个事务信息。</li>
+<li>同时，发起者会将自己（服务名）注册到 Redis 的一个代表当前事务组的集合中（比如 <code>GROUP_SERVICE_SET:&#123;groupKey&#125;</code>），表明它参与了这个全局事务。</li>
+</ul>
+</li>
+<li><strong>事务参与 (RPC拦截与上下文传递)</strong>：<ul>
+<li>当发起者或其他已参与者通过RPC调用下游服务时，框架提供的RPC拦截器（如 <code>FatDubboFilter</code>）会从 <code>TransactionThreadLocal</code> 中获取 <code>TransactionContent</code>，将其序列化（通常是JSON），并附加到RPC请求中（比如Dubbo的Attachment或HTTP Header）。</li>
+<li>下游服务的RPC拦截器接收到请求后，会解析出这个事务上下文，并将其设置到自己线程的 <code>TransactionThreadLocal</code> 中。这样，下游服务就知道自己是某个全局事务的<strong>参与者</strong>了。它也会将自己的服务名注册到上述的 <code>GROUP_SERVICE_SET:&#123;groupKey&#125;</code>。</li>
+</ul>
+</li>
+<li><strong>事务提交协调 (<code>CommitResolver.commitTransaction()</code>)</strong>：<ul>
+<li>“如果发起者的业务逻辑成功了，怎么确保所有参与者都一起提交呢？”</li>
+<li>发起者会调用 <code>CommitResolver</code>。这个协调器会做几件事：<ol>
+<li><strong>检查全局回滚标记</strong>：首先看 Redis 中是否有针对此 <code>groupKey</code> 的“一票否决”回滚标记（比如 <code>BLOCK_MARK:&#123;groupKey&#125;</code>）。如果有，说明已经有其他分支出错了，直接转入回滚。</li>
+<li><strong>等待所有参与者就绪</strong>：发起者会等待（通过轮询 Redis 的特定 Key，比如 <code>SERVICE_READY_COMMIT_LIST:&#123;groupKey&#125;</code> 和 <code>GROUP_CAN_COMMIT_LIST:&#123;groupKey&#125;</code>，并设有超时机制）所有在 <code>GROUP_SERVICE_SET:&#123;groupKey&#125;</code> 中注册的参与者都声明自己“本地业务已完成，可以提交”。</li>
+<li><strong>执行最终提交</strong>：如果所有参与者都确认可以提交，并且没有错误和超时，协调者就会通知所有参与者执行它们之前注册的 <code>commit</code> 方法（通过 <code>ServiceRunningHandler</code> 反射调用）。</li>
+<li><strong>清理状态</strong>：提交完成后，清理 Redis 中与此事务相关的所有临时状态数据。</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><strong>事务回滚协调 (<code>CommitResolver.rollbackTransaction()</code>)</strong>：<ul>
+<li>“如果任何一个环节出错了，如何保证所有操作都撤销呢？”</li>
+<li>回滚可能由多种情况触发：发起者业务异常、参与者业务异常（通过在 Redis 中设置错误标记 <code>SERVICE_ERROR_MARK:&#123;groupKey&#125;:&#123;branchKey&#125;</code> 被协调者发现）、提交或等待超时等。</li>
+<li>一旦决定回滚，协调者会：<ol>
+<li><strong>设置全局回滚标记</strong>：立即在 Redis 中设置 <code>BLOCK_MARK:&#123;groupKey&#125;</code>，阻止任何其他分支尝试提交。</li>
+<li><strong>执行补偿操作</strong>：通知所有已参与的服务执行它们注册的 <code>rollback</code> 方法（补偿方法）。</li>
+<li><strong>清理状态</strong>：回滚完成后，同样清理 Redis 中的事务状态数据。</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Redis Key 的设计与运用</strong>：<ul>
+<li>“你们在 Redis 中用了哪些关键的 Key 来管理事务状态？”</li>
+<li>可以重点介绍几个，比如：<ul>
+<li><code>SERVICE_SET:&#123;serviceName&#125;</code>: 存储服务注册的提议&#x2F;回滚方法。</li>
+<li><code>GROUP_SERVICE_SET:&#123;groupKey&#125;</code>: 记录参与当前事务的所有服务。</li>
+<li><code>BLOCK_MARK:&#123;groupKey&#125;</code>: 全局回滚标记。</li>
+<li><code>SERVICE_ERROR_MARK:&#123;groupKey&#125;:&#123;branchKey&#125;</code>: 特定分支错误标记。</li>
+<li><code>SERVICE_READY_COMMIT_LIST:&#123;groupKey&#125;</code> &#x2F; <code>GROUP_CAN_COMMIT_LIST:&#123;groupKey&#125;</code>: 用于协调提交阶段各方状态的列表。</li>
+<li>并说明这些 Key 通常都会设置<strong>过期时间（TTL）</strong>，以防止异常情况下数据永久残留。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+	
+	</div>
+  <a type="button" href="/2021/06/14/tx-fat%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/#more" class="btn btn-default more">Read More</a>
+</div>
+
+	       
+		     
+	
+	<!-- display as entry -->	
+		<h3 class="title">
 			<div class="date"> 2021-03-26 </div>
 			<div class="article-title"><a href="/2021/03/26/netty-1/" title="Netty 解析">Netty 源码解析（一）</a></div>
 		</h3>
@@ -437,68 +602,6 @@
 	
 	</div>
   <a type="button" href="/2021/03/26/netty-1/#more" class="btn btn-default more">Read More</a>
-</div>
-
-	       
-		     
-	
-	<!-- display as entry -->	
-		<h3 class="title">
-			<div class="date"> 2020-09-20 </div>
-			<div class="article-title"><a href="/2020/09/20/reentrant-read-write-lock/" title="Java 读写锁 ReentrantReadWriteLock 源码分析">读写锁ReentrantReadWriteLock</a></div>
-		</h3>
-	
-
-
-		     
-<div class="entry">
-
-  <div class="row">
-	
-	
-		<p>本文内容：读写锁 ReentrantReadWriteLock 的源码分析，基于 Java7&#x2F;Java8。</p>
-<p>阅读建议：虽然我这里会介绍一些 AQS 的知识，不过如果你完全不了解 AQS，看本文就有点吃力了。</p>
-<p><strong>目录</strong></p>
-<h2 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h2><p>下面这个例子非常实用，我是 javadoc 的搬运工：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这是一个关于缓存操作的故事</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">CachedData</span> &#123;</span><br><span class="line">    Object data;</span><br><span class="line">    <span class="keyword">volatile</span> <span class="type">boolean</span> cacheValid;</span><br><span class="line">    <span class="comment">// 读写锁实例</span></span><br><span class="line">    <span class="keyword">final</span> <span class="type">ReentrantReadWriteLock</span> <span class="variable">rwl</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantReadWriteLock</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">processCachedData</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 获取读锁</span></span><br><span class="line">        rwl.readLock().lock();</span><br><span class="line">        <span class="keyword">if</span> (!cacheValid) &#123; <span class="comment">// 如果缓存过期了，或者为 null</span></span><br><span class="line">            <span class="comment">// 释放掉读锁，然后获取写锁 (后面会看到，没释放掉读锁就获取写锁，会发生死锁情况)</span></span><br><span class="line">            rwl.readLock().unlock();</span><br><span class="line">            rwl.writeLock().lock();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (!cacheValid) &#123; <span class="comment">// 重新判断，因为在等待写锁的过程中，可能前面有其他写线程执行过了</span></span><br><span class="line">                    data = ...</span><br><span class="line">                    cacheValid = <span class="literal">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 获取读锁 (持有写锁的情况下，是允许获取读锁的，称为 “锁降级”，反之不行。)</span></span><br><span class="line">                rwl.readLock().lock();</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                <span class="comment">// 释放写锁，此时还剩一个读锁</span></span><br><span class="line">                rwl.writeLock().unlock(); <span class="comment">// Unlock write, still hold read</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            use(data);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="comment">// 释放读锁</span></span><br><span class="line">            rwl.readLock().unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>ReentrantReadWriteLock 分为读锁和写锁两个实例，读锁是共享锁，可被多个线程同时使用，写锁是独占锁。持有写锁的线程可以继续获取读锁，反之不行。</p>
-<h2 id="ReentrantReadWriteLock-总览"><a href="#ReentrantReadWriteLock-总览" class="headerlink" title="ReentrantReadWriteLock 总览"></a>ReentrantReadWriteLock 总览</h2><p>这一节比较重要，我们要先看清楚 ReentrantReadWriteLock 的大框架，然后再到源码细节。</p>
-<p>首先，我们来看下 ReentrantReadWriteLock 的结构，它有好些嵌套类：</p>
-	
-	</div>
-  <a type="button" href="/2020/09/20/reentrant-read-write-lock/#more" class="btn btn-default more">Read More</a>
-</div>
-
-	       
-		     
-	
-	<!-- display as entry -->	
-		<h3 class="title">
-			<div class="date"> 2020-07-18 </div>
-			<div class="article-title"><a href="/2020/07/18/java-memory-model/" title="经典面试内存模型">Java的内存模型-并发</a></div>
-		</h3>
-	
-
-
-		     
-<div class="entry">
-
-  <div class="row">
-	
-	
-		<p>很久没更新文章了，对隔三差五过来刷更新的读者说声抱歉。</p>
-<p>关于 Java 并发也算是写了好几篇文章了，本文将介绍一些比较基础的内容，注意，阅读本文需要一定的并发基础。</p>
-<p>本文的主要目的是让大家对于并发程序中的重排序、内存可见性以及原子性有一定的了解，同时要能准确理解 synchronized、volatile、final 几个关键字的作用。</p>
-<p>另外，本文还对<strong>双重检查形式的单例模式为什么需要使用 volatile</strong> 做了深入的解释。</p>
-<h2 id="并发三问题"><a href="#并发三问题" class="headerlink" title="并发三问题"></a>并发三问题</h2><p>这节将介绍重排序、内存可见性以及原子性相关的知识，这些也是并发程序为什么难写的原因。</p>
-<h3 id="1-重排序"><a href="#1-重排序" class="headerlink" title="1. 重排序"></a>1. 重排序</h3><p>请读者先在自己的电脑上运行一下以下程序：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">x</span> <span class="operator">=</span> <span class="number">0</span>, y = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">0</span>, b =<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(;;) &#123;</span><br><span class="line">            i++;</span><br><span class="line">            x = <span class="number">0</span>; y = <span class="number">0</span>;</span><br><span class="line">            a = <span class="number">0</span>; b = <span class="number">0</span>;</span><br><span class="line">            <span class="type">CountDownLatch</span> <span class="variable">latch</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CountDownLatch</span>(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">            <span class="type">Thread</span> <span class="variable">one</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    latch.await();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                &#125;</span><br><span class="line">                a = <span class="number">1</span>;</span><br><span class="line">                x = b;</span><br><span class="line">            &#125;);</span><br><span class="line"></span><br><span class="line">            <span class="type">Thread</span> <span class="variable">other</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    latch.await();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                &#125;</span><br><span class="line">                b = <span class="number">1</span>;</span><br><span class="line">                y = a;</span><br><span class="line">            &#125;);</span><br><span class="line">            one.start();other.start();</span><br><span class="line">            latch.countDown();</span><br><span class="line">            one.join();other.join();</span><br><span class="line"></span><br><span class="line">            <span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> <span class="string">&quot;第&quot;</span> + i + <span class="string">&quot;次 (&quot;</span> + x + <span class="string">&quot;,&quot;</span> + y + <span class="string">&quot;）&quot;</span>;</span><br><span class="line">            <span class="keyword">if</span>(x == <span class="number">0</span> &amp;&amp; y == <span class="number">0</span>) &#123;</span><br><span class="line">                System.err.println(result);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                System.out.println(result);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>几秒后，我们就可以得到 x &#x3D;&#x3D; 0 &amp;&amp; y &#x3D;&#x3D; 0 这个结果，仔细看看代码就会知道，如果不发生重排序的话，这个结果是不可能出现的。</p>
-	
-	</div>
-  <a type="button" href="/2020/07/18/java-memory-model/#more" class="btn btn-default more">Read More</a>
 </div>
 
 	       
@@ -553,7 +656,7 @@
 		
 			<li><a href="/categories/Hexo/">Hexo<span>1</span></a></li>
 		
-			<li><a href="/categories/Java/">Java<span>2</span></a></li>
+			<li><a href="/categories/Java/">Java<span>3</span></a></li>
 		
 			<li><a href="/categories/Spring/Java/">Java<span>1</span></a></li>
 		
@@ -565,13 +668,19 @@
 		
 			<li><a href="/categories/v2ray/cloudflare/">cloudflare<span>1</span></a></li>
 		
-			<li><a href="/categories/llm/">llm<span>1</span></a></li>
+			<li><a href="/categories/%E4%BA%8B%E5%8A%A1/fat/">fat<span>1</span></a></li>
+		
+			<li><a href="/categories/llm/">llm<span>2</span></a></li>
 		
 			<li><a href="/categories/netty/">netty<span>1</span></a></li>
 		
+			<li><a href="/categories/llm/pdf/">pdf<span>1</span></a></li>
+		
 			<li><a href="/categories/v2ray/">v2ray<span>1</span></a></li>
 		
-			<li><a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程<span>9</span></a></li>
+			<li><a href="/categories/%E4%BA%8B%E5%8A%A1/">事务<span>1</span></a></li>
+		
+			<li><a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程<span>10</span></a></li>
 		
 			<li><a href="/categories/%E7%9B%91%E6%8E%A7/">监控<span>1</span></a></li>
 		
@@ -584,11 +693,13 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/wiki/">wiki<span>19</span></a></li>
+			<li><a href="/tags/wiki/">wiki<span>22</span></a></li>
 		
-			<li><a href="/tags/aop/">aop<span>1</span></a></li>
+			<li><a href="/tags/pdf/">pdf<span>1</span></a></li>
 		
 			<li><a href="/tags/spring/">spring<span>1</span></a></li>
+		
+			<li><a href="/tags/aop/">aop<span>1</span></a></li>
 		
 			<li><a href="/tags/llm/">llm<span>1</span></a></li>
 		
@@ -604,6 +715,10 @@
   <ul class="entry list-unstyled">
     
       <li>
+        <a href="/2025/05/13/pdf2zn/"  title="pdf翻译" ><i class="fa fa-file-o"></i>nebius</a>
+      </li>
+    
+      <li>
         <a href="/2025/03/11/llm-agent-java/"  title="基于springboot开发agent" ><i class="fa fa-file-o"></i>llm-agent工具开发</a>
       </li>
     
@@ -616,11 +731,7 @@
       </li>
     
       <li>
-        <a href="/2024/02/04/zgc/"  title="ZGC" ><i class="fa fa-file-o"></i>ZGC 介绍</a>
-      </li>
-    
-      <li>
-        <a href="/2023/02/24/spring%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/"  title="Spring动态代理全解析：生成时机、源码脉络与代理类形态" ><i class="fa fa-file-o"></i>Spring动态代理全解析</a>
+        <a href="/2024/06/08/%E5%AD%97%E8%8A%82%E7%A0%81%E4%B9%A6%E7%B1%8D%E7%BA%BF%E8%B7%AF/"  title="书籍推荐" ><i class="fa fa-file-o"></i>字节码学习线路</a>
       </li>
     
   </ul>

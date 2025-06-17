@@ -1,0 +1,430 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>fat | pistachioss</title>
+  <meta name="author" content="shineXGO">
+  
+  <meta name="description" content="pistachioss delicious">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="pistachioss"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="pistachioss" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/themes/cerulean.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight-default.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/comment.css" media="screen" type="text/css">
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.9/es5-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-sham.min.js"></script>
+  <![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+  
+  
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+	<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  
+  <!-- analytics -->
+  
+
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <nav id="main-nav" class="navbar navbar-inverse navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+	<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+       <a class="navbar-brand" href="/">pistachioss</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="about me">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/my-page-collection/" title="独立页面。">
+			  <i class="fa fa-star"></i>Pages
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+    <div class="content">
+      
+
+<!-- title -->
+<div class="page-header page-header-inverse ">
+  <h1 class="archive-title-category title title-inverse ">fat</h1>
+</div>
+
+<div class="row page">
+  <!-- cols -->
+  
+  <div class="col-md-9">
+	
+
+	  <div id="top_search"></div>
+
+      
+         <!-- display as entry -->
+	     <div class="mypage">
+	       
+		     
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2021-06-14 </div>
+			<div class="article-title"><a href="/2021/06/14/tx-fat%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" title="分布式事务框架">tx-fat</a></div>
+		</h3>
+	
+
+
+		     
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<h2 id="tx-fat-分布式事务框架面试介绍指南"><a href="#tx-fat-分布式事务框架面试介绍指南" class="headerlink" title="tx-fat 分布式事务框架面试介绍指南"></a>tx-fat 分布式事务框架面试介绍指南</h2><p>面试官您好，我参与&#x2F;负责的 <code>tx-fat</code> 项目是一个轻量级的分布式事务解决方案，主要目标是为微服务架构下的应用提供<strong>最终一致性</strong>的事务保障。</p>
+<h3 id="一、项目背景与痛点-Why-We-Built-It"><a href="#一、项目背景与痛点-Why-We-Built-It" class="headerlink" title="一、项目背景与痛点 (Why We Built It)"></a>一、项目背景与痛点 (Why We Built It)</h3><ul>
+<li><strong>为什么需要这个项目？</strong><ul>
+<li>在微服务架构下，一个完整的业务操作往往需要跨越多个独立部署的服务。传统的单体应用中的本地数据库事务（ACID）无法保证这种跨服务操作的原子性——要么所有服务的操作都成功，要么都失败。</li>
+<li><strong>举个例子</strong>：比如电商场景的下单操作，可能涉及到订单服务创建订单、库存服务扣减库存、积分服务增加积分。如果其中任何一个服务操作失败，我们希望整个下单流程都能回滚，避免数据不一致（比如订单创建了但库存没扣）。</li>
+<li>传统的强一致性分布式事务方案，比如基于 XA 协议的两阶段提交（2PC），虽然能保证强一致性，但通常<strong>性能开销较大、实现复杂、对数据库和业务的侵入性也比较强</strong>，在高并发的互联网场景下可能不太适用。</li>
+<li>因此，我们希望找到一种<strong>更轻量、对业务侵入更小、性能表现更好</strong>的解决方案，即使它牺牲了一点点的实时一致性，转而追求最终一致性。这就是我们开发 <code>tx-fat</code> 的初衷。</li>
+</ul>
+</li>
+</ul>
+<h3 id="二、项目目标-What-We-Aimed-For"><a href="#二、项目目标-What-We-Aimed-For" class="headerlink" title="二、项目目标 (What We Aimed For)"></a>二、项目目标 (What We Aimed For)</h3><ul>
+<li><strong>我们想通过这个项目达到什么效果？</strong><ol>
+<li><strong>易用性与低侵入性</strong>：开发者可以通过简单的注解（比如 <code>@FatTransaction</code>）就能将普通方法接入分布式事务管理，而不需要修改大量的业务代码。</li>
+<li><strong>最终一致性保障</strong>：在分布式环境下，保证参与事务的各个服务最终能够达到一致的状态，要么全部成功提交，要么全部成功回滚各自的操作。</li>
+<li><strong>主流RPC框架支持</strong>：能够与业界主流的微服务通信框架（如 Dubbo、Spring Cloud OpenFeign）无缝集成，自动完成事务上下文的跨服务传播。</li>
+<li><strong>清晰的协调机制</strong>：提供明确的事务提交和回滚协调流程，并通过外部协调服务（我们选择了Redis）来管理事务状态。</li>
+<li><strong>相对较好的性能</strong>：相比传统的2PC方案，我们希望通过异步协调和优化的流程来获得更好的性能和吞吐量。</li>
+</ol>
+</li>
+</ul>
+<h3 id="三、技术选型与核心架构-How-It-Works-Overview"><a href="#三、技术选型与核心架构-How-It-Works-Overview" class="headerlink" title="三、技术选型与核心架构 (How It Works - Overview)"></a>三、技术选型与核心架构 (How It Works - Overview)</h3><ul>
+<li><strong>项目的整体设计思路和用了哪些关键技术？</strong><ul>
+<li><strong>核心思想</strong>：<code>tx-fat</code> 的核心思想借鉴了类似两阶段提交（2PC）的模式，但我们将其改造为一种<strong>基于最终一致性的异步协调模型</strong>。可以理解为，我们有一个“协调员”（事务发起者），它会先让所有“参与者”（其他微服务）尝试执行自己的那部分任务，并告诉协调员“我准备好了，可以提交”，或者“我出错了，大家一起回滚吧”。</li>
+<li><strong>协调中心 - Redis</strong>：<ul>
+<li>我们选择 <strong>Redis</strong> 作为中心化的事务协调器和状态存储服务。</li>
+<li><em>为什么是Redis？</em> 因为 Redis 具备高性能的内存读写能力，支持丰富的数据结构（如 Set、List、String），并且可以方便地实现分布式锁、状态标记等原子操作，非常适合做这种轻量级的协调工作。</li>
+</ul>
+</li>
+<li><strong>事务管理与切入 - Spring AOP</strong>：<ul>
+<li>我们利用 <strong>Spring AOP（面向切面编程）</strong> 的能力，通过自定义注解（如 <code>@FatTransaction</code> 标记事务方法，<code>@FatServiceRegister</code> 注册服务的提交&#x2F;回滚能力）来实现对事务的声明式管理。</li>
+<li>这意味着业务代码只需要关注业务逻辑，事务的开启、提交、回滚等横切关注点由框架通过AOP自动织入。</li>
+</ul>
+</li>
+<li><strong>事务上下文传播 - RPC拦截器&#x2F;过滤器</strong>：<ul>
+<li>当一个服务调用链中包含多个微服务时，事务的相关信息（比如全局事务ID、当前分支ID等，我们称之为“事务上下文”）需要在这些服务间传递。</li>
+<li><code>tx-fat</code> 提供了对 Dubbo（通过 Filter）和 Spring Cloud OpenFeign（通过 RequestInterceptor 和 HandlerInterceptor）的集成，自动在RPC调用时传递这些上下文信息。</li>
+</ul>
+</li>
+<li><strong>一致性模型 - 最终一致性</strong>：<ul>
+<li>我们追求的是<strong>最终一致性</strong>。这意味着在事务执行过程中，系统可能会存在短暂的数据不一致状态（比如A服务成功了，B服务还在处理中）。但框架会努力确保，经过协调后，所有服务的数据最终会达到一致（要么都提交，要么都回滚到初始状态）。这通常涉及到<strong>补偿逻辑</strong>（即回滚操作）。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="四、核心功能与实现细节-How-It-Works-Key-Details"><a href="#四、核心功能与实现细节-How-It-Works-Key-Details" class="headerlink" title="四、核心功能与实现细节 (How It Works - Key Details)"></a>四、核心功能与实现细节 (How It Works - Key Details)</h3><ul>
+<li><strong>“能具体讲讲几个关键功能的实现吗？”</strong> （这部分是面试官最可能深入追问的，你需要对代码细节有把握）<ol>
+<li><strong>服务注册机制 (<code>@FatServiceRegister</code>, <code>ServiceRegisterAspect</code>)</strong>：<ul>
+<li>“每个参与事务的服务都需要告诉框架，如果事务要提交，它应该执行哪个方法；如果事务要回滚，它又应该执行哪个补偿方法。这是怎么做到的？”</li>
+<li>开发者在服务实现类上使用 <code>@FatServiceRegister</code> 注解，指定服务名、提交方法名和回滚方法名。</li>
+<li>应用启动时，<code>ServiceRegisterAspect</code> 会扫描这些注解，并通过 <code>ServiceRegisterResolver</code> 将这些元数据（服务名 -&gt; {提交方法, 回滚方法} 的映射）存储到 Redis 的一个特定 Key 中（比如 <code>SERVICE_SET:&#123;serviceName&#125;</code>）。这样，事务协调时就能动态查找到并调用它们。</li>
+</ul>
+</li>
+<li><strong>事务的生命周期：发起、参与、协调</strong>：<ul>
+<li><strong>事务发起 (<code>@FatTransaction</code>, <code>TransactionAspect</code>)</strong>：<ul>
+<li>当一个被 <code>@FatTransaction</code> 注解的方法首次被调用（或者注解显式指定 <code>isStart=true</code>），并且当前线程没有事务上下文时，它就成为<strong>事务发起者</strong>。</li>
+<li><code>TransactionAspect</code> 会拦截这个方法调用，生成一个全局唯一的事务组ID（<code>groupKey</code>）和当前分支ID（<code>currentKey</code>），并将这些信息封装在 <code>TransactionContent</code> 对象中，存入 <code>TransactionThreadLocal</code>，这样在同一个线程内就能共享这个事务信息。</li>
+<li>同时，发起者会将自己（服务名）注册到 Redis 的一个代表当前事务组的集合中（比如 <code>GROUP_SERVICE_SET:&#123;groupKey&#125;</code>），表明它参与了这个全局事务。</li>
+</ul>
+</li>
+<li><strong>事务参与 (RPC拦截与上下文传递)</strong>：<ul>
+<li>当发起者或其他已参与者通过RPC调用下游服务时，框架提供的RPC拦截器（如 <code>FatDubboFilter</code>）会从 <code>TransactionThreadLocal</code> 中获取 <code>TransactionContent</code>，将其序列化（通常是JSON），并附加到RPC请求中（比如Dubbo的Attachment或HTTP Header）。</li>
+<li>下游服务的RPC拦截器接收到请求后，会解析出这个事务上下文，并将其设置到自己线程的 <code>TransactionThreadLocal</code> 中。这样，下游服务就知道自己是某个全局事务的<strong>参与者</strong>了。它也会将自己的服务名注册到上述的 <code>GROUP_SERVICE_SET:&#123;groupKey&#125;</code>。</li>
+</ul>
+</li>
+<li><strong>事务提交协调 (<code>CommitResolver.commitTransaction()</code>)</strong>：<ul>
+<li>“如果发起者的业务逻辑成功了，怎么确保所有参与者都一起提交呢？”</li>
+<li>发起者会调用 <code>CommitResolver</code>。这个协调器会做几件事：<ol>
+<li><strong>检查全局回滚标记</strong>：首先看 Redis 中是否有针对此 <code>groupKey</code> 的“一票否决”回滚标记（比如 <code>BLOCK_MARK:&#123;groupKey&#125;</code>）。如果有，说明已经有其他分支出错了，直接转入回滚。</li>
+<li><strong>等待所有参与者就绪</strong>：发起者会等待（通过轮询 Redis 的特定 Key，比如 <code>SERVICE_READY_COMMIT_LIST:&#123;groupKey&#125;</code> 和 <code>GROUP_CAN_COMMIT_LIST:&#123;groupKey&#125;</code>，并设有超时机制）所有在 <code>GROUP_SERVICE_SET:&#123;groupKey&#125;</code> 中注册的参与者都声明自己“本地业务已完成，可以提交”。</li>
+<li><strong>执行最终提交</strong>：如果所有参与者都确认可以提交，并且没有错误和超时，协调者就会通知所有参与者执行它们之前注册的 <code>commit</code> 方法（通过 <code>ServiceRunningHandler</code> 反射调用）。</li>
+<li><strong>清理状态</strong>：提交完成后，清理 Redis 中与此事务相关的所有临时状态数据。</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><strong>事务回滚协调 (<code>CommitResolver.rollbackTransaction()</code>)</strong>：<ul>
+<li>“如果任何一个环节出错了，如何保证所有操作都撤销呢？”</li>
+<li>回滚可能由多种情况触发：发起者业务异常、参与者业务异常（通过在 Redis 中设置错误标记 <code>SERVICE_ERROR_MARK:&#123;groupKey&#125;:&#123;branchKey&#125;</code> 被协调者发现）、提交或等待超时等。</li>
+<li>一旦决定回滚，协调者会：<ol>
+<li><strong>设置全局回滚标记</strong>：立即在 Redis 中设置 <code>BLOCK_MARK:&#123;groupKey&#125;</code>，阻止任何其他分支尝试提交。</li>
+<li><strong>执行补偿操作</strong>：通知所有已参与的服务执行它们注册的 <code>rollback</code> 方法（补偿方法）。</li>
+<li><strong>清理状态</strong>：回滚完成后，同样清理 Redis 中的事务状态数据。</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Redis Key 的设计与运用</strong>：<ul>
+<li>“你们在 Redis 中用了哪些关键的 Key 来管理事务状态？”</li>
+<li>可以重点介绍几个，比如：<ul>
+<li><code>SERVICE_SET:&#123;serviceName&#125;</code>: 存储服务注册的提议&#x2F;回滚方法。</li>
+<li><code>GROUP_SERVICE_SET:&#123;groupKey&#125;</code>: 记录参与当前事务的所有服务。</li>
+<li><code>BLOCK_MARK:&#123;groupKey&#125;</code>: 全局回滚标记。</li>
+<li><code>SERVICE_ERROR_MARK:&#123;groupKey&#125;:&#123;branchKey&#125;</code>: 特定分支错误标记。</li>
+<li><code>SERVICE_READY_COMMIT_LIST:&#123;groupKey&#125;</code> &#x2F; <code>GROUP_CAN_COMMIT_LIST:&#123;groupKey&#125;</code>: 用于协调提交阶段各方状态的列表。</li>
+<li>并说明这些 Key 通常都会设置<strong>过期时间（TTL）</strong>，以防止异常情况下数据永久残留。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+	
+	</div>
+  <a type="button" href="/2021/06/14/tx-fat%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/#more" class="btn btn-default more">Read More</a>
+</div>
+
+	       
+	     </div>
+	     <div>
+	       <center>
+	         <div class="pagination">
+<ul class="pagination">
+	 
+</ul>
+</div>
+
+	       </center>
+	     </div>	
+      
+
+</div> <!-- col-md-9/col-md-12 -->
+
+
+<div class="col-md-3">
+	<div id="sidebar">
+	
+			
+  <div id="site_search">
+   <div class="form-group">
+    <input type="text" id="local-search-input" name="q" results="0" placeholder="Search" class="st-search-input st-default-search-input form-control"/>
+   </div>  
+  <div id="local-search-result"></div>
+  </div>
+
+
+		
+			<div class="widget">
+    
+</div>
+
+		
+			
+	<div class="widget">
+		<h4>Categories</h4>
+		<ul class="tag_box inline list-unstyled">
+		
+			<li><a href="/categories/Hexo/">Hexo<span>1</span></a></li>
+		
+			<li><a href="/categories/Java/">Java<span>3</span></a></li>
+		
+			<li><a href="/categories/Spring/Java/">Java<span>1</span></a></li>
+		
+			<li><a href="/categories/ShardingSphere/">ShardingSphere<span>1</span></a></li>
+		
+			<li><a href="/categories/Spring/">Spring<span>2</span></a></li>
+		
+			<li><a href="/categories/blog/">blog<span>1</span></a></li>
+		
+			<li><a href="/categories/v2ray/cloudflare/">cloudflare<span>1</span></a></li>
+		
+			<li><a href="/categories/%E4%BA%8B%E5%8A%A1/fat/">fat<span>1</span></a></li>
+		
+			<li><a href="/categories/llm/">llm<span>2</span></a></li>
+		
+			<li><a href="/categories/netty/">netty<span>1</span></a></li>
+		
+			<li><a href="/categories/llm/pdf/">pdf<span>1</span></a></li>
+		
+			<li><a href="/categories/v2ray/">v2ray<span>1</span></a></li>
+		
+			<li><a href="/categories/%E4%BA%8B%E5%8A%A1/">事务<span>1</span></a></li>
+		
+			<li><a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程<span>10</span></a></li>
+		
+			<li><a href="/categories/%E7%9B%91%E6%8E%A7/">监控<span>1</span></a></li>
+		
+		</ul>
+	</div>
+
+		
+			
+	<div class="widget">
+		<h4>Tag Cloud</h4>
+		<ul class="tag_box inline list-unstyled">		
+		
+			<li><a href="/tags/aop/">aop<span>1</span></a></li>
+		
+			<li><a href="/tags/pdf/">pdf<span>1</span></a></li>
+		
+			<li><a href="/tags/llm/">llm<span>1</span></a></li>
+		
+			<li><a href="/tags/spring/">spring<span>1</span></a></li>
+		
+			<li><a href="/tags/wiki/">wiki<span>22</span></a></li>
+		
+		 
+		</ul>
+	</div>
+
+
+		
+			
+<div class="widget">
+  <h4>Recent Posts</h4>
+  <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2025/05/13/pdf2zn/"  title="pdf翻译" ><i class="fa fa-file-o"></i>nebius</a>
+      </li>
+    
+      <li>
+        <a href="/2025/03/11/llm-agent-java/"  title="基于springboot开发agent" ><i class="fa fa-file-o"></i>llm-agent工具开发</a>
+      </li>
+    
+      <li>
+        <a href="/2024/10/09/prometheus-grafana/"  title="Prometheus、Grafana " ><i class="fa fa-file-o"></i>Prometheus 数据类型解析与 Grafana 制图</a>
+      </li>
+    
+      <li>
+        <a href="/2024/09/01/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/"  title="Sharding分库分表实践、主从读取" ><i class="fa fa-file-o"></i>Sharding分库分表实践</a>
+      </li>
+    
+      <li>
+        <a href="/2024/06/08/%E5%AD%97%E8%8A%82%E7%A0%81%E4%B9%A6%E7%B1%8D%E7%BA%BF%E8%B7%AF/"  title="书籍推荐" ><i class="fa fa-file-o"></i>字节码学习线路</a>
+      </li>
+    
+  </ul>
+</div>
+
+		
+	</div> <!-- sidebar -->
+</div> <!-- col-md-3 -->
+
+
+
+
+    </div>
+  </div>
+  <div class="container-narrow">
+    <footer> <p>
+  &copy; 2025 shineXGO
+  
+      with help from <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a>. Theme by <a target="_blank" rel="noopener" href="http://github.com/wzpan/hexo-theme-freemind/">Freemind</a>.    
+</p> </footer>
+  </div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>▲</span> 
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+
+<!-- syntax highlighting -->
+
+
+</body>
+</html>

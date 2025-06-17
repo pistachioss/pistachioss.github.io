@@ -127,6 +127,44 @@
 	
 	<!-- display as entry -->	
 		<h3 class="title">
+			<div class="date"> 2024-06-08 </div>
+			<div class="article-title"><a href="/2024/06/08/%E5%AD%97%E8%8A%82%E7%A0%81%E4%B9%A6%E7%B1%8D%E7%BA%BF%E8%B7%AF/" title="书籍推荐">字节码学习线路</a></div>
+		</h3>
+	
+
+
+		     
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<h3 id="这是什么语言？"><a href="#这是什么语言？" class="headerlink" title="这是什么语言？"></a>这是什么语言？</h3><p>你看到的 <code>push ebp</code>, <code>mov ebp, esp</code> 等内容，属于 <strong>x86 汇编语言 (Assembly Language)</strong>。</p>
+<ul>
+<li><strong>汇编语言</strong>：它不是一种单一的语言，而是一族与特定计算机体系结构（CPU架构）紧密相关的低级编程语言。我们这里讨论的 x86 汇编，是为 Intel 和 AMD 等公司生产的 x86 架构 CPU 设计的“母语”。</li>
+<li><strong>为什么是“低级”语言？</strong>：因为它与机器指令（CPU能直接执行的二进制代码）几乎是一一对应的。<code>mov</code>, <code>push</code>, <code>pop</code> 这些助记符，最终都会被翻译成特定的二进制数字（机器码）让CPU执行。</li>
+<li><strong>与高级语言的关系</strong>：像 Java, C++, Python 这样的高级语言，最终都必须通过<strong>编译器 (Compiler)</strong> 或 <strong>解释器 (Interpreter) + 即时编译器 (JIT)</strong>，被翻译成汇编语言，然后再转成机器码，才能在CPU上运行。</li>
+</ul>
+<p>你之前问到的 JVM 锁升级、JIT 编译等，其最终在操作系统和硬件层面执行的，就是这些汇编指令。</p>
+<hr>
+<h3 id="需要学习什么书籍才能懂这些？"><a href="#需要学习什么书籍才能懂这些？" class="headerlink" title="需要学习什么书籍才能懂这些？"></a>需要学习什么书籍才能懂这些？</h3><p>懂了这些，就能真正理解“代码是如何运行的”。这需要一个系统性的学习路径，而不是只看一本书。推荐一个从基础到深入的学习路径和经典书籍。</p>
+<h4 id="学习路径"><a href="#学习路径" class="headerlink" title="学习路径"></a>学习路径</h4><ol>
+<li><strong>第一步：打好地基 —— 计算机组成原理 (Computer Organization)</strong><br>在学习汇编之前，你必须先知道计算机的基本构造：什么是CPU，什么是内存，什么是寄存器（EBP&#x2F;ESP就是寄存器），数据是如何在它们之间流动的。</li>
+<li><strong>第二步：理解环境 —— 操作系统 (Operating Systems)</strong><br>程序不是在真空中运行的。操作系统负责管理进程、线程、内存（虚拟内存）、文件系统等。函数调用、栈的建立，都离不开操作系统的支持。</li>
+<li><strong>第三步：学习语言本身 —— 汇编语言 (Assembly Language)</strong><br>掌握汇编指令、寻址模式、伪指令，并开始编写简单的汇编程序。</li>
+<li><strong>第四步：连接高低 —— 编译原理 (Compilers)</strong><br>理解高级语言的结构（如 <code>if</code> 语句, <code>for</code> 循环, 函数调用）是如何被翻译成汇编语言的。这是将你已有的 Java&#x2F;C++ 知识与汇编知识连接起来的关键。</li>
+</ol>
+<h4 id="经典书籍推荐"><a href="#经典书籍推荐" class="headerlink" title="经典书籍推荐"></a>经典书籍推荐</h4>
+	
+	</div>
+  <a type="button" href="/2024/06/08/%E5%AD%97%E8%8A%82%E7%A0%81%E4%B9%A6%E7%B1%8D%E7%BA%BF%E8%B7%AF/#more" class="btn btn-default more">Read More</a>
+</div>
+
+	       
+		     
+	
+	<!-- display as entry -->	
+		<h3 class="title">
 			<div class="date"> 2024-02-04 </div>
 			<div class="article-title"><a href="/2024/02/04/zgc/" title="ZGC">ZGC 介绍</a></div>
 		</h3>
@@ -229,7 +267,7 @@
 		
 			<li><a href="/categories/Hexo/">Hexo<span>1</span></a></li>
 		
-			<li><a href="/categories/Java/">Java<span>2</span></a></li>
+			<li><a href="/categories/Java/">Java<span>3</span></a></li>
 		
 			<li><a href="/categories/Spring/Java/">Java<span>1</span></a></li>
 		
@@ -241,13 +279,19 @@
 		
 			<li><a href="/categories/v2ray/cloudflare/">cloudflare<span>1</span></a></li>
 		
-			<li><a href="/categories/llm/">llm<span>1</span></a></li>
+			<li><a href="/categories/%E4%BA%8B%E5%8A%A1/fat/">fat<span>1</span></a></li>
+		
+			<li><a href="/categories/llm/">llm<span>2</span></a></li>
 		
 			<li><a href="/categories/netty/">netty<span>1</span></a></li>
 		
+			<li><a href="/categories/llm/pdf/">pdf<span>1</span></a></li>
+		
 			<li><a href="/categories/v2ray/">v2ray<span>1</span></a></li>
 		
-			<li><a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程<span>9</span></a></li>
+			<li><a href="/categories/%E4%BA%8B%E5%8A%A1/">事务<span>1</span></a></li>
+		
+			<li><a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程<span>10</span></a></li>
 		
 			<li><a href="/categories/%E7%9B%91%E6%8E%A7/">监控<span>1</span></a></li>
 		
@@ -260,13 +304,15 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/aop/">aop<span>1</span></a></li>
+			<li><a href="/tags/pdf/">pdf<span>1</span></a></li>
+		
+			<li><a href="/tags/spring/">spring<span>1</span></a></li>
 		
 			<li><a href="/tags/llm/">llm<span>1</span></a></li>
 		
-			<li><a href="/tags/wiki/">wiki<span>19</span></a></li>
+			<li><a href="/tags/wiki/">wiki<span>22</span></a></li>
 		
-			<li><a href="/tags/spring/">spring<span>1</span></a></li>
+			<li><a href="/tags/aop/">aop<span>1</span></a></li>
 		
 		 
 		</ul>
@@ -278,6 +324,10 @@
 <div class="widget">
   <h4>Recent Posts</h4>
   <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2025/05/13/pdf2zn/"  title="pdf翻译" ><i class="fa fa-file-o"></i>nebius</a>
+      </li>
     
       <li>
         <a href="/2025/03/11/llm-agent-java/"  title="基于springboot开发agent" ><i class="fa fa-file-o"></i>llm-agent工具开发</a>
@@ -292,11 +342,7 @@
       </li>
     
       <li>
-        <a href="/2024/02/04/zgc/"  title="ZGC" ><i class="fa fa-file-o"></i>ZGC 介绍</a>
-      </li>
-    
-      <li>
-        <a href="/2023/02/24/spring%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/"  title="Spring动态代理全解析：生成时机、源码脉络与代理类形态" ><i class="fa fa-file-o"></i>Spring动态代理全解析</a>
+        <a href="/2024/06/08/%E5%AD%97%E8%8A%82%E7%A0%81%E4%B9%A6%E7%B1%8D%E7%BA%BF%E8%B7%AF/"  title="书籍推荐" ><i class="fa fa-file-o"></i>字节码学习线路</a>
       </li>
     
   </ul>
