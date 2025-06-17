@@ -36,9 +36,9 @@ deepseek-ai/DeepSeek-V3-0324
 
 ## config
 
-![image-20250617083635531](..\images\image-20250617083635531.png)
+![image-20250617083635531](images/image-20250617083635531.png)
 
-![image-20250617083656827](..\images\image-20250617083656827.png)
+![image-20250617083656827](images/image-20250617083656827.png)
 
 ## 启动
 
