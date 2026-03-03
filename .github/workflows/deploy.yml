@@ -24,6 +24,17 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Cache Hexo
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            db.json
+            .deploy_git
+          key: ${{ runner.os }}-hexo-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-hexo-
+
       - name: Install Dependencies
         run: |
           npm install -g hexo-cli
