@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>贷款利率计算器</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #818CF8;
+            --primary-dark: #3730A3;
+            --bg: #F8FAFC;
+            --card: #FFFFFF;
+            --text: #1E293B;
+            --text-secondary: #64748B;
+            --border: #E2E8F0;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            opacity: 0.9;
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            border: 1px solid var(--border);
+            transition: box-shadow 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title .icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .icon-blue { background: #EEF2FF; }
+        .icon-green { background: #ECFDF5; }
+        .icon-orange { background: #FFF7ED; }
+        .icon-purple { background: #F5F3FF; }
+
+        /* ========== 计算模式切换 ========== */
+        .mode-switcher {
+            display: flex;
+            background: #F1F5F9;
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 1.5rem;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 0.6rem 1rem;
+            border: none;
+            background: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* ========== 表单 ========== */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            padding-right: 3rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            color: var(--text);
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        .input-wrapper input:focus {
+            border-color: var(--primary-light);
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 0.9rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            pointer-events: none;
+        }
+
+        .btn-calculate {
+            grid-column: 1 / -1;
+            padding: 0.85rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            margin-top: 0.5rem;
+        }
+
+        .btn-calculate:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79,70,229,0.4);
+        }
+
+        .btn-calculate:active {
+            transform: translateY(0);
+        }
+
+        /* ========== 结果面板 ========== */
+        .result-panel {
+            display: none;
+        }
+
+        .result-panel.show {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-highlight {
+            background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1.2rem;
+            border: 1px solid #C7D2FE;
+        }
+
+        .result-highlight .label {
+            font-size: 0.9rem;
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+
+        .result-highlight .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 0.3rem 0;
+        }
+
+        .result-highlight .sub {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-item {
+            background: #F8FAFC;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .result-item .ri-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+        }
+
+        .result-item .ri-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .result-item .ri-value.green { color: var(--success); }
+        .result-item .ri-value.orange { color: var(--warning); }
+        .result-item .ri-value.red { color: var(--danger); }
+
+        /* ========== 图表区域 ========== */
+        .chart-container {
+            position: relative;
+            margin: 1rem 0;
+        }
+
+        .pie-chart-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .pie-svg {
+            width: 180px;
+            height: 180px;
+        }
+
+        .pie-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+        }
+
+        .legend-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-value {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* ========== 还款明细表 ========== */
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 0.5rem;
+        }
+
+        .amort-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .amort-table thead {
+            background: #F1F5F9;
+            position: sticky;
+            top: 0;
+        }
+
+        .amort-table th {
+            padding: 0.7rem 0.6rem;
+            text-align: right;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .amort-table th:first-child {
+            text-align: center;
+        }
+
+        .amort-table td {
+            padding: 0.65rem 0.6rem;
+            text-align: right;
+            border-bottom: 1px solid #F1F5F9;
+            white-space: nowrap;
+        }
+
+        .amort-table td:first-child {
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .amort-table tbody tr:hover {
+            background: #F8FAFC;
+        }
+
+        .amort-table .interest-cell {
+            color: var(--danger);
+        }
+
+        .amort-table .principal-cell {
+            color: var(--success);
+        }
+
+        .amort-table tfoot td {
+            font-weight: 700;
+            border-top: 2px solid var(--border);
+            background: #F8FAFC;
+        }
+
+        /* ========== 进度条 ========== */
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .bar-label {
+            width: 50px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-align: right;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 20px;
+            background: #F1F5F9;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .bar-principal {
+            height: 100%;
+            background: linear-gradient(90deg, #6366F1, #818CF8);
+            transition: width 0.6s ease;
+        }
+
+        .bar-interest {
+            height: 100%;
+            background: linear-gradient(90deg, #F59E0B, #FBBF24);
+            transition: width 0.6s ease;
+        }
+
+        .bar-percent {
+            width: 50px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* ========== 公式说明 ========== */
+        .formula-box {
+            background: #F8FAFC;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .formula-box code {
+            background: #E2E8F0;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.82rem;
+            color: var(--primary-dark);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            color: var(--primary);
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn:hover {
+            background: #EEF2FF;
+        }
+
+        .error-msg {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .error-msg.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>💰 贷款利率计算器</h1>
+    <p>等额本息 · 精准反算年化利率 · 完整还款明细</p>
+</div>
+
+<div class="container">
+
+    <!-- 计算模式 -->
+    <div class="card">
+        <div class="card-title">
+            <div class="icon icon-blue">📋</div>
+            计算模式
+        </div>
+        <div class="mode-switcher">
+            <button class="mode-btn active" onclick="switchMode('rate')">已知月供 → 求利率</button>
+            <button class="mode-btn" onclick="switchMode('payment')">已知利率 → 求月供</button>
+        </div>
+
+        <div id="form-rate" class="form-grid">
+            <div class="form-group">
+                <label>贷款总额</label>
+                <div class="input-wrapper">
+                    <input type="number" id="r_principal" value="50000" step="1000" min="1">
+                    <span class="input-suffix">元</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>每月还款</label>
+                <div class="input-wrapper">
+                    <input type="number" id="r_payment" value="4236.53" step="0.01" min="0.01">
+                    <span class="input-suffix">元</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>还款期数</label>
+                <div class="input-wrapper">
+                    <input type="number" id="r_months" value="12" step="1" min="1" max="360">
+                    <span class="input-suffix">期(月)</span>
+                </div>
+            </div>
+            <button class="btn-calculate" onclick="calculateRate()">🔍 计算年化利率</button>
+        </div>
+
+        <div id="form-payment" class="form-grid" style="display:none;">
+            <div class="form-group">
+                <label>贷款总额</label>
+                <div class="input-wrapper">
+                    <input type="number" id="p_principal" value="50000" step="1000" min="1">
+                    <span class="input-suffix">元</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>年化利率</label>
+                <div class="input-wrapper">
+                    <input type="number" id="p_rate" value="3.07" step="0.01" min="0.01">
+                    <span class="input-suffix">%</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>还款期数</label>
+                <div class="input-wrapper">
+                    <input type="number" id="p_months" value="12" step="1" min="1" max="360">
+                    <span class="input-suffix">期(月)</span>
+                </div>
+            </div>
+            <button class="btn-calculate" onclick="calculatePayment()">🔍 计算每月还款</button>
+        </div>
+
+        <div id="error-msg" class="error-msg"></div>
+    </div>
+
+    <!-- 结果面板 -->
+    <div id="result-panel" class="result-panel">
+
+        <!-- 核心结果 -->
+        <div class="card">
+            <div class="card-title">
+                <div class="icon icon-green">✅</div>
+                计算结果
+            </div>
+            <div class="result-highlight">
+                <div class="label" id="hl-label">年化利率（名义）</div>
+                <div class="value" id="hl-value">3.07%</div>
+                <div class="sub" id="hl-sub">月利率 ≈ 0.2559%</div>
+            </div>
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="ri-label">贷款总额</div>
+                    <div class="ri-value" id="res-principal">¥50,000.00</div>
+                </div>
+                <div class="result-item">
+                    <div class="ri-label">每月还款</div>
+                    <div class="ri-value" id="res-payment">¥4,236.53</div>
+                </div>
+                <div class="result-item">
+                    <div class="ri-label">还款总额</div>
+                    <div class="ri-value" id="res-total">¥50,838.36</div>
+                </div>
+                <div class="result-item">
+                    <div class="ri-label">利息总额</div>
+                    <div class="ri-value orange" id="res-interest">¥838.36</div>
+                </div>
+                <div class="result-item">
+                    <div class="ri-label">名义年利率</div>
+                    <div class="ri-value" id="res-nominal">3.07%</div>
+                </div>
+                <div class="result-item">
+                    <div class="ri-label">实际年利率(IRR)</div>
+                    <div class="ri-value red" id="res-effective">3.12%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 还款构成图 -->
+        <div class="card">
+            <div class="card-title">
+                <div class="icon icon-orange">📊</div>
+                还款构成
+            </div>
+            <div class="pie-chart-wrapper">
+                <svg class="pie-svg" viewBox="0 0 42 42">
+                    <circle cx="21" cy="21" r="15.91549431" fill="transparent" 
+                            stroke="#818CF8" stroke-width="6" stroke-dasharray="0 100"
+                            id="pie-principal-ring"
+                            transform="rotate(-90 21 21)"/>
+                    <circle cx="21" cy="21" r="15.91549431" fill="transparent" 
+                            stroke="#FBBF24" stroke-width="6" stroke-dasharray="0 100"
+                            id="pie-interest-ring"
+                            transform="rotate(-90 21 21)"/>
+                    <text x="21" y="20" text-anchor="middle" font-size="3.5" font-weight="700" fill="#1E293B" id="pie-center-pct">98.4%</text>
+                    <text x="21" y="24" text-anchor="middle" font-size="2" fill="#64748B">本金占比</text>
+                </svg>
+                <div class="pie-legend">
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#818CF8"></div>
+                        <div>
+                            <div class="legend-text">本金</div>
+                            <div class="legend-value" id="leg-principal">¥50,000.00</div>
+                        </div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#FBBF24"></div>
+                        <div>
+                            <div class="legend-text">利息</div>
+                            <div class="legend-value" id="leg-interest">¥838.36</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 每期构成条 -->
+            <div id="bar-chart" style="margin-top:1.5rem;max-height:300px;overflow-y:auto;"></div>
+        </div>
+
+        <!-- 还款明细 -->
+        <div class="card">
+            <div class="card-title">
+                <div class="icon icon-purple">📄</div>
+                还款明细表
+            </div>
+            <button class="toggle-btn" id="toggle-table" onclick="toggleTable()">展开还款明细 ▼</button>
+            <div class="table-wrapper" id="table-wrapper" style="display:none; max-height:500px; overflow-y:auto; margin-top:1rem;">
+                <table class="amort-table" id="amort-table">
+                    <thead>
+                        <tr>
+                            <th>期数</th>
+                            <th>月供(元)</th>
+                            <th>本金(元)</th>
+                            <th>利息(元)</th>
+                            <th>剩余本金(元)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="amort-body"></tbody>
+                    <tfoot id="amort-foot"></tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- 公式说明 -->
+        <div class="card">
+            <div class="card-title">
+                <div class="icon icon-blue">📐</div>
+                计算原理
+            </div>
+            <div class="formula-box">
+                <strong>等额本息还款公式：</strong><br>
+                <code>M = P × r × (1+r)^n / [(1+r)^n - 1]</code><br><br>
+                其中：<code>M</code>=每月还款额，<code>P</code>=贷款本金，<code>r</code>=月利率，<code>n</code>=还款月数<br><br>
+                <strong>反算利率方法：</strong>采用<strong>牛顿迭代法 (Newton-Raphson)</strong>求解月利率 <code>r</code>，收敛精度达 10⁻¹⁰。<br><br>
+                <strong>名义年利率</strong> = 月利率 × 12<br>
+                <strong>实际年利率(EAR)</strong> = (1 + 月利率)^12 - 1
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="footer">
+    贷款利率计算器 · 仅供参考，不构成任何金融建议
+</div>
+
+<script>
+// ============ 工具函数 ============
+function fmt(num) {
+    return num.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtPct(num, digits = 2) {
+    return (num * 100).toFixed(digits) + '%';
+}
+
+// 等额本息月供
+function calcMonthlyPayment(P, r, n) {
+    if (r === 0) return P / n;
+    const rn = Math.pow(1 + r, n);
+    return P * r * rn / (rn - 1);
+}
+
+// 牛顿法求月利率: 已知 M, P, n → 求 r
+function solveMonthlyRate(P, M, n, maxIter = 200, tol = 1e-10) {
+    // 初始猜测
+    let r = 0.01; // 1% per month
+
+    for (let i = 0; i < maxIter; i++) {
+        const rn = Math.pow(1 + r, n);
+        const f = P * r * rn / (rn - 1) - M;
+
+        // 导数 df/dr (数值微分)
+        const dr = 1e-8;
+        const rn2 = Math.pow(1 + r + dr, n);
+        const f2 = P * (r + dr) * rn2 / (rn2 - 1) - M;
+        const df = (f2 - f) / dr;
+
+        if (Math.abs(df) < 1e-20) break;
+
+        const rNew = r - f / df;
+        if (rNew <= 0) r = r / 2; // 防止负数
+        else r = rNew;
+
+        if (Math.abs(f) < tol) break;
+    }
+    return r;
+}
+
+// 生成摊还表
+function amortizationSchedule(P, r, n, M) {
+    const schedule = [];
+    let balance = P;
+    let totalInterest = 0;
+    let totalPrincipal = 0;
+
+    for (let i = 1; i <= n; i++) {
+        const interest = balance * r;
+        let principal = M - interest;
+        if (i === n) {
+            principal = balance; // 最后一期清零
+        }
+        balance -= principal;
+        if (balance < 0) balance = 0;
+        totalInterest += interest;
+        totalPrincipal += principal;
+
+        schedule.push({
+            period: i,
+            payment: principal + interest,
+            principal: principal,
+            interest: interest,
+            balance: balance
+        });
+    }
+    return { schedule, totalInterest, totalPrincipal };
+}
+
+// ============ 模式切换 ============
+function switchMode(mode) {
+    document.querySelectorAll('.mode-btn').forEach((btn, i) => {
+        btn.classList.toggle('active', (mode === 'rate' && i === 0) || (mode === 'payment' && i === 1));
+    });
+    document.getElementById('form-rate').style.display = mode === 'rate' ? 'grid' : 'none';
+    document.getElementById('form-payment').style.display = mode === 'payment' ? 'grid' : 'none';
+    document.getElementById('error-msg').classList.remove('show');
+}
+
+// ============ 计算利率 ============
+function calculateRate() {
+    const P = parseFloat(document.getElementById('r_principal').value);
+    const M = parseFloat(document.getElementById('r_payment').value);
+    const n = parseInt(document.getElementById('r_months').value);
+    const errEl = document.getElementById('error-msg');
+
+    if (!P || P <= 0 || !M || M <= 0 || !n || n <= 0) {
+        errEl.textContent = '⚠️ 请输入有效的正数';
+        errEl.classList.add('show');
+        return;
+    }
+
+    if (M * n <= P) {
+        errEl.textContent = '⚠️ 月供 × 期数 必须大于贷款总额，否则无法覆盖本金';
+        errEl.classList.add('show');
+        return;
+    }
+
+    errEl.classList.remove('show');
+
+    const r = solveMonthlyRate(P, M, n);
+    const nominalAnnual = r * 12;
+    const effectiveAnnual = Math.pow(1 + r, 12) - 1;
+
+    const { schedule, totalInterest, totalPrincipal } = amortizationSchedule(P, r, n, M);
+    const totalPayment = totalPrincipal + totalInterest;
+
+    renderResults({
+        principal: P,
+        monthlyPayment: M,
+        months: n,
+        monthlyRate: r,
+        nominalAnnual,
+        effectiveAnnual,
+        totalPayment,
+        totalInterest,
+        schedule,
+        highlightLabel: '年化利率（名义）',
+        highlightValue: fmtPct(nominalAnnual),
+        highlightSub: `月利率 ≈ ${fmtPct(r, 4)}`
+    });
+}
+
+// ============ 计算月供 ============
+function calculatePayment() {
+    const P = parseFloat(document.getElementById('p_principal').value);
+    const annualRate = parseFloat(document.getElementById('p_rate').value);
+    const n = parseInt(document.getElementById('p_months').value);
+    const errEl = document.getElementById('error-msg');
+
+    if (!P || P <= 0 || !annualRate || annualRate <= 0 || !n || n <= 0) {
+        errEl.textContent = '⚠️ 请输入有效的正数';
+        errEl.classList.add('show');
+        return;
+    }
+
+    errEl.classList.remove('show');
+
+    const r = annualRate / 100 / 12;
+    const M = calcMonthlyPayment(P, r, n);
+    const nominalAnnual = annualRate / 100;
+    const effectiveAnnual = Math.pow(1 + r, 12) - 1;
+
+    const { schedule, totalInterest } = amortizationSchedule(P, r, n, M);
+    const totalPayment = M * n;
+
+    renderResults({
+        principal: P,
+        monthlyPayment: M,
+        months: n,
+        monthlyRate: r,
+        nominalAnnual,
+        effectiveAnnual,
+        totalPayment: P + totalInterest,
+        totalInterest,
+        schedule,
+        highlightLabel: '每月还款额',
+        highlightValue: '¥' + fmt(M),
+        highlightSub: `共还 ${n} 期，总计 ¥${fmt(P + totalInterest)}`
+    });
+}
+
+// ============ 渲染结果 ============
+function renderResults(data) {
+    const panel = document.getElementById('result-panel');
+    panel.classList.add('show');
+
+    // 高亮
+    document.getElementById('hl-label').textContent = data.highlightLabel;
+    document.getElementById('hl-value').textContent = data.highlightValue;
+    document.getElementById('hl-sub').textContent = data.highlightSub;
+
+    // 摘要
+    document.getElementById('res-principal').textContent = '¥' + fmt(data.principal);
+    document.getElementById('res-payment').textContent = '¥' + fmt(data.monthlyPayment);
+    document.getElementById('res-total').textContent = '¥' + fmt(data.totalPayment);
+    document.getElementById('res-interest').textContent = '¥' + fmt(data.totalInterest);
+    document.getElementById('res-nominal').textContent = fmtPct(data.nominalAnnual);
+    document.getElementById('res-effective').textContent = fmtPct(data.effectiveAnnual);
+
+    // 饼图
+    const pPct = data.principal / data.totalPayment * 100;
+    const iPct = data.totalInterest / data.totalPayment * 100;
+    document.getElementById('pie-principal-ring').setAttribute('stroke-dasharray', `${pPct} ${100 - pPct}`);
+    document.getElementById('pie-interest-ring').setAttribute('stroke-dasharray', `${iPct} ${100 - iPct}`);
+    document.getElementById('pie-interest-ring').setAttribute('stroke-dashoffset', `-${pPct}`);
+    document.getElementById('pie-center-pct').textContent = pPct.toFixed(1) + '%';
+    document.getElementById('leg-principal').textContent = '¥' + fmt(data.principal);
+    document.getElementById('leg-interest').textContent = '¥' + fmt(data.totalInterest);
+
+    // 条形图
+    const barContainer = document.getElementById('bar-chart');
+    barContainer.innerHTML = '';
+    data.schedule.forEach(row => {
+        const total = row.principal + row.interest;
+        const pW = (row.principal / total * 100).toFixed(1);
+        const iW = (row.interest / total * 100).toFixed(1);
+        barContainer.innerHTML += `
+            <div class="bar-row">
+                <div class="bar-label">第${row.period}期</div>
+                <div class="bar-track">
+                    <div class="bar-principal" style="width:${pW}%" title="本金 ¥${fmt(row.principal)}"></div>
+                    <div class="bar-interest" style="width:${iW}%" title="利息 ¥${fmt(row.interest)}"></div>
+                </div>
+                <div class="bar-percent">${pW}%</div>
+            </div>
+        `;
+    });
+
+    // 摊还表
+    const tbody = document.getElementById('amort-body');
+    const tfoot = document.getElementById('amort-foot');
+    tbody.innerHTML = '';
+    let sumPayment = 0, sumPrincipal = 0, sumInterest = 0;
+
+    data.schedule.forEach(row => {
+        sumPayment += row.payment;
+        sumPrincipal += row.principal;
+        sumInterest += row.interest;
+        tbody.innerHTML += `
+            <tr>
+                <td>${row.period}</td>
+                <td>${fmt(row.payment)}</td>
+                <td class="principal-cell">${fmt(row.principal)}</td>
+                <td class="interest-cell">${fmt(row.interest)}</td>
+                <td>${fmt(row.balance)}</td>
+            </tr>
+        `;
+    });
+
+    tfoot.innerHTML = `
+        <tr>
+            <td>合计</td>
+            <td>${fmt(sumPayment)}</td>
+            <td class="principal-cell">${fmt(sumPrincipal)}</td>
+            <td class="interest-cell">${fmt(sumInterest)}</td>
+            <td>—</td>
+        </tr>
+    `;
+
+    // 默认收起表格
+    document.getElementById('table-wrapper').style.display = 'none';
+    document.getElementById('toggle-table').textContent = '展开还款明细 ▼';
+
+    // 滚动到结果
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function toggleTable() {
+    const wrapper = document.getElementById('table-wrapper');
+    const btn = document.getElementById('toggle-table');
+    if (wrapper.style.display === 'none') {
+        wrapper.style.display = 'block';
+        btn.textContent = '收起还款明细 ▲';
+    } else {
+        wrapper.style.display = 'none';
+        btn.textContent = '展开还款明细 ▼';
+    }
+}
+
+// 页面加载后自动计算一次
+window.addEventListener('DOMContentLoaded', () => {
+    calculateRate();
+});
+</script>
+</body>
+</html>
