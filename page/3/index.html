@@ -140,6 +140,47 @@
 	
 	<!-- display as entry -->	
 		<h3 class="title">
+			<div class="date"> 2020-05-12 </div>
+			<div class="article-title"><a href="/2020/05/12/AbstractQueuedSynchronizer/" title="一行一行源码AbstractQueuedSynchronizer">AQS源码分析1</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>在分析 Java 并发包 java.util.concurrent 源码的时候，少不了需要了解 AbstractQueuedSynchronizer（以下简写AQS）这个抽象类，因为它是 Java 并发包的基础工具类，是实现 ReentrantLock、CountDownLatch、Semaphore、FutureTask 等类的基础。</p>
+<p>Google 一下 AbstractQueuedSynchronizer，我们可以找到很多关于 AQS 的介绍，但是很多都没有介绍清楚，因为大部分文章没有把其中的一些关键的细节说清楚。</p>
+<p>本文将从 ReentrantLock 的公平锁源码出发，分析下 AbstractQueuedSynchronizer 这个类是怎么工作的，希望能给大家提供一些简单的帮助。</p>
+<p>申明以下几点：</p>
+<ol>
+<li>本文有点长，但还是挺简单，主要面向读者对象为并发编程的初学者，或者想要阅读 Java 并发包源码的开发者。对于新手来说，可能需要花好几个小时才能完全看懂，但是这时间肯定是值得的。</li>
+<li>源码环境 JDK1.7（1.8没啥变化），看到不懂或有疑惑的部分，最好能自己打开源码看看。Doug Lea 大神的代码写得真心不错。</li>
+<li>本文不分析共享模式，这样可以给读者减少很多负担，<a href="/post/AbstractQueuedSynchronizer-3">第三篇文章</a>对共享模式进行了分析。而且也不分析 condition 部分，所以应该说很容易就可以看懂了。</li>
+<li>本文大量使用我们平时用得最多的 ReentrantLock 的概念，本质上来说是不正确的，读者应该清楚，AQS 不仅仅用来实现可重入锁，只是希望读者可以用锁来联想 AQS 的使用场景，降低阅读压力。</li>
+<li>ReentrantLock 的公平锁和非公平锁只有一点点区别，<a href="/post/AbstractQueuedSynchronizer-2">第二篇文章</a>做了介绍。</li>
+<li>评论区有读者反馈本文直接用代码说不友好，应该多配点流程图，这篇文章确实有这个问题。但是作为过来人，我想告诉大家，对于 AQS 来说，形式真的不重要，重要的是把细节说清楚。</li>
+</ol>
+<h2 id="AQS-结构"><a href="#AQS-结构" class="headerlink" title="AQS 结构"></a>AQS 结构</h2><p>先来看看 AQS 有哪些属性，搞清楚这些基本就知道 AQS 是什么套路了，毕竟可以猜嘛！</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 头结点，你直接把它当做 当前持有锁的线程 可能是最好理解的</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">transient</span> <span class="keyword">volatile</span> Node head;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 阻塞的尾节点，每个新的节点进来，都插入到最后，也就形成了一个链表</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">transient</span> <span class="keyword">volatile</span> Node tail;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这个是最重要的，代表当前锁的状态，0代表没有被占用，大于 0 代表有线程持有当前锁</span></span><br><span class="line"><span class="comment">// 这个值可以大于 1，是因为锁可以重入，每次重入都加上 1</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">volatile</span> <span class="type">int</span> state;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 代表当前持有独占锁的线程，举个最重要的使用例子，因为锁可以重入</span></span><br><span class="line"><span class="comment">// reentrantLock.lock()可以嵌套调用多次，所以每次用这个来判断当前线程是否已经拥有了锁</span></span><br><span class="line"><span class="comment">// if (currentThread == getExclusiveOwnerThread()) &#123;state++&#125;</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">transient</span> Thread exclusiveOwnerThread; <span class="comment">//继承自AbstractOwnableSynchronizer</span></span><br></pre></td></tr></table></figure>
+
+<p>怎么样，看样子应该是很简单的吧，毕竟也就四个属性啊。</p>
+<p>AbstractQueuedSynchronizer 的等待队列示意如下所示，注意了，之后分析过程中所说的 queue，也就是阻塞队列<strong>不包含 head，不包含 head，不包含 head</strong>。</p>
+	
+	</div>
+  <a type="button" href="/2020/05/12/AbstractQueuedSynchronizer/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
 			<div class="date"> 2020-02-10 </div>
 			<div class="article-title"><a href="/2020/02/10/Hexo%20%E5%8D%9A%E5%AE%A2%E8%BF%81%E7%A7%BB%E4%B8%8E%20GitHub%20Actions%20%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/" title="Hexo 迁移自动化部署">Hexo Github Action部署</a></div>
 		</h3>
@@ -362,7 +403,7 @@
 		<h4>Categories</h4>
 		<ul class="tag_box inline list-unstyled">
 		
-			<li><a href="/categories/Hexo/">Hexo<span>1</span></a></li>
+			<li><a href="/categories/Hexo/">Hexo<span>2</span></a></li>
 		
 			<li><a href="/categories/Java/">Java<span>3</span></a></li>
 		
@@ -401,15 +442,15 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/wiki/">wiki<span>22</span></a></li>
+			<li><a href="/tags/wiki/">wiki<span>23</span></a></li>
 		
 			<li><a href="/tags/llm/">llm<span>1</span></a></li>
+		
+			<li><a href="/tags/pdf/">pdf<span>1</span></a></li>
 		
 			<li><a href="/tags/spring/">spring<span>1</span></a></li>
 		
 			<li><a href="/tags/aop/">aop<span>1</span></a></li>
-		
-			<li><a href="/tags/pdf/">pdf<span>1</span></a></li>
 		
 		 
 		</ul>
@@ -421,6 +462,10 @@
 <div class="widget">
   <h4>Recent Posts</h4>
   <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2026/02/28/hexo%E5%A4%9A%E4%B8%BB%E9%A2%98%E5%AE%89%E8%A3%85%E9%97%AE%E9%A2%98/"  title="Hexo 博客 + Wiki 双主题完整部署指南" ><i class="fa fa-file-o"></i>Hexo多主题完整部署指南</a>
+      </li>
     
       <li>
         <a href="/2025/05/13/pdf2zn/"  title="pdf翻译" ><i class="fa fa-file-o"></i>nebius</a>
@@ -436,10 +481,6 @@
     
       <li>
         <a href="/2024/09/01/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/"  title="Sharding分库分表实践、主从读取" ><i class="fa fa-file-o"></i>Sharding分库分表实践</a>
-      </li>
-    
-      <li>
-        <a href="/2024/06/08/%E5%AD%97%E8%8A%82%E7%A0%81%E4%B9%A6%E7%B1%8D%E7%BA%BF%E8%B7%AF/"  title="书籍推荐" ><i class="fa fa-file-o"></i>字节码学习线路</a>
       </li>
     
   </ul>

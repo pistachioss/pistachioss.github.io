@@ -141,6 +141,44 @@
 	<!-- display as entry -->	
 		<h3 class="title">
 			<div class="date"> 2021-06-14 </div>
+			<div class="article-title"><a href="/2021/06/14/Threads-And-Locks-md/" title="Threads-And-Locks">深入分析 java 8 编程语言规范：Threads and Locks</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<p>在 java 并发编程中，线程和锁永远是最重要的概念。语言规范虽然是规范描述，但是其中也有非常多的知识和最佳实践是值得学习的，相信这篇文章还是可以给很多读者提供学习参考的。</p>
+<p>本文主要是<strong>翻译 + 解释</strong> Oracle《<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/index.html">The Java Language Specification, Java SE 8 Edition</a>》的第17章《<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html">Threads and Locks</a>》，原文大概30页pdf，我加入了很多自己的理解，希望能帮大家把规范看懂，并且从中得到很多你一直想要知道但是还不知道的知识。</p>
+<p>注意，本文在说 Java 语言规范，不是 JVM 规范，JVM 的实现需要满足语言规范中定义的内容，但是具体的实现细节由各 JVM 厂商自己来决定。所以，语言规范要尽可能严谨全面，但是也不能限制过多，不然会限制 JVM 厂商对很多细节进行性能优化。</p>
+<p>我能力有限，虽然已经很用心了，但有些地方我真的不懂，我已经在文中标记出来了。</p>
+<p>建议分 3 部分阅读。</p>
+<ol>
+<li>将 17.1、17.2、17.3 一起阅读，这里关于线程中的 wait、notify、中断有很多的知识；</li>
+<li>17.4 的内存模型比较长，重排序和 happens-before 关系是重点；</li>
+<li>剩下的 final、字分裂、double和long的非原子问题，这些都是相对独立的 topic。</li>
+</ol>
+<div style="text-align: center; font-size: 24px; font-weight: bold">Chapter 17. Threads and Locks</div>
+
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>在 java 中，线程由 Thread 类表示，用户创建线程的<strong>唯一方式</strong>是创建 Thread 类的一个实例，每一个线程都和这样的一个实例关联。在相应的 Thread 实例上调用 start() 方法将启动一个线程。</p>
+<p>如果没有正确使用同步，线程表现出来的现象将会是令人疑惑的、违反直觉的。这个章节将描述多线程编程的语义问题，包括一系列的规则，这些规则定义了<strong>在多线程环境中线程对共享内存中值的修改是否对其他线程立即可见</strong>。java编程语言内存模型定义了统一的内存模型用于屏蔽不同的硬件架构，在没有歧义的情况下，下面将用<strong>内存模型</strong>表示这个概念。</p>
+	
+	</div>
+  <a type="button" href="/2021/06/14/Threads-And-Locks-md/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2021-06-14 </div>
 			<div class="article-title"><a href="/2021/06/14/tx-fat%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" title="分布式事务框架">tx-fat</a></div>
 		</h3>
 	
@@ -540,47 +578,6 @@
 
            
 		
-           
-			  
-	
-	<!-- display as entry -->	
-		<h3 class="title">
-			<div class="date"> 2020-05-12 </div>
-			<div class="article-title"><a href="/2020/05/12/AbstractQueuedSynchronizer/" title="一行一行源码AbstractQueuedSynchronizer">AQS源码分析1</a></div>
-		</h3>
-	
-
-
-			  
-<div class="entry">
-
-  <div class="row">
-	
-	
-		<p>在分析 Java 并发包 java.util.concurrent 源码的时候，少不了需要了解 AbstractQueuedSynchronizer（以下简写AQS）这个抽象类，因为它是 Java 并发包的基础工具类，是实现 ReentrantLock、CountDownLatch、Semaphore、FutureTask 等类的基础。</p>
-<p>Google 一下 AbstractQueuedSynchronizer，我们可以找到很多关于 AQS 的介绍，但是很多都没有介绍清楚，因为大部分文章没有把其中的一些关键的细节说清楚。</p>
-<p>本文将从 ReentrantLock 的公平锁源码出发，分析下 AbstractQueuedSynchronizer 这个类是怎么工作的，希望能给大家提供一些简单的帮助。</p>
-<p>申明以下几点：</p>
-<ol>
-<li>本文有点长，但还是挺简单，主要面向读者对象为并发编程的初学者，或者想要阅读 Java 并发包源码的开发者。对于新手来说，可能需要花好几个小时才能完全看懂，但是这时间肯定是值得的。</li>
-<li>源码环境 JDK1.7（1.8没啥变化），看到不懂或有疑惑的部分，最好能自己打开源码看看。Doug Lea 大神的代码写得真心不错。</li>
-<li>本文不分析共享模式，这样可以给读者减少很多负担，<a href="/post/AbstractQueuedSynchronizer-3">第三篇文章</a>对共享模式进行了分析。而且也不分析 condition 部分，所以应该说很容易就可以看懂了。</li>
-<li>本文大量使用我们平时用得最多的 ReentrantLock 的概念，本质上来说是不正确的，读者应该清楚，AQS 不仅仅用来实现可重入锁，只是希望读者可以用锁来联想 AQS 的使用场景，降低阅读压力。</li>
-<li>ReentrantLock 的公平锁和非公平锁只有一点点区别，<a href="/post/AbstractQueuedSynchronizer-2">第二篇文章</a>做了介绍。</li>
-<li>评论区有读者反馈本文直接用代码说不友好，应该多配点流程图，这篇文章确实有这个问题。但是作为过来人，我想告诉大家，对于 AQS 来说，形式真的不重要，重要的是把细节说清楚。</li>
-</ol>
-<h2 id="AQS-结构"><a href="#AQS-结构" class="headerlink" title="AQS 结构"></a>AQS 结构</h2><p>先来看看 AQS 有哪些属性，搞清楚这些基本就知道 AQS 是什么套路了，毕竟可以猜嘛！</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 头结点，你直接把它当做 当前持有锁的线程 可能是最好理解的</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">transient</span> <span class="keyword">volatile</span> Node head;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 阻塞的尾节点，每个新的节点进来，都插入到最后，也就形成了一个链表</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">transient</span> <span class="keyword">volatile</span> Node tail;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这个是最重要的，代表当前锁的状态，0代表没有被占用，大于 0 代表有线程持有当前锁</span></span><br><span class="line"><span class="comment">// 这个值可以大于 1，是因为锁可以重入，每次重入都加上 1</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">volatile</span> <span class="type">int</span> state;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 代表当前持有独占锁的线程，举个最重要的使用例子，因为锁可以重入</span></span><br><span class="line"><span class="comment">// reentrantLock.lock()可以嵌套调用多次，所以每次用这个来判断当前线程是否已经拥有了锁</span></span><br><span class="line"><span class="comment">// if (currentThread == getExclusiveOwnerThread()) &#123;state++&#125;</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">transient</span> Thread exclusiveOwnerThread; <span class="comment">//继承自AbstractOwnableSynchronizer</span></span><br></pre></td></tr></table></figure>
-
-<p>怎么样，看样子应该是很简单的吧，毕竟也就四个属性啊。</p>
-<p>AbstractQueuedSynchronizer 的等待队列示意如下所示，注意了，之后分析过程中所说的 queue，也就是阻塞队列<strong>不包含 head，不包含 head，不包含 head</strong>。</p>
-	
-	</div>
-  <a type="button" href="/2020/05/12/AbstractQueuedSynchronizer/#more" class="btn btn-default more">Read More</a>
-</div>
-
-           
-		
 
 		</div>
 
@@ -634,7 +631,7 @@
 		<h4>Categories</h4>
 		<ul class="tag_box inline list-unstyled">
 		
-			<li><a href="/categories/Hexo/">Hexo<span>1</span></a></li>
+			<li><a href="/categories/Hexo/">Hexo<span>2</span></a></li>
 		
 			<li><a href="/categories/Java/">Java<span>3</span></a></li>
 		
@@ -675,13 +672,13 @@
 		
 			<li><a href="/tags/spring/">spring<span>1</span></a></li>
 		
-			<li><a href="/tags/wiki/">wiki<span>22</span></a></li>
-		
-			<li><a href="/tags/aop/">aop<span>1</span></a></li>
-		
 			<li><a href="/tags/pdf/">pdf<span>1</span></a></li>
 		
 			<li><a href="/tags/llm/">llm<span>1</span></a></li>
+		
+			<li><a href="/tags/aop/">aop<span>1</span></a></li>
+		
+			<li><a href="/tags/wiki/">wiki<span>23</span></a></li>
 		
 		 
 		</ul>
@@ -693,6 +690,10 @@
 <div class="widget">
   <h4>Recent Posts</h4>
   <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2026/02/28/hexo%E5%A4%9A%E4%B8%BB%E9%A2%98%E5%AE%89%E8%A3%85%E9%97%AE%E9%A2%98/"  title="Hexo 博客 + Wiki 双主题完整部署指南" ><i class="fa fa-file-o"></i>Hexo多主题完整部署指南</a>
+      </li>
     
       <li>
         <a href="/2025/05/13/pdf2zn/"  title="pdf翻译" ><i class="fa fa-file-o"></i>nebius</a>
@@ -708,10 +709,6 @@
     
       <li>
         <a href="/2024/09/01/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/"  title="Sharding分库分表实践、主从读取" ><i class="fa fa-file-o"></i>Sharding分库分表实践</a>
-      </li>
-    
-      <li>
-        <a href="/2024/06/08/%E5%AD%97%E8%8A%82%E7%A0%81%E4%B9%A6%E7%B1%8D%E7%BA%BF%E8%B7%AF/"  title="书籍推荐" ><i class="fa fa-file-o"></i>字节码学习线路</a>
       </li>
     
   </ul>

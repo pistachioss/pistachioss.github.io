@@ -182,9 +182,61 @@
 		
             
 		
+            
+		
         
         <!-- render other articles -->
         
+           
+			  
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2026-02-28 </div>
+			<div class="article-title"><a href="/2026/02/28/hexo%E5%A4%9A%E4%B8%BB%E9%A2%98%E5%AE%89%E8%A3%85%E9%97%AE%E9%A2%98/" title="Hexo 博客 + Wiki 双主题完整部署指南">Hexo多主题完整部署指南</a></div>
+		</h3>
+	
+
+
+			  
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<h1 id="Hexo-博客-Wiki-双主题完整部署指南"><a href="#Hexo-博客-Wiki-双主题完整部署指南" class="headerlink" title="Hexo 博客 + Wiki 双主题完整部署指南"></a>Hexo 博客 + Wiki 双主题完整部署指南</h1><blockquote>
+<p>本文档记录了如何为 Hexo 博客添加 Wiki 功能，使用两个独立主题（Freemind + Wixo），实现类似 wzpan 博客的效果。</p>
+<p><strong>最终效果</strong>：</p>
+<ul>
+<li>博客：<a href="https://blog.xiangyang.xyz/">https://blog.xiangyang.xyz</a> （Freemind 主题）</li>
+<li>Wiki：<a href="https://blog.xiangyang.xyz/wiki">https://blog.xiangyang.xyz/wiki</a> （Wixo 主题）</li>
+<li>自动部署：推送任一仓库，两个站点同步更新</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="📋-目录"><a href="#📋-目录" class="headerlink" title="📋 目录"></a>📋 目录</h2><ol>
+<li><a href="#%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF">项目背景</a></li>
+<li><a href="#%E6%8A%80%E6%9C%AF%E6%96%B9%E6%A1%88">技术方案</a></li>
+<li><a href="#%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%96%BD%E6%AD%A5%E9%AA%A4">完整实施步骤</a></li>
+<li><a href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88">常见问题与解决方案</a></li>
+<li><a href="#%E6%97%A5%E5%B8%B8%E4%BD%BF%E7%94%A8%E6%B5%81%E7%A8%8B">日常使用流程</a></li>
+<li><a href="#%E9%AB%98%E7%BA%A7%E9%85%8D%E7%BD%AE">高级配置</a></li>
+</ol>
+<hr>
+<h2 id="项目背景"><a href="#项目背景" class="headerlink" title="项目背景"></a>项目背景</h2><h3 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h3><p>参考 wzpan 的博客（<a href="https://www.hahack.com），实现：">https://www.hahack.com），实现：</a></p>
+<ul>
+<li><strong>博客</strong>：时间线组织，用于发表文章和想法</li>
+<li><strong>Wiki</strong>：主题组织，用于系统化的知识管理</li>
+<li><strong>统一域名</strong>：通过子路径访问（&#x2F;wiki）</li>
+<li><strong>不同主题</strong>：博客和 Wiki 使用不同的视觉风格</li>
+</ul>
+	
+	</div>
+  <a type="button" href="/2026/02/28/hexo%E5%A4%9A%E4%B8%BB%E9%A2%98%E5%AE%89%E8%A3%85%E9%97%AE%E9%A2%98/#more" class="btn btn-default more">Read More</a>
+</div>
+
+           
+		
            
 			  
 	
@@ -244,6 +296,25 @@
 </ul>
 <h3 id="建-Repository-层："><a href="#建-Repository-层：" class="headerlink" title="建 Repository 层："></a>建 Repository 层：</h3><ul>
 <li>“为 <code>AgentTask</code> 实体创建一个 Spring Data JPA Repository 接口 <code>AgentTaskRepository</code>，继承自 <code>JpaRepository</code>。并添加一个根据 <code>status</code> 查询任务列表的方法。”</li>
+</ul>
+<h3 id="Service-层："><a href="#Service-层：" class="headerlink" title="Service 层："></a>Service 层：</h3><ul>
+<li><p>“创建一个 Spring Boot Service 类 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AgentTaskService</span><br></pre></td></tr></table></figure>
+
+<p>，注入 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AgentTaskRepository</span><br></pre></td></tr></table></figure>
+
+<p>。实现以下方法：</p>
+<ul>
+<li><code>createTask(AgentTaskDTO taskDTO)</code>: 创建一个新的 Agent 任务。</li>
+<li><code>getTaskById(Long id)</code>: 根据 ID 获取任务详情。</li>
+<li><code>getAllTasks()</code>: 获取所有任务列表。</li>
+<li><code>updateTaskStatus(Long id, TaskStatus status)</code>: 更新任务状态。</li>
+<li><code>deleteTask(Long id)</code>: 删除任务。”</li>
+</ul>
+</li>
+<li><p>“在 <code>AgentTaskService</code> 的 <code>createTask</code> 方法中，添加逻辑：在保存任务到数据库之前，记录一条 info 级别的日志，内容为 ‘Creating new agent task with name: [taskName]’。”</p>
+</li>
 </ul>
 	
 	</div>
@@ -543,44 +614,6 @@
 
            
 		
-           
-			  
-	
-	<!-- display as entry -->	
-		<h3 class="title">
-			<div class="date"> 2021-06-14 </div>
-			<div class="article-title"><a href="/2021/06/14/Threads-And-Locks-md/" title="Threads-And-Locks">深入分析 java 8 编程语言规范：Threads and Locks</a></div>
-		</h3>
-	
-
-
-			  
-<div class="entry">
-
-  <div class="row">
-	
-	
-		<p>在 java 并发编程中，线程和锁永远是最重要的概念。语言规范虽然是规范描述，但是其中也有非常多的知识和最佳实践是值得学习的，相信这篇文章还是可以给很多读者提供学习参考的。</p>
-<p>本文主要是<strong>翻译 + 解释</strong> Oracle《<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/index.html">The Java Language Specification, Java SE 8 Edition</a>》的第17章《<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html">Threads and Locks</a>》，原文大概30页pdf，我加入了很多自己的理解，希望能帮大家把规范看懂，并且从中得到很多你一直想要知道但是还不知道的知识。</p>
-<p>注意，本文在说 Java 语言规范，不是 JVM 规范，JVM 的实现需要满足语言规范中定义的内容，但是具体的实现细节由各 JVM 厂商自己来决定。所以，语言规范要尽可能严谨全面，但是也不能限制过多，不然会限制 JVM 厂商对很多细节进行性能优化。</p>
-<p>我能力有限，虽然已经很用心了，但有些地方我真的不懂，我已经在文中标记出来了。</p>
-<p>建议分 3 部分阅读。</p>
-<ol>
-<li>将 17.1、17.2、17.3 一起阅读，这里关于线程中的 wait、notify、中断有很多的知识；</li>
-<li>17.4 的内存模型比较长，重排序和 happens-before 关系是重点；</li>
-<li>剩下的 final、字分裂、double和long的非原子问题，这些都是相对独立的 topic。</li>
-</ol>
-<div style="text-align: center; font-size: 24px; font-weight: bold">Chapter 17. Threads and Locks</div>
-
-<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>在 java 中，线程由 Thread 类表示，用户创建线程的<strong>唯一方式</strong>是创建 Thread 类的一个实例，每一个线程都和这样的一个实例关联。在相应的 Thread 实例上调用 start() 方法将启动一个线程。</p>
-<p>如果没有正确使用同步，线程表现出来的现象将会是令人疑惑的、违反直觉的。这个章节将描述多线程编程的语义问题，包括一系列的规则，这些规则定义了<strong>在多线程环境中线程对共享内存中值的修改是否对其他线程立即可见</strong>。java编程语言内存模型定义了统一的内存模型用于屏蔽不同的硬件架构，在没有歧义的情况下，下面将用<strong>内存模型</strong>表示这个概念。</p>
-	
-	</div>
-  <a type="button" href="/2021/06/14/Threads-And-Locks-md/#more" class="btn btn-default more">Read More</a>
-</div>
-
-           
-		
 
 		</div>
 
@@ -634,7 +667,7 @@
 		<h4>Categories</h4>
 		<ul class="tag_box inline list-unstyled">
 		
-			<li><a href="/categories/Hexo/">Hexo<span>1</span></a></li>
+			<li><a href="/categories/Hexo/">Hexo<span>2</span></a></li>
 		
 			<li><a href="/categories/Java/">Java<span>3</span></a></li>
 		
@@ -677,9 +710,9 @@
 		
 			<li><a href="/tags/aop/">aop<span>1</span></a></li>
 		
-			<li><a href="/tags/spring/">spring<span>1</span></a></li>
+			<li><a href="/tags/wiki/">wiki<span>23</span></a></li>
 		
-			<li><a href="/tags/wiki/">wiki<span>22</span></a></li>
+			<li><a href="/tags/spring/">spring<span>1</span></a></li>
 		
 			<li><a href="/tags/llm/">llm<span>1</span></a></li>
 		
@@ -695,6 +728,10 @@
   <ul class="entry list-unstyled">
     
       <li>
+        <a href="/2026/02/28/hexo%E5%A4%9A%E4%B8%BB%E9%A2%98%E5%AE%89%E8%A3%85%E9%97%AE%E9%A2%98/"  title="Hexo 博客 + Wiki 双主题完整部署指南" ><i class="fa fa-file-o"></i>Hexo多主题完整部署指南</a>
+      </li>
+    
+      <li>
         <a href="/2025/05/13/pdf2zn/"  title="pdf翻译" ><i class="fa fa-file-o"></i>nebius</a>
       </li>
     
@@ -708,10 +745,6 @@
     
       <li>
         <a href="/2024/09/01/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/"  title="Sharding分库分表实践、主从读取" ><i class="fa fa-file-o"></i>Sharding分库分表实践</a>
-      </li>
-    
-      <li>
-        <a href="/2024/06/08/%E5%AD%97%E8%8A%82%E7%A0%81%E4%B9%A6%E7%B1%8D%E7%BA%BF%E8%B7%AF/"  title="书籍推荐" ><i class="fa fa-file-o"></i>字节码学习线路</a>
       </li>
     
   </ul>

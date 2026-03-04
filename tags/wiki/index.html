@@ -133,6 +133,54 @@
 	
 	<!-- display as entry -->	
 		<h3 class="title">
+			<div class="date"> 2026-02-28 </div>
+			<div class="article-title"><a href="/2026/02/28/hexo%E5%A4%9A%E4%B8%BB%E9%A2%98%E5%AE%89%E8%A3%85%E9%97%AE%E9%A2%98/" title="Hexo 博客 + Wiki 双主题完整部署指南">Hexo多主题完整部署指南</a></div>
+		</h3>
+	
+
+
+		     
+<div class="entry">
+
+  <div class="row">
+	
+	
+		<h1 id="Hexo-博客-Wiki-双主题完整部署指南"><a href="#Hexo-博客-Wiki-双主题完整部署指南" class="headerlink" title="Hexo 博客 + Wiki 双主题完整部署指南"></a>Hexo 博客 + Wiki 双主题完整部署指南</h1><blockquote>
+<p>本文档记录了如何为 Hexo 博客添加 Wiki 功能，使用两个独立主题（Freemind + Wixo），实现类似 wzpan 博客的效果。</p>
+<p><strong>最终效果</strong>：</p>
+<ul>
+<li>博客：<a href="https://blog.xiangyang.xyz/">https://blog.xiangyang.xyz</a> （Freemind 主题）</li>
+<li>Wiki：<a href="https://blog.xiangyang.xyz/wiki">https://blog.xiangyang.xyz/wiki</a> （Wixo 主题）</li>
+<li>自动部署：推送任一仓库，两个站点同步更新</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="📋-目录"><a href="#📋-目录" class="headerlink" title="📋 目录"></a>📋 目录</h2><ol>
+<li><a href="#%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF">项目背景</a></li>
+<li><a href="#%E6%8A%80%E6%9C%AF%E6%96%B9%E6%A1%88">技术方案</a></li>
+<li><a href="#%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%96%BD%E6%AD%A5%E9%AA%A4">完整实施步骤</a></li>
+<li><a href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88">常见问题与解决方案</a></li>
+<li><a href="#%E6%97%A5%E5%B8%B8%E4%BD%BF%E7%94%A8%E6%B5%81%E7%A8%8B">日常使用流程</a></li>
+<li><a href="#%E9%AB%98%E7%BA%A7%E9%85%8D%E7%BD%AE">高级配置</a></li>
+</ol>
+<hr>
+<h2 id="项目背景"><a href="#项目背景" class="headerlink" title="项目背景"></a>项目背景</h2><h3 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h3><p>参考 wzpan 的博客（<a href="https://www.hahack.com），实现：">https://www.hahack.com），实现：</a></p>
+<ul>
+<li><strong>博客</strong>：时间线组织，用于发表文章和想法</li>
+<li><strong>Wiki</strong>：主题组织，用于系统化的知识管理</li>
+<li><strong>统一域名</strong>：通过子路径访问（&#x2F;wiki）</li>
+<li><strong>不同主题</strong>：博客和 Wiki 使用不同的视觉风格</li>
+</ul>
+	
+	</div>
+  <a type="button" href="/2026/02/28/hexo%E5%A4%9A%E4%B8%BB%E9%A2%98%E5%AE%89%E8%A3%85%E9%97%AE%E9%A2%98/#more" class="btn btn-default more">Read More</a>
+</div>
+
+	       
+		     
+	
+	<!-- display as entry -->	
+		<h3 class="title">
 			<div class="date"> 2025-03-11 </div>
 			<div class="article-title"><a href="/2025/03/11/llm-agent-java/" title="基于springboot开发agent">llm-agent工具开发</a></div>
 		</h3>
@@ -156,6 +204,25 @@
 </ul>
 <h3 id="建-Repository-层："><a href="#建-Repository-层：" class="headerlink" title="建 Repository 层："></a>建 Repository 层：</h3><ul>
 <li>“为 <code>AgentTask</code> 实体创建一个 Spring Data JPA Repository 接口 <code>AgentTaskRepository</code>，继承自 <code>JpaRepository</code>。并添加一个根据 <code>status</code> 查询任务列表的方法。”</li>
+</ul>
+<h3 id="Service-层："><a href="#Service-层：" class="headerlink" title="Service 层："></a>Service 层：</h3><ul>
+<li><p>“创建一个 Spring Boot Service 类 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AgentTaskService</span><br></pre></td></tr></table></figure>
+
+<p>，注入 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AgentTaskRepository</span><br></pre></td></tr></table></figure>
+
+<p>。实现以下方法：</p>
+<ul>
+<li><code>createTask(AgentTaskDTO taskDTO)</code>: 创建一个新的 Agent 任务。</li>
+<li><code>getTaskById(Long id)</code>: 根据 ID 获取任务详情。</li>
+<li><code>getAllTasks()</code>: 获取所有任务列表。</li>
+<li><code>updateTaskStatus(Long id, TaskStatus status)</code>: 更新任务状态。</li>
+<li><code>deleteTask(Long id)</code>: 删除任务。”</li>
+</ul>
+</li>
+<li><p>“在 <code>AgentTaskService</code> 的 <code>createTask</code> 方法中，添加逻辑：在保存任务到数据库之前，记录一条 info 级别的日志，内容为 ‘Creating new agent task with name: [taskName]’。”</p>
+</li>
 </ul>
 	
 	</div>
@@ -557,41 +624,6 @@
 </div>
 
 	       
-		     
-	
-	<!-- display as entry -->	
-		<h3 class="title">
-			<div class="date"> 2021-03-26 </div>
-			<div class="article-title"><a href="/2021/03/26/netty-1/" title="Netty 解析">Netty 源码解析（一）</a></div>
-		</h3>
-	
-
-
-		     
-<div class="entry">
-
-  <div class="row">
-	
-	
-		<p>本文又是一篇源码分析文章，其实除了 Doug Lea 的并发包源码，我是真不太爱写源码分析。因为要花非常多的时间，而且很多地方需要反复组织语言。</p>
-<p>本文将介绍 Netty，Java 平台上使用最广泛的 NIO 包，它是对 JDK 中的 NIO 实现的一层封装，让我们能更方便地开发 NIO 程序。其实，Netty 不仅仅是 NIO 吧，但是，基本上大家都冲着 NIO 来的。</p>
-<p>个人感觉国内对于 Netty 的吹嘘是有点过了，主要是很多人靠它吃饭，要么是搞培训的，要么是出书的，恨不得把 Netty 吹上天去，这种现象也是挺不好的，反而使得初学者觉得 Netty 是什么高深的技术一样。</p>
-<p>Netty 的源码不是很简单，因为它比较多，而且各个类之间的关系错综复杂，很多人说它的源码很好，这点我觉得一般，真要说好代码，还得 Doug Lea 的并发源码比较漂亮，一行行都是精华，不过它们是不同类型的，也没什么好对比的。Netty 源码好就好在它的接口使用比较灵活，往往接口好用的框架，源码都不会太简单。</p>
-<p>本文将立足于源码分析，所以读者需要先掌握 NIO 的基础知识，至少我之前写的 <a href="/post/java-nio">《Java NIO：Buffer、Channel 和 Selector》</a> 中介绍的基础知识要清楚，如果读者已经对 Netty 有些了解，或者使用过，那就更好了。</p>
-<ul>
-<li>本文只介绍 TCP 相关的内容，Netty 对于其他协议的支持，不在本文的讨论范围内。</li>
-<li>和并发包的源码分析不一样，我不可能一行一行源码说，所以有些异常分支是会直接略过，除非我觉得需要介绍。</li>
-<li>Netty 源码一直在更新，各版本之间有些差异，我是按照 2018-09-06 的最新版本 <strong>4.1.25.Final</strong> 来进行介绍的。</li>
-</ul>
-<p>建议初学者在看完本文以后，可以去翻翻《Netty In Action》，网上也可以找到中文文字版的。</p>
-<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><p>学习源码，一开始肯定是准备环境。</p>
-<p>我喜欢用 maven，也喜欢 Spring Boot，所以我一般先到 <a target="_blank" rel="noopener" href="https://start.spring.io/">https://start.spring.io/</a> 准备一个最简单的脚手架。</p>
-	
-	</div>
-  <a type="button" href="/2021/03/26/netty-1/#more" class="btn btn-default more">Read More</a>
-</div>
-
-	       
 	     </div>
 	     <div>
 	       <center>
@@ -641,7 +673,7 @@
 		<h4>Categories</h4>
 		<ul class="tag_box inline list-unstyled">
 		
-			<li><a href="/categories/Hexo/">Hexo<span>1</span></a></li>
+			<li><a href="/categories/Hexo/">Hexo<span>2</span></a></li>
 		
 			<li><a href="/categories/Java/">Java<span>3</span></a></li>
 		
@@ -680,15 +712,15 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
+			<li><a href="/tags/aop/">aop<span>1</span></a></li>
+		
 			<li><a href="/tags/pdf/">pdf<span>1</span></a></li>
 		
 			<li><a href="/tags/spring/">spring<span>1</span></a></li>
 		
+			<li><a href="/tags/wiki/">wiki<span>23</span></a></li>
+		
 			<li><a href="/tags/llm/">llm<span>1</span></a></li>
-		
-			<li><a href="/tags/wiki/">wiki<span>22</span></a></li>
-		
-			<li><a href="/tags/aop/">aop<span>1</span></a></li>
 		
 		 
 		</ul>
@@ -700,6 +732,10 @@
 <div class="widget">
   <h4>Recent Posts</h4>
   <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2026/02/28/hexo%E5%A4%9A%E4%B8%BB%E9%A2%98%E5%AE%89%E8%A3%85%E9%97%AE%E9%A2%98/"  title="Hexo 博客 + Wiki 双主题完整部署指南" ><i class="fa fa-file-o"></i>Hexo多主题完整部署指南</a>
+      </li>
     
       <li>
         <a href="/2025/05/13/pdf2zn/"  title="pdf翻译" ><i class="fa fa-file-o"></i>nebius</a>
@@ -715,10 +751,6 @@
     
       <li>
         <a href="/2024/09/01/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/"  title="Sharding分库分表实践、主从读取" ><i class="fa fa-file-o"></i>Sharding分库分表实践</a>
-      </li>
-    
-      <li>
-        <a href="/2024/06/08/%E5%AD%97%E8%8A%82%E7%A0%81%E4%B9%A6%E7%B1%8D%E7%BA%BF%E8%B7%AF/"  title="书籍推荐" ><i class="fa fa-file-o"></i>字节码学习线路</a>
       </li>
     
   </ul>
