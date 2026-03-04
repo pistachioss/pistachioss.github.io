@@ -19,7 +19,7 @@ menu:
     intro: "All the tags."
     icon: "fa fa-tags"
   - title: Wiki                    # ✨ 新增
-    url: /wiki                     # ✨ 新增（注意开头的斜杠）
+    url: wiki                     # ✨ 新增（注意开头的斜杠）
     intro: "My knowledge base."    # ✨ 新增
     icon: "fa fa-book"             # ✨ 新增（使用书本图标）
   - title: About
