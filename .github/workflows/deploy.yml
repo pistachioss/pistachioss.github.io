@@ -1,4 +1,4 @@
-name: Build and Deploy Hexo Blog
+name: Build and Deploy Hexo Blog with Wiki
 
 on:
   push:
@@ -13,46 +13,106 @@ jobs:
       contents: write
 
     steps:
+       # ===== 步骤 1: 检出博客仓库 =====
       - name: Checkout source code
         uses: actions/checkout@v4
         with:
+          path: blog
           fetch-depth: 0
 
+      # ===== 步骤 2: 检出 Wiki 仓库 =====
+      - name: Checkout Wiki Repository
+        uses: actions/checkout@v4
+        with:
+          repository: pistachioss/pistachioss-wiki
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: wiki
+          fetch-depth: 0
+
+      # ===== 步骤 3: 设置 Node.js 环境 =====
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: |
+            blog/package-lock.json
+            wiki/package-lock.json
 
+      # ===== 步骤 4: 缓存（可选，加速构建）=====
       - name: Cache Hexo
         uses: actions/cache@v4
         with:
           path: |
-            node_modules
-            db.json
-            .deploy_git
+            blog/node_modules
+            blog/db.json
+            wiki/node_modules
+            wiki/db.json
           key: ${{ runner.os }}-hexo-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-hexo-
 
+      # ===== 步骤 5: 安装 Hexo CLI =====
       - name: Install Dependencies
         run: |
           npm install -g hexo-cli
+
+      # ===== 步骤 6: 构建博客 =====
+#      - name: Build Hexo
+#        run: npx hexo clean && npx hexo generate
+      - name: Build Blog
+        run: |
+          cd blog
           npm install
+          npx hexo clean
+          npx hexo generate
+          echo "✅ Blog built successfully"
 
-      - name: Build Hexo
-        run: npx hexo clean && npx hexo generate
+      # ===== 步骤 7: 构建 Wiki =====
+      - name: Build Wiki
+        run: |
+          cd wiki
+          npm install
+          npx hexo clean
+          npx hexo generate
+          echo "✅ Wiki built successfully"
 
-      - name: Add .nojekyll
-        run: touch public/.nojekyll
+#      - name: Add .nojekyll
+#        run: touch public/.nojekyll
 
+          # ===== 步骤 8: 合并输出 =====
+      - name: Combine Blog and Wiki
+        run: |
+          # 创建最终输出目录
+          mkdir -p final-output
+          
+          # 复制博客内容到根目录
+          echo "Copying blog content..."
+          cp -r blog/public/* final-output/
+          
+          # 创建 wiki 子目录并复制 Wiki 内容
+          echo "Copying wiki content..."
+          mkdir -p final-output/wiki
+          cp -r wiki/public/* final-output/wiki/
+          
+          # 添加 .nojekyll
+          touch final-output/.nojekyll
+          
+          echo "✅ Blog and Wiki combined successfully!"
+          echo "📊 Directory structure:"
+          ls -la final-output/
+          echo "📊 Wiki directory:"
+          ls -la final-output/wiki/
+
+      # ===== 步骤 9: 部署到 GitHub Pages =====
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+          publish_dir: ./final-output
           publish_branch: gh-pages
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_message: 'Deploy: ${{ github.event.head_commit.message }}'
+          commit_message: 'Deploy Blog+Wiki: ${{ github.event.head_commit.message }}'
           keep_files: false
+          cname: blog.xiangyang.xyz
