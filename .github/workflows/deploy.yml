@@ -115,12 +115,19 @@ jobs:
           SHA: ${{ github.sha }}
         run: |
           if [ "$EVENT_NAME" = "repository_dispatch" ]; then
-            echo "message=Deploy Blog+Wiki: repository_dispatch($EVENT_ACTION) @ $SHA" >> "$GITHUB_OUTPUT"
+            MESSAGE="Deploy Blog+Wiki: repository_dispatch($EVENT_ACTION) @ $SHA"
           elif [ -n "$HEAD_COMMIT_MESSAGE" ]; then
-            echo "message=Deploy Blog+Wiki: $HEAD_COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
+            MESSAGE="Deploy Blog+Wiki: $HEAD_COMMIT_MESSAGE"
           else
-            echo "message=Deploy Blog+Wiki: $EVENT_NAME @ $SHA" >> "$GITHUB_OUTPUT"
+            MESSAGE="Deploy Blog+Wiki: $EVENT_NAME @ $SHA"
           fi
+
+          # 使用 heredoc 处理多行内容
+          {
+            echo "message<<EOF"
+            echo "$MESSAGE"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       # ===== 步骤 9: 部署到 GitHub Pages =====
       - name: Deploy to gh-pages
