@@ -106,6 +106,22 @@ jobs:
           echo "📊 Wiki directory:"
           ls -la final-output/wiki/
 
+      - name: Prepare Deploy Commit Message
+        id: deploy_meta
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          SHA: ${{ github.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "repository_dispatch" ]; then
+            echo "message=Deploy Blog+Wiki: repository_dispatch($EVENT_ACTION) @ $SHA" >> "$GITHUB_OUTPUT"
+          elif [ -n "$HEAD_COMMIT_MESSAGE" ]; then
+            echo "message=Deploy Blog+Wiki: $HEAD_COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
+          else
+            echo "message=Deploy Blog+Wiki: $EVENT_NAME @ $SHA" >> "$GITHUB_OUTPUT"
+          fi
+
       # ===== 步骤 9: 部署到 GitHub Pages =====
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
