@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  repository_dispatch:
+    types: [wiki_updated]  # 新增这行
   workflow_dispatch:
 
 jobs:
